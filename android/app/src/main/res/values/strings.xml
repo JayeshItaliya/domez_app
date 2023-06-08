@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<resources>
+    <string name="app_name">DOMEZ</string>
+    <string name="facebook_app_id">640411657758281</string>
+    <string name="fb_login_protocol_scheme">fb640411657758281</string>
+    <string name="facebook_client_token">57a3629e79cc1b1178b0f801ba6df668</string>
+</resources>

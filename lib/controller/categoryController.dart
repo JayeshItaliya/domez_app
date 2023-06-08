@@ -1,0 +1,80 @@
+import 'dart:async';
+import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import '../model/categoryModel.dart';
+import '../service/getAPI.dart';
+
+class CategoryController extends GetxController {
+
+  var myList = List<CategoryModel>.empty(growable: true).obs;
+  var isDataProcessing = false.obs;
+
+  ScrollController scrollController = ScrollController();
+  StreamSubscription? subscription;
+  var isoffline = false.obs;
+
+
+  checkNetwork() {
+    subscription = Connectivity()
+        .onConnectivityChanged
+        .listen((ConnectivityResult result) {
+
+      if (result == ConnectivityResult.none) {
+        isoffline.value = true;
+      } else if (result == ConnectivityResult.mobile) {
+        isoffline.value = false;
+      } else if (result == ConnectivityResult.wifi) {
+        isoffline.value = false;
+      } else {
+        Get.snackbar("Network Error", "Failed to get network connection");
+        isoffline.value = false;
+      }
+    });
+  }
+
+  @override
+  void onInit() {
+    // TODO: implement onInit
+    super.onInit();
+
+    getTask();
+    checkNetwork();
+  }
+
+  Future<void> getTask() async {
+    try {
+      isDataProcessing.value = true;
+
+      if (isoffline.value == false) {
+        TaskProvider().getCategoryList().then((resp) {
+
+          isDataProcessing.value = false;
+          if(resp!=null){
+            myList.clear();
+            myList.addAll(resp!);
+          }
+
+
+        }, onError: (err) {
+          isDataProcessing.value = false;
+          showSnackbar("Error", err.toString(), Colors.red);
+        });
+      }
+    } catch (e) {
+      isDataProcessing.value = false;
+      showSnackbar("Exception", e.toString(), Colors.red);
+    }
+  }
+
+  showSnackbar(title, message, color) {
+    Get.snackbar(title, message,
+        colorText: Colors.white, backgroundColor: color);
+  }
+  @override
+  void onClose() {
+    // TODO: implement onClose
+    super.onClose();
+  }
+
+}

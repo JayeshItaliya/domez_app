@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "992900498574",
+    "project_id": "domez-dev",
+    "storage_bucket": "domez-dev.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:992900498574:android:dec09c261389ff776435df",
+        "android_client_info": {
+          "package_name": "domez.io"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "992900498574-huhc6gnuaviekhl2a8vujnsf0vptmeat.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "domez.io",
+            "certificate_hash": "4bb06d11b8a9544932c7b732966a62649963735d"
+          }
+        },
+        {
+          "client_id": "992900498574-130qs6hpu804b5frstkoo585ifb31vlk.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCHYsAIsuw4yGYd7EXwFro9coWguKdWu_A"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "992900498574-130qs6hpu804b5frstkoo585ifb31vlk.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "992900498574-51smtse4prm78n25p8mdj1osli5h8vo0.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "domez.io",
+                "app_store_id": "6444339880"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
