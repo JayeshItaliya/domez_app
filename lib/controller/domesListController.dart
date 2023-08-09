@@ -3,9 +3,9 @@ import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../commonModule/Strings.dart';
+import '../commonModule/utils.dart';
 import '../model/domesListModel.dart';
 import '../service/getAPI.dart';
-import 'categoryController.dart';
 import 'commonController.dart';
 
 class DomesListController extends GetxController {
@@ -13,17 +13,24 @@ class DomesListController extends GetxController {
   var myList1 = List<DomesListModel>.empty(growable: true).obs;
   var myList2 = List<DomesListModel>.empty(growable: true).obs;
   var myList3 = List<DomesListModel>.empty(growable: true).obs;
+
   var isDataProcessing1 = false.obs;
   var isDataProcessing2 = false.obs;
   var isDataProcessing3 = false.obs;
-  ScrollController scrollController = ScrollController();
+
   StreamSubscription? subscription;
   var isoffline = false.obs;
-
-  var sportid="6".obs;
   CommonController cx = Get.put(CommonController());
-  CategoryController mycontroller = Get.put(CategoryController());
 
+  ScrollController scrollController2 = ScrollController();
+  ScrollController scrollController3 = ScrollController();
+
+
+  var reLoadingData2=false.obs;
+  var reLoadingData3=false.obs;
+
+  var page2=1;
+  var page3=1;
 
   checkNetwork() {
     subscription = Connectivity()
@@ -48,15 +55,13 @@ class DomesListController extends GetxController {
 
     cx.id.value=cx.read("id");
     print(cx.read("id"));
-    print("Soham");
 
     // TODO: implement onInit
     super.onInit();
 
-    getTask1(sportid.value);
-    getTask2(sportid.value);
-    getTask3(sportid.value);
     checkNetwork();
+    paginateTask2(cx.read(Keys.paginationDomeSportId)??"");
+    paginateTask3(cx.read(Keys.paginationDomeSportId)??"");
   }
 
   Future<void> getTask1(String sid) async {
@@ -64,7 +69,6 @@ class DomesListController extends GetxController {
     if(cx.read("islogin")??false){
       try {
 
-        print("dome1");
         isDataProcessing1.value = true;
 
         if (isoffline.value == false) {
@@ -76,18 +80,17 @@ class DomesListController extends GetxController {
           TaskProvider().getDomesList(
             type: "1",
             uid: cx.read("id").toString(),
-            lat:'',
-            lng:'',
+            lat: "36.8516437",
+            lng: "-75.97921939999999",
+            page: 1,
             sportId: sid.toString(),
 
           ).then((resp) {
-            print("SOMU3");
 
             if(resp!=null) {
               isDataProcessing1.value = false;
               myList1.clear();
               myList1.addAll(resp);
-              print("LOL");
             }
             else{
               print("Oops! Null Response");
@@ -107,6 +110,8 @@ class DomesListController extends GetxController {
     }
     return null;
   }
+
+
   Future<void> getTask2(String sid) async {
     try {
       print("dome2");
@@ -117,11 +122,11 @@ class DomesListController extends GetxController {
         TaskProvider().getDomesList(
           type: "2",
           uid: cx.read("id").toString(),
-          lat:'',
-          lng:'',
+          // lat: "",
+          // lng: "-75.97921939999999",
+          page: 1,
           sportId:sid.toString(),
         ).then((resp) {
-          print("SOMU2");
 
           if(resp!=null){
             isDataProcessing2.value = false;
@@ -153,13 +158,13 @@ class DomesListController extends GetxController {
       if (isoffline.value == false) {
         TaskProvider().getDomesList(
           type: "3",
+          page: 1,
           uid: cx.read("id").toString(),
           lat: cx.read(Keys.lat).toString(),
           lng: cx.read(Keys.lng).toString(),
           sportId:sid.toString(),
 
         ).then((resp) {
-          print("SOMU4");
 
           if(resp!=null) {
             isDataProcessing3.value = false;
@@ -188,17 +193,112 @@ class DomesListController extends GetxController {
         colorText: Colors.white, backgroundColor: color);
   }
   sportsUpdate(cid){
-    print("hi");
-    sportid.value=cid;
+    // print("hi");
+    // sportid.value=cid;
+    sportIdUpdate(cid);
+
     getTask1(cid);
     getTask2(cid);
     getTask3(cid);
 
   }
-  @override
-  void onClose() {
-    // TODO: implement onClose
-    super.onClose();
-  }
 
+
+ void getMoreTask2(String sid){
+   try {
+     print("dome2");
+     reLoadingData2.value = true;
+
+     if (isoffline.value == false) {
+       TaskProvider().getDomesList(
+         type: "2",
+         uid: cx.read("id").toString(),
+         // lat: "36.8516437",
+         // lng: "-75.97921939999999",
+         page: page2,
+         sportId:sid.toString(),
+       ).then((resp) {
+
+         if(resp!=null){
+           reLoadingData2.value = false;
+           //myList2.clear();
+           myList2.addAll(resp);
+           if(resp.isEmpty){
+             reLoadingData2.value=false;
+           }
+         }
+         else{
+           reLoadingData2.value = false;
+
+           print("Oops! Null Response");
+         }
+
+       }, onError: (err) {
+         reLoadingData2.value = false;
+         showSnackbar("Error", err.toString(), Colors.red);
+       });
+     }
+   } catch (e) {
+     isDataProcessing2.value = false;
+     showSnackbar("Exception", e.toString(), Colors.red);
+   }
+ }
+ void getMoreTask3(String sid){
+   try {
+     reLoadingData2.value = true;
+
+     if (isoffline.value == false) {
+       TaskProvider().getDomesList(
+         type: "3",
+         page: page3,
+         uid: cx.read("id").toString(),
+         lat: cx.read(Keys.lat).toString(),
+         lng: cx.read(Keys.lng).toString(),
+         sportId:sid.toString(),
+
+       ).then((resp) {
+
+         if(resp!=null) {
+           reLoadingData2.value = false;
+           //myList3.clear();
+           myList3.addAll(resp);
+           if(resp.isEmpty){
+             reLoadingData2.value=false;
+           }
+         }
+         else{
+           reLoadingData2.value = false;
+
+           print("Oops! Null Response");
+
+         }
+       }, onError: (err) {
+         reLoadingData2.value = false;
+         showSnackbar("Error", err.toString(), Colors.red);
+       });
+     }
+   } catch (e) {
+     reLoadingData2.value = false;
+     showSnackbar("Exception", e.toString(), Colors.red);
+   }
+ }
+
+  void paginateTask2(String sportid){
+    scrollController2.addListener(() {
+      if(scrollController2.position.pixels == scrollController2.position.maxScrollExtent){
+        page2++;
+        print("page===>${page2}");
+        getMoreTask2(sportid);
+      }
+    });
+  }
+  void paginateTask3(String sportid){
+    scrollController3.addListener(() {
+      if(scrollController3.position.pixels == scrollController3.position.maxScrollExtent){
+        page3++;
+        print("page===>${page3}");
+        getMoreTask3(sportid);
+      }
+    });
+  }
 }

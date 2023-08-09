@@ -9,6 +9,7 @@ import '../../../commonModule/AppColor.dart';
 import '../../../controller/commonController.dart';
 import '../../commonModule/Constant.dart';
 import 'package:gap/gap.dart';
+import '../../commonModule/utils.dart';
 import '../../commonModule/widget/common/textInter.dart';
 import '../../commonModule/widget/common/textNunito.dart';
 import '../../commonModule/widget/common/textSentic.dart';
@@ -23,8 +24,16 @@ import 'package:flutter_calendar_carousel/classes/multiple_marked_dates.dart';
 import 'package:flutter_calendar_carousel/flutter_calendar_carousel.dart';
 
 class BookSlot extends StatefulWidget {
-  bool isEditing;
-  BookSlot({Key? key,required this.isEditing}) : super(key: key);
+  final bool isEditing;
+  final List<int>? closedDays;
+  final DateTime? torontoTimeStamp;
+
+  BookSlot(
+      {Key? key,
+      required this.isEditing,
+      this.closedDays,
+      this.torontoTimeStamp})
+      : super(key: key);
 
   @override
   State<BookSlot> createState() => _BookSlotState();
@@ -42,8 +51,8 @@ class _BookSlotState extends State<BookSlot> {
   double previousPrice = 0.0;
   int removedIndex = -1;
   String bookedSlotList = '';
-
-  // int isSelectedIndex = 0;
+  DateTime selectedDate = DateTime.now();
+  List<int> errorDomeImage = [];
 
   int? _key;
   bool fav = false;
@@ -52,8 +61,6 @@ class _BookSlotState extends State<BookSlot> {
   _collapse() {
     int? newKey;
     print(_key.toString());
-    print("_keyyyyyy");
-
     do {
       _key = Random().nextInt(10000);
       print(_key.toString());
@@ -61,49 +68,53 @@ class _BookSlotState extends State<BookSlot> {
   }
 
   //---------- CalCarousel Variables-------//
-  DateTime date = DateTime.now();
   final controller = new PageController(
     viewportFraction: 1 / 5,
     initialPage: 3,
   );
 
   DateTime todayDate = DateTime.now().subtract(const Duration(days: 1));
+  DateTime currentDate = DateTime.now();
 
-  // DateTime cx.currentDate.value = DateTime.now();
-  String _currentMonth = DateFormat.yMMM().format(DateTime(2023, 04, 14));
-  DateTime _targetDateTime = DateTime(2023, 04, 14);
+  String _currentMonth = DateFormat.yMMM().format(DateTime.now());
+  DateTime _targetDateTime = DateTime.now();
 
   int presentDate = 17;
   int presentMonth = 4;
   int presentYear = 2023;
 
   List<MarkedDate> markedDates = [];
+  List<DateTime> closedDates = [];
   bool isMarked = false;
-
-  MarkedDate marked(var Date) {
-    return MarkedDate(
-        color: Color(0xFFF5F7F9),
-        date: Date,
-        textStyle: TextStyle(fontSize: 18, color: Color(0xFFD4D8D6)));
-  }
 
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
-    // print("selectedIndexinit");
-    print(cx.globalSelectedIndex);
-    // print(cx.globalSelectedIndex.value);
-    // String tempValue=cx.globalSelectedIndex.value.replaceAll(',', '');
 
-    print("selectedIndex");
-    print(selectedIndex);
-    if(cx.globalSelectedIndex.length!=0){
-      totalPrice=cx.globalPrice.value;
-      previousPrice =totalPrice;
-      for(int i=0;i<cx.globalSelectedIndex.length;i++){
+    print('bookedSlotList');
+    print(bookedSlotList);
 
-        setState((){
+    selectedDate = widget.torontoTimeStamp ?? DateTime.now();
+    todayDate = widget.torontoTimeStamp?.subtract(const Duration(days: 1)) ??
+        DateTime.now();
+
+    int date = int.parse(
+        DateFormat.d().format(widget.torontoTimeStamp ?? DateTime.now()));
+    int month = int.parse(
+        DateFormat.M().format(widget.torontoTimeStamp ?? DateTime.now()));
+    int year = int.parse(
+        DateFormat.y().format(widget.torontoTimeStamp ?? DateTime.now()));
+
+    currentDate = DateTime(year, month, date);
+
+    addCloseDates(currentDate);
+
+    if (cx.globalSelectedIndex.length != 0) {
+      totalPrice = cx.globalPrice.value;
+      previousPrice = totalPrice;
+      for (int i = 0; i < cx.globalSelectedIndex.length; i++) {
+        setState(() {
           selectedIndex.add(cx.globalSelectedIndex[i]);
         });
       }
@@ -115,22 +126,8 @@ class _BookSlotState extends State<BookSlot> {
     presentDate = int.parse(DateFormat("d").format(todayDate));
     presentMonth = int.parse(DateFormat("M").format(todayDate));
     presentYear = int.parse(DateFormat("y").format(todayDate));
-    _currentMonth = DateFormat.yMMM().format(todayDate.add(const Duration(days: 1)));
-
-    print(presentDate);
-    print(presentMonth);
-    print(presentYear);
-    print("Heyyyy" + presentDate.toString());
-    print("Heyyyy" + cx.fullDate.value);
-    //---------- MarkedDate Variables-------//
-
-    // markedDates.add(marked(DateTime(2023, 04, 22)));
-    // markedDates.add(marked(DateTime.now().add(const Duration(days: 3))));
-    // markedDates.add(marked(DateTime(2023, 04, 22)));
-    // markedDates.add(marked(DateTime(2023, 04, 22)));
-    // markedDates.add(marked(DateTime(2023, 04, 22)));
-    // markedDates.add(marked(DateTime(2023, 04, 2)));
-
+    _currentMonth =
+        DateFormat.yMMM().format(todayDate.add(const Duration(days: 1)));
 
     for (int i = 1; i < presentDate; i++) {
       markedDates.addIf(
@@ -142,11 +139,15 @@ class _BookSlotState extends State<BookSlot> {
     print("presentDate" + presentDate.toString());
     print("fullDate" + cx.fullDate.value);
 
+    //----------Static MarkedDate Variables-------//
+
+    // markedDates.add(marked(DateTime(2023, 08, 22)));
+    // markedDates.add(marked(torontoDate.add(const Duration(days: 3))));
+    // markedDates.add(marked(DateTime(2023, 08, 23)));
   }
 
   @override
   Widget build(BuildContext context) {
-
     return Obx(
       () => Scaffold(
           extendBodyBehindAppBar: true,
@@ -182,18 +183,48 @@ class _BookSlotState extends State<BookSlot> {
                               clipBehavior: Clip.none,
                               children: [
                                 Container(
+                                  decoration: errorDomeImage
+                                          .contains(cx.read(Keys.domeId))
+                                      ? BoxDecoration(
+                                          borderRadius:
+                                              BorderRadius.circular(20),
+                                          gradient: backShadowContainer(),
+                                          image: DecorationImage(
+                                            image: AssetImage(
+                                              Image1.domesAround,
+                                            ),
+                                            fit: BoxFit.cover,
+                                          ))
+                                      : BoxDecoration(
+                                          borderRadius: BorderRadius.all(
+                                              Radius.circular(
+                                                  cx.height / 26.68)),
+                                      gradient: backShadowContainer(),
+                                          image: DecorationImage(
+                                            image: NetworkImage(
+                                              (cx.read(
+                                                Keys.image,
+                                              )).isEmpty
+                                                  ? "https://thumbs.dreamstime.com/b/indoor-stadium-view-behind-wicket-cricket-160851985.jpg"
+                                                  : cx.read(
+                                                      Keys.image,
+                                                    ),
+                                              scale:
+                                                  cx.height > 800 ? 1.8 : 2.4,
+                                            ),
+                                            fit: BoxFit.cover,
+                                            onError: (Object e,
+                                                StackTrace? stackTrace) {
+                                              setState(() {
+                                                errorDomeImage
+                                                    .add(cx.read(Keys.domeId));
+                                              });
+                                            },
+                                          )),
                                   margin: EdgeInsets.only(
                                       left: 8, right: 8, top: 8),
                                   width: MediaQuery.of(context).size.width,
                                   height: cx.height / 4.3,
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.all(
-                                        Radius.circular(cx.height / 26.68)),
-                                    image: DecorationImage(
-                                        image: AssetImage(
-                                            "assets/images/step.png"),
-                                        fit: BoxFit.cover),
-                                  ),
                                 ),
                                 Positioned(
                                   top: cx.height / 6.06,
@@ -202,12 +233,10 @@ class _BookSlotState extends State<BookSlot> {
                                   left: 20,
                                   child: Container(
                                     width: MediaQuery.of(context).size.width,
-                                    height: cx.height / 8.4,
                                     decoration: BoxDecoration(
                                         color: Color(0xFFFFFFFF),
                                         borderRadius: BorderRadius.all(
-                                            Radius.circular(
-                                                cx.height / 66.7))),
+                                            Radius.circular(cx.height / 66.7))),
                                     child: Column(
                                       mainAxisAlignment:
                                           MainAxisAlignment.center,
@@ -218,13 +247,13 @@ class _BookSlotState extends State<BookSlot> {
                                           // title:const Text("Dome Stadium",style: TextStyle(fontWeight: FontWeight.bold,fontSize: 24),),
                                           title: SenticText(
                                               text: cx.read(Keys.domeName),
+                                              maxLines: 2,
                                               fontSize:
                                                   cx.height > 800 ? 25 : 21,
                                               fontWeight: FontWeight.w600),
                                           subtitle: Padding(
-                                            padding:
-                                                const EdgeInsets.fromLTRB(
-                                                    0, 4, 0, 4),
+                                            padding: const EdgeInsets.fromLTRB(
+                                                0, 4, 0, 4),
                                             child: Row(
                                               mainAxisAlignment:
                                                   MainAxisAlignment.start,
@@ -233,24 +262,20 @@ class _BookSlotState extends State<BookSlot> {
                                               children: [
                                                 Image.asset(
                                                     "assets/images/location.png",
-                                                    scale:
-                                                        cx.responsive(2.5,1.5, 2),
-                                                    color:
-                                                        AppColor.darkGreen),
+                                                    scale: cx.responsive(
+                                                        2.5, 1.5, 2),
+                                                    color: AppColor.darkGreen),
                                                 Container(
                                                   width: cx.width * 0.65,
                                                   child: NunitoText(
-                                                    textAlign:
-                                                        TextAlign.start,
+                                                    textAlign: TextAlign.start,
                                                     text:
                                                         "${cx.read(Keys.city)}, ${cx.read(Keys.state)}",
-                                                    fontWeight:
-                                                        FontWeight.w400,
+                                                    fontWeight: FontWeight.w400,
                                                     fontSize: cx.height > 800
                                                         ? 18
                                                         : 15,
-                                                    color:
-                                                        AppColor.lightGreen,
+                                                    color: AppColor.lightGreen,
                                                     textOverflow:
                                                         TextOverflow.ellipsis,
                                                     maxLines: 1,
@@ -277,12 +302,12 @@ class _BookSlotState extends State<BookSlot> {
                             },
                             child: CircleAvatar(
                               backgroundColor: Colors.white,
-                              radius: cx.responsive(30,25, 22),
+                              radius: cx.responsive(30, 25, 22),
                               child: SimpleCircularIconButton(
                                 iconData: Icons.arrow_back_ios_new,
                                 iconColor:
                                     fav ? AppColor.darkGreen : Colors.black,
-                                radius: cx.responsive(60,47, 37),
+                                radius: cx.responsive(60, 47, 37),
                               ),
                             ),
                           ),
@@ -296,21 +321,15 @@ class _BookSlotState extends State<BookSlot> {
                               decoration: BoxDecoration(
                                   color: Colors.white,
                                   borderRadius: BorderRadius.only(
-                                    topRight:
-                                        Radius.circular(cx.height / 16.7),
-                                    topLeft:
-                                        Radius.circular(cx.height / 16.7),
+                                    topRight: Radius.circular(cx.height / 16.7),
+                                    topLeft: Radius.circular(cx.height / 16.7),
                                   )),
                               child: Padding(
-                                padding: EdgeInsets.fromLTRB(
-                                    cx.height / 26.68,
-                                    8,
-                                    cx.height / 26.68,
-                                    cx.height / 83.375),
+                                padding: EdgeInsets.fromLTRB(cx.height / 26.68,
+                                    8, cx.height / 26.68, cx.height / 83.375),
                                 child: Column(
                                   mainAxisAlignment: MainAxisAlignment.start,
-                                  crossAxisAlignment:
-                                      CrossAxisAlignment.start,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Gap(cx.height / 45),
                                     Card(
@@ -335,11 +354,10 @@ class _BookSlotState extends State<BookSlot> {
                                         initiallyExpanded: s2expanded,
                                         tilePadding: EdgeInsets.fromLTRB(
                                             10,
-                                            cx.responsive(12,8, 0),
+                                            cx.responsive(12, 8, 0),
                                             10,
-                                            cx.responsive(12,8, 0)),
-                                        collapsedIconColor:
-                                            AppColor.darkGreen,
+                                            cx.responsive(12, 8, 0)),
+                                        collapsedIconColor: AppColor.darkGreen,
                                         onExpansionChanged: (s) {
                                           setState(() {
                                             s2expanded = s;
@@ -365,8 +383,7 @@ class _BookSlotState extends State<BookSlot> {
                                                     ),
                                                     child: SvgPicture.asset(
                                                       "assets/svg/edit.svg",
-                                                      color:
-                                                          AppColor.darkGreen,
+                                                      color: AppColor.darkGreen,
                                                       height: 25,
                                                     ),
                                                   ),
@@ -376,76 +393,75 @@ class _BookSlotState extends State<BookSlot> {
                                                 height: 1,
                                                 width: 1,
                                               ),
-                                        title: Padding(
-                                          padding: EdgeInsets.only(
-                                            top: s2expanded
-                                                ? cx.height / 41.69
-                                                : 0.0,
-                                            left: cx.s4complete.value
-                                                ? 0
-                                                : s2expanded
-                                                    ? 0
-                                                    : 10.0,
-                                          ),
-                                          child: Container(
-                                            child: Row(
-                                              mainAxisAlignment: cx
-                                                      .s4complete.value
-                                                  ? MainAxisAlignment.start
-                                                  : MainAxisAlignment.center,
-                                              crossAxisAlignment: cx
-                                                      .s4complete.value
-                                                  ? CrossAxisAlignment.start
-                                                  : CrossAxisAlignment.center,
-                                              children: [
-                                                Padding(
-                                                  padding: EdgeInsets.only(
-                                                      top: cx.responsive(
-                                                         5, 4, 3)),
-                                                  child: NunitoText(
-                                                    text: s2expanded
-                                                        ? "Select Your Date"
-                                                        : "Date:\t\t",
-                                                    // textAlign:TextAlign.center,
-                                                    fontSize: cx.height > 800
-                                                        ? 19
-                                                        : 17,
-                                                    fontWeight:
-                                                        FontWeight.w700,
-                                                    color: s2expanded
-                                                        ? AppColor.darkGreen
-                                                        : AppColor.darkGreen,
+
+                                        title: Center(
+                                          child: Padding(
+                                            padding: EdgeInsets.only(
+                                              top: s2expanded
+                                                  ? cx.height / 41.69
+                                                  : 0.0,
+                                              left: cx.s4complete.value
+                                                  ? 0
+                                                  : s2expanded
+                                                      ? 0
+                                                      : 10.0,
+                                              right:10
+                                            ),
+                                            child: Container(
+                                              child: Row(
+                                                mainAxisAlignment: cx
+                                                        .s4complete.value
+                                                    ? MainAxisAlignment.start
+                                                    : MainAxisAlignment.center,
+                                                crossAxisAlignment: cx
+                                                        .s4complete.value
+                                                    ? CrossAxisAlignment.start
+                                                    : CrossAxisAlignment.center,
+                                                children: [
+                                                  Padding(
+                                                    padding: EdgeInsets.only(
+                                                        top: cx.responsive(
+                                                            5, 4, 3)),
+                                                    child: NunitoText(
+                                                      text: s2expanded
+                                                          ? "Select Your Date"
+                                                          : "Date:\t\t",
+                                                      // textAlign:TextAlign.center,
+                                                      fontSize: cx.height > 800
+                                                          ? 19
+                                                          : 17,
+                                                      fontWeight: FontWeight.w700,
+                                                      color: s2expanded
+                                                          ? AppColor.darkGreen
+                                                          : AppColor.darkGreen,
+                                                    ),
                                                   ),
-                                                ),
-                                                Padding(
-                                                  padding: EdgeInsets.only(
-                                                      top: 3.0),
-                                                  child:  NunitoText(
+                                                  Padding(
+                                                    padding:
+                                                        EdgeInsets.only(top: 3.0),
+                                                    child: NunitoText(
                                                       text: s2expanded
                                                           ? ""
                                                           : "${cx.selDate.value}" +
                                                               " " +
                                                               "${cx.selMonth.value}",
-                                                      textAlign:
-                                                          TextAlign.end,
-                                                      fontSize:
-                                                          cx.height > 800
-                                                              ? 22
-                                                              : 20,
-                                                      fontWeight:
-                                                          FontWeight.w800,
+                                                      textAlign: TextAlign.end,
+                                                      fontSize: cx.height > 800
+                                                          ? 22
+                                                          : 20,
+                                                      fontWeight: FontWeight.w800,
                                                       color: s2expanded
                                                           ? AppColor.darkGreen
                                                           : Color(0xFF628477),
                                                     ),
-                                                ),
-                                              ],
+                                                  ),
+                                                ],
+                                              ),
                                             ),
                                           ),
                                         ),
                                         childrenPadding: EdgeInsets.zero,
-                                        expandedAlignment:
-                                            Alignment.bottomLeft,
+                                        expandedAlignment: Alignment.bottomLeft,
                                         expandedCrossAxisAlignment:
                                             CrossAxisAlignment.center,
                                         children: [
@@ -460,31 +476,25 @@ class _BookSlotState extends State<BookSlot> {
                                                   children: [
                                                     Gap(7),
                                                     Container(
-                                                      padding:
-                                                          EdgeInsets.only(
-                                                        left:
-                                                            cx.height / 44.47,
+                                                      padding: EdgeInsets.only(
+                                                        left: cx.height / 44.47,
                                                         right:
                                                             cx.height / 44.47,
                                                       ),
                                                       child: Row(
                                                         children: [
                                                           NunitoText(
-                                                            textAlign:
-                                                                TextAlign
-                                                                    .center,
-                                                            text:
-                                                                _currentMonth,
+                                                            textAlign: TextAlign
+                                                                .center,
+                                                            text: _currentMonth,
                                                             color: AppColor
                                                                 .darkGreen,
                                                             fontSize:
-                                                                cx.height >
-                                                                        800
+                                                                cx.height > 800
                                                                     ? 21
                                                                     : 18,
                                                             fontWeight:
-                                                                FontWeight
-                                                                    .w700,
+                                                                FontWeight.w700,
                                                           ),
                                                         ],
                                                       ),
@@ -492,27 +502,30 @@ class _BookSlotState extends State<BookSlot> {
                                                     Gap(cx.height / 41.69),
                                                     Container(
                                                       height: 300,
-                                                      margin: EdgeInsets
-                                                          .symmetric(
-                                                              horizontal:
-                                                                  8.0),
+
+                                                      margin:
+                                                          EdgeInsets.symmetric(
+                                                              horizontal: 8.0),
+
                                                       child: CalendarCarousel<
                                                           Event>(
                                                         markedDateCustomShapeBorder:
                                                             CircleBorder(
                                                                 side:
                                                                     BorderSide(
-                                                          color: Color(
-                                                              0xFFF5F7F9),
+                                                          color:
+                                                              Color(0xFFF5F7F9),
                                                         )),
+
+                                                        pageScrollPhysics: BouncingScrollPhysics(),
+
                                                         markedDateCustomTextStyle:
                                                             TextStyle(
                                                           fontSize: 18,
-                                                          color: Color(
-                                                              0xFFD4D8D6),
+                                                          color:
+                                                              Color(0xFFD4D8D6),
                                                         ),
-                                                        daysHaveCircularBorder:
-                                                            false,
+                                                        daysHaveCircularBorder:false,
                                                         // markedDatesMap: _markedDateMap,
                                                         daysTextStyle:
                                                             TextStyle(
@@ -522,7 +535,6 @@ class _BookSlotState extends State<BookSlot> {
                                                         ),
                                                         dayButtonColor:
                                                             AppColor.bg,
-
 
                                                         //-----Making Grey Previous Day-----//
                                                         customDayBuilder: (
@@ -536,7 +548,6 @@ class _BookSlotState extends State<BookSlot> {
                                                           bool isThisMonthDay,
                                                           DateTime day,
                                                         ) {
-
                                                           if (day.month ==
                                                                   presentMonth &&
                                                               day.day ==
@@ -587,89 +598,94 @@ class _BookSlotState extends State<BookSlot> {
                                                           color: Colors.grey,
                                                           fontSize: 18,
                                                         ),
-
-
+                                                        childAspectRatio: cx.responsive(1.3, 1.1, 1),
                                                         onDayPressed:
                                                             (date, events) {
-                                                          // setState(() {
-                                                          //   isMarked =
-                                                          //       MultipleMarkedDates(
-                                                          //     markedDates:
-                                                          //         markedDates,
-                                                          //   ).isMarked(date);
-                                                          // });
-                                                          // print(isMarked);
+                                                          selectedDate = date;
 
-                                                          if ((date)
-                                                                  .millisecondsSinceEpoch >=
-                                                              todayDate
-                                                                  .millisecondsSinceEpoch) {
-                                                            if (!isMarked) {
-                                                              setState(() {
-                                                                cx.currentDate
-                                                                        .value =
-                                                                    date;
-                                                                cx.selDate
-                                                                    .value = DateFormat
-                                                                        .d()
-                                                                    .format(cx
-                                                                        .currentDate
-                                                                        .value);
-                                                                cx.selMonth
-                                                                    .value = DateFormat
-                                                                        .MMM()
-                                                                    .format(cx
-                                                                        .currentDate
-                                                                        .value);
-                                                                cx.selYear
-                                                                    .value = DateFormat
-                                                                        .y()
-                                                                    .format(cx
-                                                                        .currentDate
-                                                                        .value);
-                                                                cx.fullDate
-                                                                    .value = DateFormat(
-                                                                        "yyyy-MM-dd")
-                                                                    .format(cx
-                                                                        .currentDate
-                                                                        .value);
-                                                              });
-                                                            }
-                                                            print(cx.selDate
-                                                                .value);
-                                                            print(cx.selMonth
-                                                                .value);
-                                                            print(cx.selYear
-                                                                .value);
-                                                            print(cx.fullDate
-                                                                .value);
+                                                          setState(() {
+                                                            isMarked =
+                                                                MultipleMarkedDates(
+                                                              markedDates:
+                                                                  markedDates,
+                                                            ).isMarked(date);
+                                                          });
+                                                          print(isMarked);
 
-                                                            cx.write(
-                                                                Keys.fullDate,
-                                                                cx.fullDate
-                                                                    .value);
-                                                            cx.write(
-                                                                Keys.selDate,
-                                                                cx.selDate
-                                                                    .value);
-                                                            cx.write(
-                                                                Keys.selMonth,
-                                                                cx.selMonth
-                                                                    .value);
-                                                            cx.write(
-                                                                Keys.selYear,
-                                                                cx.selYear
-                                                                    .value);
-                                                            mycontroller
-                                                                .getTask();
-                                                            selectedIndex.clear();
+                                                          if (!isMarked) {
+                                                            if ((date)
+                                                                    .millisecondsSinceEpoch >=
+                                                                todayDate
+                                                                    .millisecondsSinceEpoch) {
+                                                              if (!isMarked) {
+                                                                setState(() {
+                                                                  cx.currentDate
+                                                                          .value =
+                                                                      date;
+                                                                  cx.selDate
+                                                                      .value = DateFormat
+                                                                          .d()
+                                                                      .format(cx
+                                                                          .currentDate
+                                                                          .value);
+                                                                  cx.selMonth
+                                                                      .value = DateFormat
+                                                                          .MMM()
+                                                                      .format(cx
+                                                                          .currentDate
+                                                                          .value);
+                                                                  cx.selYear
+                                                                      .value = DateFormat
+                                                                          .y()
+                                                                      .format(cx
+                                                                          .currentDate
+                                                                          .value);
+                                                                  cx.fullDate
+                                                                      .value = DateFormat(
+                                                                          "yyyy-MM-dd")
+                                                                      .format(cx
+                                                                          .currentDate
+                                                                          .value);
+                                                                });
+                                                              }
+                                                              print(cx.selDate
+                                                                  .value);
+                                                              print(cx.selMonth
+                                                                  .value);
+                                                              print(cx.selYear
+                                                                  .value);
+                                                              print(cx.fullDate
+                                                                  .value);
 
-                                                            totalPrice = 0.0;
-                                                            previousPrice = 0.0;
-                                                            cx.write(Keys.price, totalPrice);
+                                                              cx.write(
+                                                                  Keys.fullDate,
+                                                                  cx.fullDate
+                                                                      .value);
+                                                              cx.write(
+                                                                  Keys.selDate,
+                                                                  cx.selDate
+                                                                      .value);
+                                                              cx.write(
+                                                                  Keys.selMonth,
+                                                                  cx.selMonth
+                                                                      .value);
+                                                              cx.write(
+                                                                  Keys.selYear,
+                                                                  cx.selYear
+                                                                      .value);
+                                                              mycontroller
+                                                                  .getTask();
+                                                              selectedIndex
+                                                                  .clear();
 
+                                                              totalPrice = 0.0;
+                                                              previousPrice =
+                                                                  0.0;
+                                                              cx.write(
+                                                                  Keys.price,
+                                                                  totalPrice);
+                                                            };
                                                           }
-                                                          ;
                                                         },
                                                         staticSixWeekFormat:
                                                             true,
@@ -681,8 +697,7 @@ class _BookSlotState extends State<BookSlot> {
                                                         height: 420.0,
                                                         showHeader: false,
                                                         selectedDateTime: cx
-                                                            .currentDate
-                                                            .value,
+                                                            .currentDate.value,
                                                         customGridViewPhysics:
                                                             NeverScrollableScrollPhysics(),
                                                         todayTextStyle:
@@ -707,6 +722,7 @@ class _BookSlotState extends State<BookSlot> {
                                                                     FontWeight
                                                                         .w600),
                                                         dayPadding: 3,
+
                                                         multipleMarkedDates:
                                                             MultipleMarkedDates(
                                                                 markedDates:
@@ -716,49 +732,36 @@ class _BookSlotState extends State<BookSlot> {
                                                             _targetDateTime,
 
                                                         selectedDayBorderColor:
-                                                            AppColor
-                                                                .darkGreen,
+                                                            AppColor.darkGreen,
                                                         selectedDayButtonColor:
-                                                            AppColor
-                                                                .darkGreen,
-
+                                                            AppColor.darkGreen,
 
                                                         minSelectedDate:
                                                             todayDate,
                                                         maxSelectedDate:
                                                             todayDate.add(
                                                                 Duration(
-                                                                    days:
-                                                                        90)),
+                                                                    days: 90)),
 
                                                         onCalendarChanged:
                                                             (DateTime date) {
                                                           this.setState(() {
-                                                            _targetDateTime =
-                                                                date;
+                                                            _targetDateTime =date;
                                                             _currentMonth =
                                                                 DateFormat
                                                                         .yMMM()
                                                                     .format(
                                                                         _targetDateTime);
-                                                            print(
-                                                                _currentMonth);
                                                           });
-                                                          print("Hello");
                                                         },
-                                                        markedDateIconBorderColor:
-                                                        Color(0xFFF5F7F9),
-                                                        // markedDateWidget:
-                                                        //     Container(
-                                                        //   height: 50,
-                                                        //   color: Colors.red,
-                                                        // ),
-                                                        //
-                                                        // markedDateMoreCustomDecoration:
-                                                        //     BoxDecoration(
-                                                        //         color: Colors
-                                                        //             .red),
-                                                        //
+                                                        markedDateIconBorderColor:Color(0xFFF5F7F9),
+                                                        markedDateWidget:Container(
+                                                          height: 50,
+                                                          color: Colors.red,
+                                                        ),
+                                                        markedDateMoreCustomDecoration:
+                                                            BoxDecoration( color:Colors.red),
+
                                                         // nextMonthDayBorderColor:
                                                         //     Colors.red,
                                                         // prevDaysTextStyle:
@@ -778,7 +781,6 @@ class _BookSlotState extends State<BookSlot> {
                                                   print(cx.selDate.value);
                                                   print(cx.selMonth.value);
                                                   print(cx.selYear.value);
-                                                  print("cx.fullDate.value");
                                                   print(cx.fullDate.value);
 
                                                   setState(() {
@@ -802,10 +804,9 @@ class _BookSlotState extends State<BookSlot> {
                                                           TextAlign.center,
                                                       text: 'Confirm',
                                                       color: Colors.white,
-                                                      fontSize:
-                                                          cx.height > 800
-                                                              ? 25
-                                                              : 21,
+                                                      fontSize: cx.height > 800
+                                                          ? 25
+                                                          : 21,
                                                       fontWeight:
                                                           FontWeight.w700,
                                                     ),
@@ -818,277 +819,337 @@ class _BookSlotState extends State<BookSlot> {
                                       ),
                                     ),
                                     Gap(cx.height / 30),
-                                    mycontroller.isDataProcessing.value
-                                        ?Container():InterText(
-                                      text: "Available Slots (" +
-                                          (mycontroller.myList.length)
-                                              .toString() +
-                                          ")",
-                                      fontSize: cx.responsive(25,20, 17),
-                                      color: Colors.black,
-                                      fontWeight: FontWeight.w600,
-                                      textAlign: TextAlign.left,
-                                    ),
+                                    mycontroller.isDataProcessing.value ||
+                                            mycontroller.myList.length == 0 ||
+                                            (closedDates.contains(currentDate))
+                                        ? Container()
+                                        : InterText(
+                                            text: "Available Slots (" +
+                                                (mycontroller.myList.length)
+                                                    .toString() +
+                                                ")",
+                                            fontSize: cx.responsive(25, 20, 17),
+                                            color: Colors.black,
+                                            fontWeight: FontWeight.w600,
+                                            textAlign: TextAlign.left,
+                                          ),
                                     Gap(cx.height / 40),
-                                     mycontroller.isDataProcessing.value
-                                            ? Center(
-                                                child:
-                                                    CircularProgressIndicator(
-                                                  color: AppColor.darkGreen,
-                                                ),
-                                              )
-                                            : mycontroller.myList.length == 0
-                                                ? Column(
-                                                    mainAxisAlignment:
-                                                        MainAxisAlignment
-                                                            .center,
-                                                    crossAxisAlignment:
-                                                        CrossAxisAlignment
-                                                            .center,
-                                                    children: [
-                                                      Container(
-                                                        height:
-                                                            cx.height * 0.25,
-                                                        // height: 200,
-                                                        color: Colors.white,
-                                                        alignment:
-                                                            Alignment.center,
-                                                        child: NunitoText(
-                                                            text:
-                                                                'Oops! No slots available',
-                                                            textAlign:
-                                                                TextAlign
-                                                                    .center,
-                                                            fontSize:
-                                                                cx.responsive(
-                                                                    35,27, 23),
-                                                            color: Colors.grey
-                                                                .shade600),
-                                                      ),
-                                                    ],
-                                                  )
-                                                : ListView.builder(
-                                                    shrinkWrap: true,
-                                                    physics:
-                                                        BouncingScrollPhysics(),
-                                                    scrollDirection:
-                                                        Axis.vertical,
-                                                    itemCount: mycontroller
-                                                        .myList.length,
-                                                    itemBuilder:
-                                                        (context, index) {
-
-                                                      TimeSlotsModel item =mycontroller.myList[index];
-
-                                                      return InkWell(
-                                                              onTap: () {
-                                                                setState(() {
-                                                                  if (item.status ==
-                                                                      1) {
-                                                                    if (selectedIndex
-                                                                            .length !=
-                                                                        0) {
-                                                                      selectedIndex
-                                                                          .sort();
-                                                                      if (selectedIndex
-                                                                          .contains(index)) {
-                                                                        if (index == selectedIndex[0] ||
-                                                                            index == selectedIndex[selectedIndex.length - 1]) {
-                                                                          if (index ==
-                                                                              selectedIndex[0]&&index!=selectedIndex[selectedIndex.length - 1]) {
-                                                                            bottomNavigationTime(index, mycontroller.myList[index + 1]);
-                                                                          } else if (index ==
-                                                                              selectedIndex[selectedIndex.length - 1]&&index!=selectedIndex[0]) {
-                                                                            bottomNavigationTime(index, mycontroller.myList[index - 1]);
-                                                                          }
-                                                                          selectedIndex.remove(index);
-                                                                          totalPrice =
-                                                                              previousPrice - item.price;
-                                                                          previousPrice =
-                                                                              totalPrice;
-                                                                          removedIndex =
-                                                                              index;
-                                                                        }
-                                                                      } else if (index == selectedIndex[0] - 1 ||
-                                                                          index ==
-                                                                              selectedIndex[selectedIndex.length - 1] + 1) {
-                                                                        selectedIndex
-                                                                            .add(index);
-
-                                                                        totalPrice =
-                                                                            previousPrice + item.price;
-                                                                        previousPrice =
-                                                                            totalPrice;
-                                                                        bottomNavigationTime(
-                                                                            index,
-                                                                            mycontroller.myList[index]);
-                                                                      }
-
-                                                                      if (!selectedIndex.contains(index) &&
-                                                                          index !=
-                                                                              removedIndex) {
-                                                                        onBookSlotAlert(
-                                                                            context: context);
-                                                                      }
-                                                                    } else {
-                                                                      selectedIndex
-                                                                          .add(index);
-                                                                      setState(
-                                                                          () {
-                                                                        totalPrice =
-                                                                            previousPrice + item.price;
-                                                                        previousPrice =
-                                                                            totalPrice;
-                                                                      });
-                                                                      bottomNavigationTime(
-                                                                          index,
-                                                                          mycontroller.myList[index]);
-                                                                    }
-
-
-                                                                  }
-
-                                                                  //Time For Bottom Navigation
-
-                                                                  print(
-                                                                      "startTimeeeeeee");
-                                                                  print(
-                                                                      startTime);
-                                                                  print(
-                                                                      startMeanTime);
-
-                                                                  print(
-                                                                      "endTimeeeeeee");
-                                                                  print(
-                                                                      endTime);
-                                                                  print(
-                                                                      endMeanTime);
-                                                                });
-                                                              },
-                                                              child: Padding(
-                                                                padding:
-                                                                    const EdgeInsets
-                                                                        .fromLTRB(
-                                                                  0,
-                                                                  8,
-                                                                  0,
-                                                                  0,
-                                                                ),
-                                                                child:
-                                                                    Container(
-                                                                  width: double
-                                                                      .infinity,
-                                                                  height:
-                                                                      cx.height /
-                                                                          12,
-                                                                  decoration: BoxDecoration(
-                                                                      color: item.status == 0
-                                                                          ? Color(0xFFDADADA)
-                                                                          : selectedIndex.contains(index)
-                                                                              ? AppColor.bg
-                                                                              : Colors.white,
-                                                                      borderRadius: BorderRadius.all(Radius.circular(12)),
-                                                                      border: Border.all(
-                                                                        width: selectedIndex.contains(index)
-                                                                            ? 1.8
-                                                                            : 1.6,
-                                                                        color: item.status == 0
-                                                                            ? Color(0xFFA8A8A8)
-                                                                            : selectedIndex.contains(index)
-                                                                                ? Color(0xFF9BD9C1)
-                                                                                : Color(0xFFF5F7F9),
-                                                                      )),
-                                                                  child: Row(
-                                                                    mainAxisAlignment:
-                                                                        MainAxisAlignment
-                                                                            .spaceBetween,
-                                                                    crossAxisAlignment:
-                                                                        CrossAxisAlignment
-                                                                            .center,
-                                                                    children: [
-                                                                      // Padding(
-                                                                      //   padding: const EdgeInsets.only(
-                                                                      //       left: 8.0),
-                                                                      //   child: Row(
-                                                                      //     children: [
-                                                                      //       NunitoText(
-                                                                      //         text:(index+1).toString()+":00 PM -",
-                                                                      //         color: Colors.black,
-                                                                      //         fontSize: cx.responsive(18,15, 13),
-                                                                      //         fontWeight: FontWeight.w700,
-                                                                      //
-                                                                      //       ),
-                                                                      //       NunitoText(
-                                                                      //         text:(index+2).toString()+":00 PM",
-                                                                      //         color: Colors.black,
-                                                                      //         fontSize: cx.responsive(18,15, 13),
-                                                                      //         fontWeight: FontWeight.w700,
-                                                                      //
-                                                                      //       ),
-                                                                      //     ],
-                                                                      //   ),
-                                                                      // ),
-
-                                                                      Padding(
-                                                                        padding:
-                                                                            const EdgeInsets.only(left: 8.0),
-                                                                        child:
-                                                                            NunitoText(
-                                                                          text:
-                                                                              item.slot,
-                                                                          color: item.status == 0
-                                                                              ? Color(0xFF757575)
-                                                                              : Colors.black,
-                                                                          fontSize:
-                                                                              cx.responsive(18,15, 13),
-                                                                          fontWeight:
-                                                                              FontWeight.w700,
-                                                                        ),
-                                                                      ),
-                                                                      NunitoText(
-                                                                        text:
-                                                                            "\$${item.price}",
-                                                                        color: item.status == 0
-                                                                            ? Color(0xFF757575)
-                                                                            : Colors.black,
-                                                                        fontSize: cx.responsive(
-                                                                            22,17, 15),
-                                                                        fontWeight:
-                                                                            FontWeight.w700,
-                                                                      ),
-                                                                      item.status ==
-                                                                              0
-                                                                          ? Container(
-                                                                              width: cx.width * 0.15,
-                                                                            )
-                                                                          : selectedIndex.contains(index)
-                                                                              ? Container(
-                                                                                  width: cx.width * 0.15,
-                                                                                  child: Padding(
-                                                                                    padding: const EdgeInsets.only(right: 12.0),
-                                                                                    child: Icon(
-                                                                                      Icons.highlight_remove_rounded,
-                                                                                      color: Color(0xFFFF1A1A),
-                                                                                    ),
-                                                                                  ),
-                                                                                )
-                                                                              : Container(
-                                                                                  width: cx.width * 0.15,
-                                                                                  child: Padding(
-                                                                                    padding: const EdgeInsets.only(right: 12.0),
-                                                                                    child: Icon(
-                                                                                      Icons.add_circle_outline_rounded,
-                                                                                      color: AppColor.lightGreen,
-                                                                                    ),
-                                                                                  ),
-                                                                                )
-                                                                    ],
-                                                                  ),
-                                                                ),
-                                                              ),
-                                                            );
-                                                    },
+                                    mycontroller.isDataProcessing.value
+                                        ? Center(
+                                            child: CircularProgressIndicator(
+                                              color: AppColor.darkGreen,
+                                            ),
+                                          )
+                                        : mycontroller.myList.length == 0 ||
+                                                (closedDates.contains(
+                                                        currentDate) &&
+                                                    selectedDate ==
+                                                        widget.torontoTimeStamp)
+                                            ? Column(
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment.center,
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.center,
+                                                children: [
+                                                  Container(
+                                                    height: cx.height * 0.25,
+                                                    // height: 200,
+                                                    color: Colors.white,
+                                                    alignment: Alignment.center,
+                                                    child: NunitoText(
+                                                        text:
+                                                            'Oops! No slots available',
+                                                        textAlign:
+                                                            TextAlign.center,
+                                                        fontSize: cx.responsive(
+                                                            35, 27, 23),
+                                                        color: Colors
+                                                            .grey.shade600),
                                                   ),
+                                                ],
+                                              )
+                                            : ListView.builder(
+                                                shrinkWrap: true,
+                                                physics:
+                                                    BouncingScrollPhysics(),
+                                                scrollDirection: Axis.vertical,
+                                                itemCount:
+                                                    mycontroller.myList.length,
+                                                itemBuilder: (context, index) {
+                                                  TimeSlotsModel item =
+                                                      mycontroller
+                                                          .myList[index];
+
+                                                  return InkWell(
+                                                    onTap: () {
+                                                      setState(() {
+                                                        if (item.status == 1) {
+                                                          if (selectedIndex
+                                                                  .length !=
+                                                              0) {
+                                                            selectedIndex
+                                                                .sort();
+                                                            if (selectedIndex
+                                                                .contains(
+                                                                    index)) {
+                                                              if (index ==
+                                                                      selectedIndex[
+                                                                          0] ||
+                                                                  index ==
+                                                                      selectedIndex[
+                                                                          selectedIndex.length -
+                                                                              1]) {
+                                                                if (index ==
+                                                                        selectedIndex[
+                                                                            0] &&
+                                                                    index !=
+                                                                        selectedIndex[selectedIndex.length -
+                                                                            1]) {
+                                                                  bottomNavigationTime(
+                                                                      index,
+                                                                      mycontroller
+                                                                              .myList[
+                                                                          index +
+                                                                              1]);
+                                                                } else if (index ==
+                                                                        selectedIndex[selectedIndex.length -
+                                                                            1] &&
+                                                                    index !=
+                                                                        selectedIndex[
+                                                                            0]) {
+                                                                  bottomNavigationTime(
+                                                                      index,
+                                                                      mycontroller
+                                                                              .myList[
+                                                                          index -
+                                                                              1]);
+                                                                }
+                                                                selectedIndex
+                                                                    .remove(
+                                                                        index);
+                                                                totalPrice =
+                                                                    previousPrice -
+                                                                        item.price;
+                                                                previousPrice =
+                                                                    totalPrice;
+                                                                removedIndex =
+                                                                    index;
+                                                              }
+                                                            } else if (index ==
+                                                                    selectedIndex[
+                                                                            0] -
+                                                                        1 ||
+                                                                index ==
+                                                                    selectedIndex[selectedIndex.length -
+                                                                            1] +
+                                                                        1) {
+                                                              selectedIndex
+                                                                  .add(index);
+
+                                                              totalPrice =
+                                                                  previousPrice +
+                                                                      item.price;
+                                                              previousPrice =
+                                                                  totalPrice;
+                                                              bottomNavigationTime(
+                                                                  index,
+                                                                  mycontroller
+                                                                          .myList[
+                                                                      index]);
+                                                            }
+
+                                                            if (!selectedIndex
+                                                                    .contains(
+                                                                        index) &&
+                                                                index !=
+                                                                    removedIndex) {
+                                                              onBookSlotAlert(
+                                                                  context:
+                                                                      context);
+                                                            }
+                                                          } else {
+                                                            selectedIndex
+                                                                .add(index);
+                                                            setState(() {
+                                                              totalPrice =
+                                                                  previousPrice +
+                                                                      item.price;
+                                                              previousPrice =
+                                                                  totalPrice;
+                                                            });
+                                                            bottomNavigationTime(
+                                                                index,
+                                                                mycontroller
+                                                                        .myList[
+                                                                    index]);
+                                                          }
+                                                        }
+                                                      });
+                                                    },
+                                                    child: Padding(
+                                                      padding: const EdgeInsets
+                                                          .fromLTRB(
+                                                        0,
+                                                        8,
+                                                        0,
+                                                        0,
+                                                      ),
+                                                      child: Container(
+                                                        width: double.infinity,
+                                                        height: cx.height / 12,
+                                                        decoration:
+                                                            BoxDecoration(
+                                                                color: item.status ==
+                                                                        0
+                                                                    ? Color(
+                                                                        0xFFDADADA)
+                                                                    : selectedIndex.contains(
+                                                                            index)
+                                                                        ? AppColor
+                                                                            .bg
+                                                                        : Colors
+                                                                            .white,
+                                                                borderRadius: BorderRadius
+                                                                    .all(Radius
+                                                                        .circular(
+                                                                            12)),
+                                                                border:
+                                                                    Border.all(
+                                                                  width: selectedIndex
+                                                                          .contains(
+                                                                              index)
+                                                                      ? 1.8
+                                                                      : 1.6,
+                                                                  color: item.status ==
+                                                                          0
+                                                                      ? Color(
+                                                                          0xFFA8A8A8)
+                                                                      : selectedIndex.contains(
+                                                                              index)
+                                                                          ? Color(
+                                                                              0xFF9BD9C1)
+                                                                          : Color(
+                                                                              0xFFF5F7F9),
+                                                                )),
+                                                        child: Row(
+                                                          mainAxisAlignment:
+                                                              MainAxisAlignment
+                                                                  .spaceBetween,
+                                                          crossAxisAlignment:
+                                                              CrossAxisAlignment
+                                                                  .center,
+                                                          children: [
+                                                            // Padding(
+                                                            //   padding: const EdgeInsets.only(
+                                                            //       left: 8.0),
+                                                            //   child: Row(
+                                                            //     children: [
+                                                            //       NunitoText(
+                                                            //         text:(index+1).toString()+":00 PM -",
+                                                            //         color: Colors.black,
+                                                            //         fontSize: cx.responsive(18,15, 13),
+                                                            //         fontWeight: FontWeight.w700,
+                                                            //
+                                                            //       ),
+                                                            //       NunitoText(
+                                                            //         text:(index+2).toString()+":00 PM",
+                                                            //         color: Colors.black,
+                                                            //         fontSize: cx.responsive(18,15, 13),
+                                                            //         fontWeight: FontWeight.w700,
+                                                            //
+                                                            //       ),
+                                                            //     ],
+                                                            //   ),
+                                                            // ),
+
+                                                            Padding(
+                                                              padding:
+                                                                  const EdgeInsets
+                                                                          .only(
+                                                                      left:
+                                                                          8.0),
+                                                              child: NunitoText(
+                                                                text: item.slot,
+                                                                color: item.status ==
+                                                                        0
+                                                                    ? Color(
+                                                                        0xFF757575)
+                                                                    : Colors
+                                                                        .black,
+                                                                fontSize: cx
+                                                                    .responsive(
+                                                                        18,
+                                                                        15,
+                                                                        13),
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .w700,
+                                                              ),
+                                                            ),
+                                                            NunitoText(
+                                                              text:
+                                                                  "\$${item.price}",
+                                                              color: item.status ==
+                                                                      0
+                                                                  ? Color(
+                                                                      0xFF757575)
+                                                                  : Colors
+                                                                      .black,
+                                                              fontSize:
+                                                                  cx.responsive(
+                                                                      22,
+                                                                      17,
+                                                                      15),
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .w700,
+                                                            ),
+                                                            item.status == 0
+                                                                ? Container(
+                                                                    width:
+                                                                        cx.width *
+                                                                            0.15,
+                                                                  )
+                                                                : selectedIndex
+                                                                        .contains(
+                                                                            index)
+                                                                    ? Container(
+                                                                        width: cx.width *
+                                                                            0.15,
+                                                                        child:
+                                                                            Padding(
+                                                                          padding:
+                                                                              const EdgeInsets.only(right: 12.0),
+                                                                          child:
+                                                                              Icon(
+                                                                            Icons.highlight_remove_rounded,
+                                                                            color:
+                                                                                Color(0xFFFF1A1A),
+                                                                          ),
+                                                                        ),
+                                                                      )
+                                                                    : Container(
+                                                                        width: cx.width *
+                                                                            0.15,
+                                                                        child:
+                                                                            Padding(
+                                                                          padding:
+                                                                              const EdgeInsets.only(right: 12.0),
+                                                                          child:
+                                                                              Icon(
+                                                                            Icons.add_circle_outline_rounded,
+                                                                            color:
+                                                                                AppColor.lightGreen,
+                                                                          ),
+                                                                        ),
+                                                                      )
+                                                          ],
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  );
+                                                },
+                                              ),
                                     selectedIndex.length == 0
                                         ? Gap(cx.height / 20)
                                         : Gap(cx.height / 15),
@@ -1139,9 +1200,8 @@ class _BookSlotState extends State<BookSlot> {
                                   Row(
                                     children: [
                                       SenticText(
-                                        text: "\$" +
-                                            totalPrice.toString() +
-                                            " ",
+                                        text:
+                                            "\$" + totalPrice.toString() + " ",
                                         fontSize: cx.height > 800 ? 23 : 20,
                                         fontWeight: FontWeight.w600,
                                         color: Colors.white,
@@ -1150,7 +1210,7 @@ class _BookSlotState extends State<BookSlot> {
                                       ),
                                       SenticText(
                                         text:
-                                            "(${selectedIndex.length} Slots Selected)",
+                                        selectedIndex.length==1?"(${selectedIndex.length} Slot Selected)":"(${selectedIndex.length} Slots Selected)",
                                         fontSize: cx.height > 800 ? 12 : 10,
                                         fontWeight: FontWeight.w300,
                                         color: Colors.white,
@@ -1182,61 +1242,66 @@ class _BookSlotState extends State<BookSlot> {
                         AbsorbPointer(
                           absorbing: selectedIndex.length == 0 ? true : false,
                           child: Padding(
-                            padding: EdgeInsets.only(bottom:  cx.responsive(cx.height / 25, cx.height / 35, cx.height / 50)),
-
+                            padding: EdgeInsets.only(
+                                bottom: cx.responsive(cx.height / 25,
+                                    cx.height / 35, cx.height / 50)),
                             child: Container(
                               child: CustomButton(
-                                text: widget.isEditing?"Confirm":"Proceed",
+                                text: widget.isEditing ? "Confirm" : "Proceed",
                                 fun: () {
 
                                   cx.write(Keys.price, totalPrice);
                                   cx.write(Keys.slots, selectedIndex.length);
+                                  bookedSlotList = '';
                                   selectedIndex.forEach((element) {
-                                    bookedSlotList = bookedSlotList + mycontroller.myList[element].slot +',';
-                                    cx.write(
-                                        Keys.slotsList,
-                                        bookedSlotList.substring(
-                                            0, bookedSlotList.length - 1));
+                                    bookedSlotList = bookedSlotList +
+                                        mycontroller.myList[element].slot +
+                                        ',';
+
                                   });
+                                  cx.write(
+                                      Keys.slotsList,
+                                      bookedSlotList.substring(
+                                          0, bookedSlotList.length - 1));
+                                  print("cx.read(Keys.slotsList)");
+                                  print(bookedSlotList.substring(0, bookedSlotList.length - 1));
+                                  print(cx.read(Keys.slotsList));
 
 
-
-                                  cx.globalSelectedIndex=selectedIndex;
-                                  cx.globalPrice.value=totalPrice;
-                                  if(widget.isEditing){
-                                    if(cx.read(Keys.fieldName).length!=0){
-                                      List fields = cx.read(Keys.fieldName).split(",");
-                                      cx.write(Keys.price, totalPrice*fields.length);
+                                  cx.globalSelectedIndex = selectedIndex;
+                                  cx.globalPrice.value = totalPrice;
+                                  if (widget.isEditing) {
+                                    if (cx.read(Keys.fieldName).length != 0) {
+                                      List fields =
+                                          cx.read(Keys.fieldName).split(",");
+                                      cx.write(Keys.price,
+                                          totalPrice * fields.length);
                                     }
 
-
-                                    print("new price");
+                                    // print("new price");
                                     print(cx.read(Keys.price));
-                                  }
-                                  else{
+                                  } else {}
 
-                                  }
-
-
-
-                                  print("selectedIndex");
                                   print(cx.globalSelectedIndex);
 
                                   print(bookedSlotList.substring(
                                       0, bookedSlotList.length - 1));
-                                  widget.isEditing?
-                                      Get.back(result: [
-                                        // cx.selDate.value,
-                                        // cx.selMonth.value,
-                                        cx.read(Keys.startTime),
-                                        cx.read(Keys.endTime),
-                                      ]):Get.to(
-                                    SelectPlayers(isEditing: false,),
-                                  )?.then((value) => refreshData());
+                                  widget.isEditing
+                                      ? Get.back(result: [
+                                          // cx.selDate.value,
+                                          // cx.selMonth.value,
+                                          cx.read(Keys.startTime),
+                                          cx.read(Keys.endTime),
+                                        ])
+                                      : Get.to(
+                                          SelectPlayers(
+                                            isEditing: false,
+                                          ),
+                                        )?.then((value) => refreshData());
                                 },
                                 radius: cx.height / 13.34,
-                                width: cx.width *0.32,
-                                size: cx.responsive(24,20, 18),
+                                width: cx.width * 0.32,
+                                size: cx.responsive(24, 20, 18),
                                 color: selectedIndex.length == 0
                                     ? Colors.grey
                                     : Colors.white,
@@ -1253,21 +1318,16 @@ class _BookSlotState extends State<BookSlot> {
   }
 
   void bottomNavigationTime(int index, TimeSlotsModel item) {
-    print("iti");
     print(item.slot);
     if (selectedIndex.length != 0) {
       selectedIndex.sort();
-      print("item.slot.toString()");
       print(selectedIndex);
       print(selectedIndex[0]);
       print(selectedIndex[selectedIndex.length - 1]);
 
       if (index == selectedIndex[0]) {
-        print("crushy1");
         print(item.slot.toString());
-
         cx.write(Keys.startTime, item.slot.toString());
-        print("Original");
         print(cx.read(Keys.startTime));
         print(cx.read(Keys.endTime));
 
@@ -1280,7 +1340,6 @@ class _BookSlotState extends State<BookSlot> {
         print(startMeanTime);
       }
       if (index == selectedIndex[selectedIndex.length - 1]) {
-        print("crushy2");
         print(item.slot.toString());
 
         cx.write(Keys.endTime, item.slot.toString());
@@ -1299,25 +1358,26 @@ class _BookSlotState extends State<BookSlot> {
     }
   }
 
-
   refreshData() {
-    cx.write(Keys.fieldName,'');
+    cx.write(Keys.fieldName, '');
     print("hey");
-    if(cx.globalSelectedIndex.length!=0){
-      totalPrice=cx.globalPrice.value;
-      previousPrice =totalPrice;
+    if (cx.globalSelectedIndex.length != 0) {
+      totalPrice = cx.globalPrice.value;
+      previousPrice = totalPrice;
       print("hey1");
       print(cx.globalSelectedIndex.length);
       print(cx.globalSelectedIndex);
-      setState((){
-        selectedIndex=cx.globalSelectedIndex;
-
+      setState(() {
+        selectedIndex = cx.globalSelectedIndex;
       });
       print("selectedIndex");
       print(selectedIndex);
     }
   }
-  onBookSlotAlert({required BuildContext context, }) {
+
+  onBookSlotAlert({
+    required BuildContext context,
+  }) {
     Alert(
       style: AlertStyle(
           buttonsDirection: ButtonsDirection.column,
@@ -1337,7 +1397,8 @@ class _BookSlotState extends State<BookSlot> {
           Text(
             "Note",
             style: TextStyle(
-                fontSize: cx.responsive(24,20, 18), fontWeight: FontWeight.w700),
+                fontSize: cx.responsive(24, 20, 18),
+                fontWeight: FontWeight.w700),
           ),
           Gap(cx.height / 60),
           Text(
@@ -1346,7 +1407,9 @@ class _BookSlotState extends State<BookSlot> {
             overflow: TextOverflow.clip,
             maxLines: 3,
             style: TextStyle(
-                fontSize: cx.responsive(22,18, 14), fontWeight: FontWeight.w400, color: Colors.grey),
+                fontSize: cx.responsive(22, 18, 14),
+                fontWeight: FontWeight.w400,
+                color: Colors.grey),
           ),
         ],
       ),
@@ -1361,5 +1424,29 @@ class _BookSlotState extends State<BookSlot> {
       ),
       // onWillPopActive:true ,
     ).show();
+  }
+
+  void addCloseDates(DateTime todayDate) {
+    int dayOfWeek = todayDate.weekday;
+
+    for (int i = 0; i < 90; i++) {
+      dayOfWeek = (todayDate.add(Duration(days: i))).weekday;
+      if (widget.closedDays?.contains(dayOfWeek) ?? false) {
+        markedDates.add(marked(todayDate.add(Duration(days: i))));
+        closedDates.add(todayDate.add(Duration(days: i)));
+
+        print(todayDate.add(Duration(days: i)));
+      }
+    }
+
+    print("weekOfDate===>>>");
+    print(markedDates);
+  }
+
+  MarkedDate marked(var Date) {
+    return MarkedDate(
+        color: Color(0xFFF5F7F9),
+        date: Date,
+        textStyle: TextStyle(fontSize: 18, color: Color(0xFFD4D8D6)));
   }
 }

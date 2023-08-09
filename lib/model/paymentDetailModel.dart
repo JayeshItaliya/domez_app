@@ -6,6 +6,9 @@ class PaymentDetailsModel {
     required this.transactionId,
     required this.bookingId,
     required this.paymentLink,
+    required this.bookingCreatedAt,
+    required this.currentTime,
+
   });
 
   int status;
@@ -13,6 +16,8 @@ class PaymentDetailsModel {
   String transactionId;
   int bookingId;
   String paymentLink;
+  DateTime bookingCreatedAt;
+  DateTime currentTime;
 
   factory PaymentDetailsModel.fromJson(Map<String, dynamic> json) => PaymentDetailsModel(
     status: json["status"],
@@ -20,6 +25,9 @@ class PaymentDetailsModel {
     transactionId: json["transaction_id"],
     bookingId: json["booking_id"],
     paymentLink: json["payment_link"],
+    bookingCreatedAt: DateTime.parse(json["booking_created_at"]),
+    currentTime: DateTime.parse(json["current_time"]),
+
   );
 
   Map<String, dynamic> toJson() => {
@@ -28,5 +36,7 @@ class PaymentDetailsModel {
     "transaction_id": transactionId,
     "booking_id": bookingId,
     "payment_link": paymentLink,
+    "booking_created_at": bookingCreatedAt.toIso8601String(),
+    "current_time": currentTime.toIso8601String(),
   };
 }

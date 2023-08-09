@@ -13,6 +13,7 @@ import '../../model/categoryModel.dart';
 import 'package:gap/gap.dart';
 import '../../commonModule/widget/common/textNunito.dart';
 
+
 class Filters extends StatefulWidget {
   const Filters({Key? key}) : super(key: key);
 
@@ -44,20 +45,11 @@ class _FiltersState extends State<Filters> {
   double maxPrice = 500.0;
   RangeLabels labels = RangeLabels('1', "500");
 
-  int vollyIndex = 0;
 
   @override
   void initState() {
     super.initState();
   }
-
-  _collapse() {
-    int? newKey;
-    do {
-      _key = Random().nextInt(10000);
-    } while (newKey == _key);
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(

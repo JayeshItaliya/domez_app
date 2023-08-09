@@ -10,8 +10,6 @@ class RatingListController extends GetxController {
 
   var myList = List<RatingListModel>.empty(growable: true).obs;
   var isDataProcessing = false.obs;
-
-  ScrollController scrollController = ScrollController();
   StreamSubscription? subscription;
   var isoffline = false.obs;
   var type =1.obs;

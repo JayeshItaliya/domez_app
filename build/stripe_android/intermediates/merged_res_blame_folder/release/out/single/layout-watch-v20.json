@@ -1,0 +1,10 @@
+[
+    {
+        "merged": "/Users/SMIINFOTECH/Downloads/domez/build/stripe_android/intermediates/merged_res/release/layout-watch-v20/abc_alert_dialog_button_bar_material.xml",
+        "source": "/Users/SMIINFOTECH/.gradle/caches/transforms-3/689d99e98054ff25199ab9484711f07c/transformed/appcompat-1.6.1/res/layout-watch-v20/abc_alert_dialog_button_bar_material.xml"
+    },
+    {
+        "merged": "/Users/SMIINFOTECH/Downloads/domez/build/stripe_android/intermediates/merged_res/release/layout-watch-v20/abc_alert_dialog_title_material.xml",
+        "source": "/Users/SMIINFOTECH/.gradle/caches/transforms-3/689d99e98054ff25199ab9484711f07c/transformed/appcompat-1.6.1/res/layout-watch-v20/abc_alert_dialog_title_material.xml"
+    }
+]

@@ -10,6 +10,7 @@ import 'package:intl/intl.dart';
 import 'package:http/http.dart'as http;
 
 import '../commonModule/Constant.dart';
+import '../commonModule/utils.dart';
 
 class CommonController extends GetxController{
   var isDataProcessing = false.obs;
@@ -77,6 +78,7 @@ class CommonController extends GetxController{
   var lng="".obs;
   final GlobalKey<FormState> ChangePassFormKey = GlobalKey<FormState>();
 
+  var totalFavourites = 0.obs;
 
   @override
   void onInit() {
@@ -126,11 +128,12 @@ class CommonController extends GetxController{
   // }
   dynamic read(String key){
     return storage.read('$key');
-
   }
+
   void write(String key,var value){
     storage.write('$key',value);
   }
+
   double responsive(double tabletDevice,double bigMobileDevice,double smallMobileDevice,){
   return Get.width>550?tabletDevice:
          Get.width>400?bigMobileDevice:
@@ -153,6 +156,7 @@ class CommonController extends GetxController{
       }
     });
   }
+
 
   Future favourite({String? uid, String? did,String? type,String? lid}) async {
     print("Fav");

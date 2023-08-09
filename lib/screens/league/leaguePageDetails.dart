@@ -1,4 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:domez/controller/categoryController.dart';
+import 'package:intl/intl.dart';
 import '../../../commonModule/AppColor.dart';
 import 'package:domez/commonModule/Strings.dart';
 import 'package:flutter/material.dart';
@@ -14,6 +16,8 @@ import '../../controller/leagueDetailsController.dart';
 import '../../controller/leaguesListController.dart';
 import '../../model/LeagueDetailsModel.dart';
 import 'addYourDetails.dart';
+import '../../commonModule/utils.dart';
+
 import '../bottomSheet/bottomSheetLeagueDetailsPage.dart';
 
 class LeaguePageDetails extends StatefulWidget {
@@ -34,6 +38,7 @@ class _LeaguePageDetailsState extends State<LeaguePageDetails> {
   bool fav = false;
   int selectedIndex = -1;
   CommonController cx = Get.put(CommonController());
+  CategoryController categoryController = Get.put(CategoryController());
   final mycontroller = Get.put(LeagueDetailsController());
   final LeagueList = Get.put(LeagueListController());
   late final LeagueDetailsModel item;
@@ -57,8 +62,8 @@ class _LeaguePageDetailsState extends State<LeaguePageDetails> {
     return WillPopScope(
         onWillPop: () async {
           print("backkkk");
-          LeagueList.getTask2(LeagueList.sportid.value).then((value) {
-            LeagueList.getTask3(LeagueList.sportid.value);
+          LeagueList.getTask2(categoryController.sportid.value).then((value) {
+            LeagueList.getTask3(categoryController.sportid.value);
             Get.back();
           });
           return false;
@@ -182,10 +187,10 @@ class _LeaguePageDetailsState extends State<LeaguePageDetails> {
                                             onTap: () {
                                               // Get.back();
                                               LeagueList.getTask2(
-                                                      LeagueList.sportid.value)
+                                                  categoryController.sportid.value)
                                                   .then((value) {
                                                 LeagueList.getTask3(
-                                                    LeagueList.sportid.value);
+                                                    categoryController.sportid.value);
                                                 Get.back();
                                               });
                                             },
@@ -222,7 +227,7 @@ class _LeaguePageDetailsState extends State<LeaguePageDetails> {
                                                     lid: item.id.toString());
                                               } else {
                                                 // Get.to(SignIn());
-                                                onAlertSignIn(context: context);
+                                                onAlertSignIn(context: context,currentIndex: 2,noOfPopTimes: 1);
                                               }
                                             },
                                             child: CircleAvatar(
@@ -310,7 +315,7 @@ class _LeaguePageDetailsState extends State<LeaguePageDetails> {
                                     ),
                                   ),
                                 ),
-                                Padding(
+                                !isDeadlineGone()?Padding(
                                   padding: EdgeInsets.only(
                                       bottom: cx.responsive(cx.height / 25,
                                           cx.height / 35, cx.height / 50)),
@@ -334,12 +339,24 @@ class _LeaguePageDetailsState extends State<LeaguePageDetails> {
                                       color: Colors.white,
                                     ),
                                   ),
-                                )
+                                ):Container()
                               ],
                             ),
                           ),
                         )),
           ),
         ));
+  }
+  bool isDeadlineGone(){
+    String todayDate=DateFormat('yyyy-MM-dd').format(item.currentTime);
+    String deadlineDate=DateFormat('yyyy-MM-dd').format(item.bookingDeadline);
+    if(todayDate==deadlineDate){
+       return false;
+    }
+    if(item.currentTime.microsecondsSinceEpoch>=item.bookingDeadline.microsecondsSinceEpoch){
+      return true;
+    }
+
+    return false;
   }
 }

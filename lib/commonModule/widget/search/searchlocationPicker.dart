@@ -11,9 +11,12 @@ import '../../../model/favouriteModel.dart';
 import '../../../screens/bookSteps/DomePage.dart';
 import '../../../screens/league/leaguePageDetails.dart';
 import '../../Constant.dart';
+import '../../Debouncer.dart';
 import '../../Strings.dart';
 import 'package:gap/gap.dart';
+import '../../utils.dart';
 import '../common/textNunito.dart';
+
 
 class LocationPicker extends StatefulWidget {
   final bool homePage;
@@ -36,8 +39,6 @@ class _LocationPickerState extends State<LocationPicker> {
 
   CommonController cx = Get.put(CommonController());
   SearchListController mycontroller = Get.put(SearchListController());
-  final dx = Get.put(DomesDetailsController());
-  final lx = Get.put(LeagueDetailsController());
 
   @override
   void initState() {
@@ -46,6 +47,10 @@ class _LocationPickerState extends State<LocationPicker> {
     googlePlace = GooglePlace(Constant.mapkey);
     super.initState();
   }
+  final _debouncer = Debouncer(delay: 500);
+  String _searchText = '';
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -196,25 +201,7 @@ class _LocationPickerState extends State<LocationPicker> {
                         filled: true,
                         contentPadding: EdgeInsets.all(20),
                       ),
-                      onChanged: (value) {
-                        // if (value.isNotEmpty) {
-                        //   autoCompleteSearch(value);
-                        // } else {
-                        //   if (predictions.length > 0 && mounted) {
-                        //     setState(() {
-                        //       predictions = [];
-                        //     });
-                        //   }
-                        // }
-                        //
-                        // if (value.isEmpty) {
-                        //   mycontroller.myList.clear();
-                        // } else {
-                        //   mycontroller.searchName.value = value;
-                        //   mycontroller.getTask(mycontroller.type.value.toString(),
-                        //       mycontroller.searchName.value);
-                        // }
-                      },
+                      onChanged: onSearchTextChanged
                     ),
                   ),
                   SizedBox(
@@ -275,16 +262,13 @@ class _LocationPickerState extends State<LocationPicker> {
                                               physics:
                                                   NeverScrollableScrollPhysics(),
                                               itemBuilder: (context, index) {
-                                                print(predictions[index]
-                                                    .description);
+
                                                 return index == 2 ||
                                                         index == 3 ||
                                                         index == 4
                                                     ? Container()
                                                     : InkWell(
                                                         onTap: () {
-                                                          print('prediction');
-
                                                           getDetils(
                                                               predictions[index]
                                                                   .placeId
@@ -543,7 +527,6 @@ class _LocationPickerState extends State<LocationPicker> {
   }
 
   void autoCompleteSearch(String value) async {
-    print("heyyyy");
     var result = await googlePlace.autocomplete.get(value);
     print(result!.status);
     if (result.predictions != null && mounted) {
@@ -551,5 +534,30 @@ class _LocationPickerState extends State<LocationPicker> {
         predictions = result.predictions!;
       });
     }
+  }
+  void onSearchTextChanged(String searchText) {
+    _debouncer(() {
+      setState(() {
+        _searchText = searchText;
+      });
+      if (searchController.text.isNotEmpty) {
+        autoCompleteSearch(searchText);
+      } else {
+        if (predictions.length > 0 && mounted) {
+          setState(() {
+            predictions = [];
+          });
+        }
+      }
+
+      if (searchController.text.isEmpty) {
+        mycontroller.myList.clear();
+      } else {
+        mycontroller.searchName.value = searchController.text;
+        mycontroller.getTask(
+            mycontroller.type.value.toString(),
+            mycontroller.searchName.value);
+      }
+    });
   }
 }

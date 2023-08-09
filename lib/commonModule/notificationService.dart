@@ -1,5 +1,5 @@
 import 'dart:io';
-import 'package:domez/commonModule/Constant.dart';
+import 'package:domez/commonModule/utils.dart';
 import 'package:domez/screens/authPage/signIn.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
@@ -9,7 +9,6 @@ import 'package:get/get.dart';
 import '../controller/bookingDetailsController.dart';
 import '../controller/leagueDetailsController.dart';
 import '../screens/league/leaguePageDetails.dart';
-import '../screens/menuPage/manageAccounts.dart';
 
 class NotificationServices {
   BookingDetailsController bx = Get.put(BookingDetailsController());
@@ -198,7 +197,6 @@ class NotificationServices {
       Get.to(SignIn(curIndex: 4,isBackButton: false,));
 
     }
-    print("Type 2");
 
   }
   else if(data['type']=="3"){
@@ -209,7 +207,6 @@ class NotificationServices {
       Get.to(SignIn(curIndex: 4,isBackButton: false,));
 
     }
-    print("Type 3");
   }
   else if(data['type']=="4"){
     if(cx.read("islogin")){

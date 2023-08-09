@@ -5,7 +5,6 @@ import 'package:domez/screens/bookSteps/reviewAndConfirm.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
 import 'package:domez/commonModule/Strings.dart';
-
 import 'package:flutter/material.dart';
 import 'package:rflutter_alert/rflutter_alert.dart';
 import '../../../commonModule/AppColor.dart';
@@ -16,10 +15,13 @@ import '../../commonModule/widget/common/textNunito.dart';
 import '../../commonModule/widget/common/textSentic.dart';
 import '../../commonModule/widget/search/customButton.dart';
 import '../../commonModule/widget/search/simplecircularIcon.dart';
+import '../../commonModule/utils.dart';
+import '../../commonModule/utils.dart';
 
 class AvailableFields extends StatefulWidget {
   bool isEditing;
-  AvailableFields({Key? key,required this.isEditing}) : super(key: key);
+
+  AvailableFields({Key? key, required this.isEditing}) : super(key: key);
 
   @override
   State<AvailableFields> createState() => _AvailableFieldsState();
@@ -28,13 +30,11 @@ class AvailableFields extends StatefulWidget {
 class _AvailableFieldsState extends State<AvailableFields> {
   CommonController cx = Get.put(CommonController());
   AvailableFieldController mycontroller = Get.put(AvailableFieldController());
-  int playerCount = 12;
 
-  // int curfieldindex = 0;
   List<int> selectedIdList = [];
   List<String> fieldNameList = [];
   List<int> erroravailableFields = [];
-
+  List<int> errorDomeImage = [];
 
   @override
   void initState() {
@@ -63,7 +63,7 @@ class _AvailableFieldsState extends State<AvailableFields> {
       print(selectedIdList);
     }
 
-    cx.price.value=cx.read(Keys.price);
+    cx.price.value = cx.read(Keys.price);
   }
 
   @override
@@ -97,33 +97,62 @@ class _AvailableFieldsState extends State<AvailableFields> {
                       children: [
                         Center(
                           child: SizedBox(
-                            width: cx.width * 0.9,
+                            width: MediaQuery.of(context).size.width * 0.9,
                             height: cx.height / 4.09,
                             child: Stack(
                               clipBehavior: Clip.none,
                               children: [
                                 Container(
+                                  decoration: errorDomeImage
+                                          .contains(cx.read(Keys.domeId))
+                                      ? BoxDecoration(
+                                          borderRadius:
+                                              BorderRadius.circular(20),
+                                          image: DecorationImage(
+                                            image: AssetImage(
+                                              Image1.domesAround,
+                                            ),
+                                            fit: BoxFit.cover,
+                                          ))
+                                      : BoxDecoration(
+                                          borderRadius: BorderRadius.all(
+                                              Radius.circular(
+                                                  cx.height / 26.68)),
+                                      gradient: backShadowContainer(),
+
+                                      image: DecorationImage(
+                                            image: NetworkImage(
+                                              (cx.read(
+                                                Keys.image,
+                                              )).isEmpty
+                                                  ? "https://thumbs.dreamstime.com/b/indoor-stadium-view-behind-wicket-cricket-160851985.jpg"
+                                                  : cx.read(
+                                                      Keys.image,
+                                                    ),
+                                              scale:
+                                                  cx.height > 800 ? 1.8 : 2.4,
+                                            ),
+                                            fit: BoxFit.cover,
+                                            onError: (Object e,
+                                                StackTrace? stackTrace) {
+                                              setState(() {
+                                                errorDomeImage
+                                                    .add(cx.read(Keys.domeId));
+                                              });
+                                            },
+                                          )),
                                   margin: EdgeInsets.only(
                                       left: 8, right: 8, top: 8),
-                                  width: cx.width,
+                                  width: MediaQuery.of(context).size.width,
                                   height: cx.height / 4.3,
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.all(
-                                        Radius.circular(cx.height / 26.68)),
-                                    image: DecorationImage(
-                                        image: AssetImage(
-                                            "assets/images/step.png"),
-                                        fit: BoxFit.cover),
-                                  ),
                                 ),
                                 Positioned(
-                                  // top: cx.responsive(200,167, 130),
                                   top: cx.height / 6.06,
+                                  // top: cx.responsive(200,167, 130),
                                   right: 20,
                                   left: 20,
                                   child: Container(
-                                    width: cx.width,
-                                    height: cx.height / 8.4,
+                                    width: MediaQuery.of(context).size.width,
                                     decoration: BoxDecoration(
                                         color: Color(0xFFFFFFFF),
                                         borderRadius: BorderRadius.all(
@@ -138,6 +167,7 @@ class _AvailableFieldsState extends State<AvailableFields> {
                                           // title:const Text("Dome Stadium",style: TextStyle(fontWeight: FontWeight.bold,fontSize: 24),),
                                           title: SenticText(
                                               text: cx.read(Keys.domeName),
+                                              maxLines: 2,
                                               fontSize:
                                                   cx.height > 800 ? 25 : 21,
                                               fontWeight: FontWeight.w600),
@@ -152,8 +182,8 @@ class _AvailableFieldsState extends State<AvailableFields> {
                                               children: [
                                                 Image.asset(
                                                     "assets/images/location.png",
-                                                    scale:
-                                                        cx.responsive(2.5,1.5, 2),
+                                                    scale: cx.responsive(
+                                                        2.5, 1.5, 2),
                                                     color: AppColor.darkGreen),
                                                 Container(
                                                   width: cx.width * 0.65,
@@ -192,11 +222,11 @@ class _AvailableFieldsState extends State<AvailableFields> {
                             },
                             child: CircleAvatar(
                               backgroundColor: Colors.white,
-                              radius: cx.responsive(30,25, 22),
+                              radius: cx.responsive(30, 25, 22),
                               child: SimpleCircularIconButton(
                                 iconData: Icons.arrow_back_ios_new,
                                 iconColor: Colors.black,
-                                radius: cx.responsive(60,47, 37),
+                                radius: cx.responsive(60, 47, 37),
                               ),
                             ),
                           ),
@@ -228,7 +258,7 @@ class _AvailableFieldsState extends State<AvailableFields> {
                                       alignment: Alignment.centerLeft,
                                       child: InterText(
                                         text: "Available Fields",
-                                        fontSize: cx.responsive(37,27, 25),
+                                        fontSize: cx.responsive(37, 27, 25),
                                         color: Colors.black,
                                         fontWeight: FontWeight.w600,
                                         textAlign: TextAlign.left,
@@ -240,29 +270,27 @@ class _AvailableFieldsState extends State<AvailableFields> {
                                           ? noInternetLottie()
                                           : mycontroller.isDataProcessing.value
                                               ? Column(
-                                                mainAxisAlignment:
-                                                MainAxisAlignment
-                                                    .center,
-                                                crossAxisAlignment:
-                                                CrossAxisAlignment
-                                                    .center,
-                                                children: [
-                                                  Container(
-                                                    height:
-                                                    cx.height * 0.4,
-                                                    // height: 200,
-                                                    color: Colors.white,
-                                                    alignment:
-                                                    Alignment.center,
-                                                    child:Center(
-                                                      child:
-                                                      CircularProgressIndicator(
-                                                        color: AppColor.darkGreen,
+                                                  mainAxisAlignment:
+                                                      MainAxisAlignment.center,
+                                                  crossAxisAlignment:
+                                                      CrossAxisAlignment.center,
+                                                  children: [
+                                                    Container(
+                                                      height: cx.height * 0.4,
+                                                      // height: 200,
+                                                      color: Colors.white,
+                                                      alignment:
+                                                          Alignment.center,
+                                                      child: Center(
+                                                        child:
+                                                            CircularProgressIndicator(
+                                                          color: AppColor
+                                                              .darkGreen,
+                                                        ),
                                                       ),
                                                     ),
-                                                  ),
-                                                ],
-                                              )
+                                                  ],
+                                                )
                                               : mycontroller.myList.length == 0
                                                   ? Column(
                                                       mainAxisAlignment:
@@ -287,7 +315,9 @@ class _AvailableFieldsState extends State<AvailableFields> {
                                                                       .center,
                                                               fontSize:
                                                                   cx.responsive(
-                                                                      35,27, 23),
+                                                                      35,
+                                                                      27,
+                                                                      23),
                                                               color: Colors.grey
                                                                   .shade600),
                                                         ),
@@ -358,7 +388,9 @@ class _AvailableFieldsState extends State<AvailableFields> {
                                                                           Container(
                                                                         height: cx.height /
                                                                             5.13,
-                                                                        width: cx.width /5,
+                                                                        width:
+                                                                            cx.width /
+                                                                                5,
                                                                         child:
                                                                             Stack(
                                                                           children: [
@@ -367,12 +399,13 @@ class _AvailableFieldsState extends State<AvailableFields> {
                                                                                 Padding(
                                                                                   padding: const EdgeInsets.all(8.0),
                                                                                   child: Container(
-                                                                                    width: cx.responsive(cx.width / 4.5,cx.width / 4, cx.width / 3.7),
-                                                                                    height: cx.responsive(160,135, 120),
+                                                                                    width: cx.responsive(cx.width / 4.5, cx.width / 4, cx.width / 3.7),
+                                                                                    height: cx.responsive(160, 135, 120),
                                                                                     decoration: BoxDecoration(
                                                                                         borderRadius: BorderRadius.all(
                                                                                           Radius.circular(20),
                                                                                         ),
+                                                                                        gradient: backShadowContainer(),
                                                                                         image: DecorationImage(
                                                                                             image: NetworkImage(
                                                                                               item.image,
@@ -386,7 +419,7 @@ class _AvailableFieldsState extends State<AvailableFields> {
                                                                                   crossAxisAlignment: CrossAxisAlignment.center,
                                                                                   children: [
                                                                                     Padding(
-                                                                                      padding: EdgeInsets.fromLTRB(cx.responsive(15,10, 8), cx.height / 50, 0, 0),
+                                                                                      padding: EdgeInsets.fromLTRB(cx.responsive(15, 10, 8), cx.height / 50, 0, 0),
                                                                                       child: Row(
                                                                                         mainAxisAlignment: MainAxisAlignment.start,
                                                                                         children: [
@@ -404,13 +437,11 @@ class _AvailableFieldsState extends State<AvailableFields> {
                                                                                                       item.sportData.image,
                                                                                                     ),
                                                                                                     onError: (Object e, StackTrace? stackTrace) {
-                                                                                                      setState(() {
-                                                                                                        erroravailableFields.add(item.id);
-                                                                                                      });
+                                                                                                      erroravailableFields.add(item.id);
                                                                                                     },
                                                                                                   )),
                                                                                             height: 25,
-                                                                                            width: cx.responsive(40,30, 21),
+                                                                                            width: cx.responsive(40, 30, 21),
                                                                                             alignment: Alignment.centerLeft,
                                                                                           ),
                                                                                           Padding(
@@ -418,7 +449,7 @@ class _AvailableFieldsState extends State<AvailableFields> {
                                                                                             child: Container(
                                                                                               child: NunitoText(
                                                                                                 textAlign: TextAlign.start,
-                                                                                                fontSize: cx.responsive(23,19, 16),
+                                                                                                fontSize: cx.responsive(23, 19, 16),
                                                                                                 fontWeight: FontWeight.w700,
                                                                                                 text: item.sportData.name,
                                                                                                 color: Color(0xFFA8A8A8),
@@ -445,7 +476,7 @@ class _AvailableFieldsState extends State<AvailableFields> {
                                                                                               child: InterText(
                                                                                                 text: "Field " + item.name,
                                                                                                 fontWeight: FontWeight.w600,
-                                                                                                fontSize: cx.responsive(26,22, 19),
+                                                                                                fontSize: cx.responsive(26, 22, 19),
                                                                                                 // color: Color(0xFF6E6B6B),
                                                                                               ),
                                                                                             ),
@@ -454,7 +485,7 @@ class _AvailableFieldsState extends State<AvailableFields> {
                                                                                               padding: const EdgeInsets.fromLTRB(0, 3, 0, 0),
                                                                                               child: NunitoText(
                                                                                                 textAlign: TextAlign.start,
-                                                                                                fontSize: cx.responsive(25,19, 16),
+                                                                                                fontSize: cx.responsive(25, 19, 16),
                                                                                                 fontWeight: FontWeight.w400,
                                                                                                 text: "Capacity:",
                                                                                                 color: Color(0xFFA8A8A8),
@@ -463,7 +494,7 @@ class _AvailableFieldsState extends State<AvailableFields> {
                                                                                               padding: const EdgeInsets.fromLTRB(0, 0, 0, 4),
                                                                                               child: NunitoText(
                                                                                                 textAlign: TextAlign.start,
-                                                                                                fontSize: cx.responsive(25,19, 16),
+                                                                                                fontSize: cx.responsive(25, 19, 16),
                                                                                                 fontWeight: FontWeight.w500,
                                                                                                 text: "${item.minPerson} - ${item.maxPerson} People",
                                                                                                 color: Color(0xFF656565),
@@ -476,7 +507,7 @@ class _AvailableFieldsState extends State<AvailableFields> {
                                                                               ],
                                                                             ),
                                                                             Positioned(
-                                                                              bottom: cx.responsive(50,33, 23),
+                                                                              bottom: cx.responsive(50, 33, 20),
                                                                               right: cx.height / 66.7,
                                                                               child: InkWell(
                                                                                 onTap: () {
@@ -507,11 +538,11 @@ class _AvailableFieldsState extends State<AvailableFields> {
                                                                                   child: Icon(
                                                                                     Icons.check,
                                                                                     color: Colors.white,
-                                                                                    size: cx.responsive(33,25, 20),
+                                                                                    size: cx.responsive(33, 25, 20),
                                                                                   ),
                                                                                   decoration: BoxDecoration(color: selectedIdList.contains(item.id) ? AppColor.darkGreen : Colors.white, border: Border.all(color: AppColor.darkGreen)),
-                                                                                  height: cx.responsive(35,27, 22),
-                                                                                  width: cx.responsive(35,27, 22),
+                                                                                  height: cx.responsive(35, 27, 22),
+                                                                                  width: cx.responsive(35, 27, 22),
                                                                                 ),
                                                                               ),
                                                                             ),
@@ -582,7 +613,7 @@ class _AvailableFieldsState extends State<AvailableFields> {
                             textOverflow: TextOverflow.ellipsis,
                           ),
                           SenticText(
-                            text: "(${cx.read(Keys.slots)} Slots Selected)",
+                            text: cx.read(Keys.slots)==1?"(${cx.read(Keys.slots)} Slot Selected)":"(${cx.read(Keys.slots)} Slots Selected)",
                             fontSize: cx.height > 800 ? 12 : 10,
                             fontWeight: FontWeight.w300,
                             color: Colors.white,
@@ -593,8 +624,10 @@ class _AvailableFieldsState extends State<AvailableFields> {
                       ),
                       Gap(3),
                       SenticText(
-                        text:
-                            cx.read(Keys.startTime).toString().substring(0, 8) +
+                        text: cx
+                                .read(Keys.startTime)
+                                .toString()
+                                .substring(0, 8) +
                             " - " +
                             cx.read(Keys.endTime).toString().substring(11, 19),
                         fontSize: cx.height > 800 ? 17 : 15,
@@ -606,10 +639,12 @@ class _AvailableFieldsState extends State<AvailableFields> {
                     ],
                   ),
                   Padding(
-                    padding: EdgeInsets.only(bottom:  cx.responsive(cx.height / 25, cx.height / 35, cx.height / 50)),
+                    padding: EdgeInsets.only(
+                        bottom: cx.responsive(
+                            cx.height / 25, cx.height / 35, cx.height / 50)),
                     child: Container(
                       child: CustomButton(
-                        text: widget.isEditing?"Confirm":"Proceed",
+                        text: widget.isEditing ? "Confirm" : "Proceed",
                         fun: () {
                           if (selectedIdList.length != 0) {
                             cx.write(Keys.fieldName, fieldNameList.join(","));
@@ -618,15 +653,15 @@ class _AvailableFieldsState extends State<AvailableFields> {
                             print("selectedIdIndex");
                             print(fieldNameList);
                             print(selectedIdList.join(","));
-                            cx.globalAvailableFieldIndex=selectedIdList;
-                            cx.globalAvailableFieldName=fieldNameList;
-                            cx.price.value=cx.read(Keys.price);
+                            cx.globalAvailableFieldIndex = selectedIdList;
+                            cx.globalAvailableFieldName = fieldNameList;
+                            cx.price.value = cx.read(Keys.price);
 
-                            widget.isEditing?Get.back(
-                              result: cx.read(Keys.fieldName)
-                            ):Get.to(
-                              ReviewConfirm(),
-                            )?.then((value) => refreshData());
+                            widget.isEditing
+                                ? Get.back(result: cx.read(Keys.fieldName))
+                                : Get.to(
+                                    ReviewConfirm(),
+                                  )?.then((value) => refreshData());
                           } else {
                             onFieldSelectionAlert(
                                 context: context,
@@ -635,8 +670,8 @@ class _AvailableFieldsState extends State<AvailableFields> {
                           }
                         },
                         radius: cx.height / 13.34,
-                        width: cx.width *0.32,
-                        size: cx.responsive(25,20, 18),
+                        width: cx.width * 0.32,
+                        size: cx.responsive(25, 20, 18),
                         color: Colors.white,
                       ),
                     ),
@@ -669,7 +704,8 @@ class _AvailableFieldsState extends State<AvailableFields> {
           Text(
             "Select Field",
             style: TextStyle(
-                fontSize: cx.responsive(25,20, 18), fontWeight: FontWeight.w700),
+                fontSize: cx.responsive(25, 20, 18),
+                fontWeight: FontWeight.w700),
           ),
           Gap(cx.height / 60),
           Text(
@@ -678,7 +714,9 @@ class _AvailableFieldsState extends State<AvailableFields> {
             overflow: TextOverflow.clip,
             maxLines: 3,
             style: TextStyle(
-                fontSize: cx.responsive(22,18, 14), fontWeight: FontWeight.w400, color: Colors.grey),
+                fontSize: cx.responsive(22, 18, 14),
+                fontWeight: FontWeight.w400,
+                color: Colors.grey),
           ),
         ],
       ),
@@ -698,27 +736,25 @@ class _AvailableFieldsState extends State<AvailableFields> {
   refreshData() {
     print("hey");
 
-    if(cx.globalAvailableFieldIndex.length!=0){
-
+    if (cx.globalAvailableFieldIndex.length != 0) {
       cx.write(Keys.price, cx.price.value);
 
       print("Price");
       print(cx.read(Keys.price));
       print(cx.globalAvailableFieldIndex.length);
       print(cx.globalAvailableFieldIndex);
-      setState((){
-        selectedIdList=cx.globalAvailableFieldIndex;
+      setState(() {
+        selectedIdList = cx.globalAvailableFieldIndex;
       });
       print("globalAvailableFieldIDIndex");
       print(selectedIdList);
     }
 
-    if(cx.globalAvailableFieldName.length!=0){
-
+    if (cx.globalAvailableFieldName.length != 0) {
       print(cx.globalAvailableFieldName.length);
       print(cx.globalAvailableFieldName);
-      setState((){
-        fieldNameList=cx.globalAvailableFieldName;
+      setState(() {
+        fieldNameList = cx.globalAvailableFieldName;
       });
       print("globalAvailableFieldNameIndex");
       print(fieldNameList);

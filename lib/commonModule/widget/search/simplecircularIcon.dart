@@ -1,5 +1,15 @@
 import 'package:flutter/material.dart';
+
 class SimpleCircularIconButton extends StatelessWidget {
+  final IconData iconData;
+  final Color fillColor;
+  final Color outlineColor;
+  final Color iconColor;
+  final Color notificationFillColor;
+  final int? notificationCount;
+  final Function? onPressed;
+  final double radius;
+
   const SimpleCircularIconButton(
       {this.fillColor = Colors.white,
         required this.iconData,
@@ -12,14 +22,6 @@ class SimpleCircularIconButton extends StatelessWidget {
         Key? key})
       : super(key: key);
 
-  final IconData iconData;
-  final Color fillColor;
-  final Color outlineColor;
-  final Color iconColor;
-  final Color notificationFillColor;
-  final int? notificationCount;
-  final Function? onPressed;
-  final double radius;
 
   @override
   Widget build(BuildContext context) {

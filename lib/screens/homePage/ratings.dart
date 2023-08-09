@@ -10,6 +10,8 @@ import '../../commonModule/widget/search/simplecircularIcon.dart';
 import '../../controller/commonController.dart';
 import '../../controller/domesDetailsController.dart';
 import '../bottomSheet/bottomSheetRatings.dart';
+import '../../commonModule/utils.dart';
+
 
 class Ratings extends StatefulWidget {
   // bool isFav;

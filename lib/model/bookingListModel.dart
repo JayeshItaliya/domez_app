@@ -7,6 +7,7 @@ class BookingListModel {
     required this.domeName,
     required this.leagueName,
     required this.date,
+    required this.time,
     required this.price,
     required this.image,
     required this.paymentType,
@@ -18,6 +19,7 @@ class BookingListModel {
   String domeName;
   String leagueName;
   String date;
+  String time;
   double price;
   String image;
   int paymentType;
@@ -29,6 +31,7 @@ class BookingListModel {
     domeName: json["dome_name"],
     leagueName: json["league_name"],
     date: json["date"],
+    time: json["time"],
     price: double.parse(json["price"].toString()),
     image: json["image"],
     paymentType: json["payment_type"],
@@ -41,6 +44,7 @@ class BookingListModel {
     "dome_name": domeName,
     "league_name": leagueName,
     "date": date,
+    "time": time,
     "price": price,
     "image": image,
     "payment_type": paymentType,

@@ -17,14 +17,16 @@ import '../authPage/editProfile.dart';
 import 'package:gap/gap.dart';
 import '../../commonModule/widget/common/textInter.dart';
 import '../../commonModule/widget/common/textNunito.dart';
-import '../../commonModule/widget/common/textSentic.dart';
+import '../../commonModule/utils.dart';
 
+import '../../commonModule/widget/common/textSentic.dart';
 
 class LeaguePage extends StatefulWidget {
   LeaguePage({Key? key}) : super(key: key);
   @override
   State<LeaguePage> createState() => _LeaguePageState();
 }
+
 class _LeaguePageState extends State<LeaguePage> {
   String location = 'Null, Press Button';
   String Address = 'search';
@@ -36,57 +38,66 @@ class _LeaguePageState extends State<LeaguePage> {
   CommonController cx = Get.put(CommonController());
   final mycontroller = Get.put(CategoryController());
   final LeagueList = Get.put(LeagueListController());
-  int initialCategoryId = 6;
 
   int vollyIndex = 0;
   final GlobalKey<ScaffoldState> _scaffoldkey = new GlobalKey<ScaffoldState>();
 
-
   @override
   void initState() {
     googlePlace = GooglePlace(Constant.mapkey);
-
-    LeagueList.getTask2(LeagueList.sportid.value);
-    LeagueList.getTask3(LeagueList.sportid.value);
+    mycontroller.currentCategoryId.value =
+        mycontroller.initialCategoryId.value;
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
-    SystemChrome.setSystemUIOverlayStyle(
-        SystemUiOverlayStyle(
-          statusBarColor: AppColor.bg,
-          //color set to transperent or set your own color
-          statusBarIconBrightness: Constant.deviceBrightness,
-          //set brightness for icons, like dark background light icons
-        )
-    );
+    SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
+      statusBarColor: AppColor.bg,
+      //color set to transperent or set your own color
+      statusBarIconBrightness: Constant.deviceBrightness,
+      //set brightness for icons, like dark background light icons
+    ));
     return WillPopScope(
       onWillPop: () async {
+        print("initial category" +
+            mycontroller.initialCategoryId.value.toString());
+        print("initial category" +
+            mycontroller.currentCategoryId.value.toString());
 
-        if (mycontroller.myList[0].id != initialCategoryId) {
-          setState((){
+        if (mycontroller.currentCategoryId.value !=
+            mycontroller.initialCategoryId.value) {
+          mycontroller.currentCategoryId.value =
+              mycontroller.initialCategoryId.value;
+          print("different sport Id");
+
+          mycontroller.currentCategoryId.value =
+              mycontroller.initialCategoryId.value;
+          setState(() {
             vollyIndex = 0;
-            _scrollController.jumpTo(0);
-            print("Seva");
+
+            //TODO NOT DONE
+            // _scrollController.initialScrollOffset;
+            // _scrollController.jumpTo(0.0);
           });
 
-
-          LeagueList.sportsUpdate(initialCategoryId.toString()).then((value) {
-            print(value);
-          });
+          LeagueList
+              .sportsUpdate(mycontroller.initialCategoryId.value.toString())
+              .then((value) {});
+          return false;
+        } else {
+          print('close app');
+          cx.curIndex.value=0;
+          return false;
         }
-        else{
-          cx.curIndex.value = 0;
-        }
-        return false;
       },
       child: SafeArea(
         top: false,
         child: Scaffold(
           key: _scaffoldkey,
           backgroundColor: Colors.transparent,
-          body: Obx(()=>Container(
+          body: Obx(
+            () => Container(
               height: cx.height,
               decoration: BoxDecoration(
                   color: AppColor.bg,
@@ -99,7 +110,8 @@ class _LeaguePageState extends State<LeaguePage> {
                       ],
                       colors: [
                         AppColor.bg,
-                        LeagueList.isDataProcessing2.value||LeagueList.isDataProcessing3.value
+                        LeagueList.isDataProcessing2.value ||
+                                LeagueList.isDataProcessing3.value
                             ? AppColor.bg
                             : LeagueList.isoffline.value
                                 ? AppColor.bg
@@ -125,8 +137,8 @@ class _LeaguePageState extends State<LeaguePage> {
                                       MainAxisAlignment.spaceBetween,
                                   children: [
                                     Padding(
-                                      padding:
-                                          EdgeInsets.only(left: cx.height / 33.5),
+                                      padding: EdgeInsets.only(
+                                          left: cx.height / 33.5),
                                       child: Column(
                                         crossAxisAlignment:
                                             CrossAxisAlignment.start,
@@ -136,7 +148,7 @@ class _LeaguePageState extends State<LeaguePage> {
                                             text: "Find A League",
                                             fontWeight: FontWeight.w500,
                                             color: Color(0xFF70A792),
-                                            fontSize: cx.responsive(30,24,20),
+                                            fontSize: cx.responsive(30, 24, 20),
                                             height: 0.15,
                                           ),
                                           Gap(cx.height / 95.29),
@@ -144,7 +156,7 @@ class _LeaguePageState extends State<LeaguePage> {
                                             text: "Near You",
                                             color: Colors.black,
                                             fontWeight: FontWeight.w500,
-                                            fontSize: cx.responsive(42,36, 32),
+                                            fontSize: cx.responsive(42, 36, 32),
                                           ),
                                         ],
                                       ),
@@ -157,16 +169,16 @@ class _LeaguePageState extends State<LeaguePage> {
                                           onTap: () {
                                             if (cx.read("islogin")) {
                                               Get.to(EditProfile());
-                                            }
-                                            else{
-                                              cx.curIndex.value=4;
+                                            } else {
+                                              cx.curIndex.value = 4;
                                             }
                                           },
                                           child: Padding(
                                             padding: EdgeInsets.only(
                                                 right: cx.height / 41.7),
                                             child: CircleAvatar(
-                                              radius: cx.responsive(25,22.5, 20),
+                                              radius:
+                                                  cx.responsive(25, 22.5, 20),
                                               backgroundColor: Colors.white,
                                               child: CachedNetworkImage(
                                                 imageUrl: cx.read("image"),
@@ -175,19 +187,20 @@ class _LeaguePageState extends State<LeaguePage> {
                                                         CircleAvatar(
                                                   backgroundColor:
                                                       Colors.transparent,
-                                                  radius: cx.responsive(25,20, 17),
+                                                  radius:
+                                                      cx.responsive(25, 20, 17),
                                                   backgroundImage: NetworkImage(
                                                     cx.read("image"),
                                                   ),
                                                 ),
                                                 fit: BoxFit.cover,
-                                                placeholder: (context, url) => CircleAvatar(
+                                                placeholder: (context, url) =>
+                                                    CircleAvatar(
                                                   backgroundColor:
-                                                  Colors.transparent,
-                                                  radius: cx.responsive(
-                                                      25,20, 17),
-                                                  backgroundImage:
-                                                  AssetImage(
+                                                      Colors.transparent,
+                                                  radius:
+                                                      cx.responsive(25, 20, 17),
+                                                  backgroundImage: AssetImage(
                                                     Image1.anime,
                                                   ),
                                                 ),
@@ -196,7 +209,8 @@ class _LeaguePageState extends State<LeaguePage> {
                                                         CircleAvatar(
                                                   backgroundColor:
                                                       Colors.transparent,
-                                                  radius: cx.responsive(25,20, 17),
+                                                  radius:
+                                                      cx.responsive(25, 20, 17),
                                                   backgroundImage: AssetImage(
                                                     Image1.anime,
                                                   ),
@@ -206,18 +220,18 @@ class _LeaguePageState extends State<LeaguePage> {
                                           ),
                                         ),
                                         Positioned(
-                                          top: cx.responsive(3.5,2, 0.1),
+                                          top: cx.responsive(3.5, 2, 0.1),
                                           right: cx.height / 33,
                                           child: CircleAvatar(
                                             backgroundColor: Colors.white,
-                                            radius: cx.responsive(13,6, 4.5),
+                                            radius: cx.responsive(13, 6, 4.5),
                                             child: Container(
                                               decoration: BoxDecoration(
                                                 color: Color(0xFFFF5C5C),
                                                 borderRadius:
                                                     BorderRadius.circular(50),
                                               ),
-                                              height:cx.responsive(20,17, 13),
+                                              height: cx.responsive(20, 17, 13),
                                               width: double.infinity,
                                             ),
                                           ),
@@ -236,7 +250,7 @@ class _LeaguePageState extends State<LeaguePage> {
                                   child: Column(
                                     children: [
                                       InkWell(
-                                        onTap: (){
+                                        onTap: () {
                                           Get.to(
                                             LocationPicker(homePage: false),
                                             transition: Transition.rightToLeft,
@@ -244,65 +258,77 @@ class _LeaguePageState extends State<LeaguePage> {
                                         },
                                         child: Container(
                                           decoration: BoxDecoration(
-                                              borderRadius: BorderRadius.circular(cx.height / 6.67),
+                                              borderRadius:
+                                                  BorderRadius.circular(
+                                                      cx.height / 6.67),
                                               color: Colors.white,
                                               border: Border.all(
                                                 width: 3,
                                                 color: Color(0xFFECFFF8),
-                                              )
-                                          ),
+                                              )),
                                           padding: const EdgeInsets.fromLTRB(
                                               15.0, 4, 15, 4),
-                                          height: cx.responsive(90,70, 55),
+                                          height: cx.responsive(90, 70, 55),
                                           child: Row(
-                                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.spaceBetween,
                                             children: [
                                               InterText(
                                                 text: "Search League",
-                                                fontSize: cx.height > 800 ? 17 : 15,
+                                                fontSize:
+                                                    cx.height > 800 ? 17 : 15,
                                                 color: Color(0xFF81B5A1),
                                               ),
                                               InkWell(
                                                 onTap: () async {
                                                   Position position =
-                                                  await _getGeoLocationPosition();
+                                                      await getGeoLocationPosition();
                                                   location =
-                                                  'Lat1: ${position.latitude} , Long: ${position.longitude}';
-                                                  GetAddressFromLatLong(position);
+                                                      'Lat1: ${position.latitude} , Long: ${position.longitude}';
+                                                  GetAddressFromLatLong(
+                                                      position);
 
                                                   debugPrint(location);
                                                   debugPrint(Address);
 
-                                                  cx.lat.value =
-                                                      position.latitude.toString();
-                                                  cx.lng.value =
-                                                      position.longitude.toString();
-                                                  cx.write(Keys.lat,cx.lat.value);
-                                                  cx.write(Keys.lng,cx.lng.value);
+                                                  cx.lat.value = position
+                                                      .latitude
+                                                      .toString();
+                                                  cx.lng.value = position
+                                                      .longitude
+                                                      .toString();
+                                                  cx.write(
+                                                      Keys.lat, cx.lat.value);
+                                                  cx.write(
+                                                      Keys.lng, cx.lng.value);
                                                   cx.curIndex.value = 3;
                                                   debugPrint("hello" +
-                                                      cx.curIndex.value.toString());
+                                                      cx.curIndex.value
+                                                          .toString());
                                                 },
                                                 child: Container(
                                                     decoration: BoxDecoration(
                                                       color: AppColor.darkGreen,
-
-                                                      borderRadius: BorderRadius
-                                                          .all(Radius.circular(
-                                                          cx.height / 6.67)),
+                                                      borderRadius:
+                                                          BorderRadius.all(
+                                                              Radius.circular(
+                                                                  cx.height /
+                                                                      6.67)),
                                                     ),
                                                     child: Padding(
-                                                      padding: const EdgeInsets.all(8.0),
+                                                      padding:
+                                                          const EdgeInsets.all(
+                                                              8.0),
                                                       child: Icon(
-                                                        Icons.location_searching,
+                                                        Icons
+                                                            .location_searching,
                                                         color: Colors.white,
-                                                        size:
-                                                        cx.height > 800 ? 26 : 20,
+                                                        size: cx.height > 800
+                                                            ? 26
+                                                            : 20,
                                                       ),
                                                     )),
                                               ),
-
                                             ],
                                           ),
                                         ),
@@ -312,7 +338,8 @@ class _LeaguePageState extends State<LeaguePage> {
                                 ),
                               ],
                             ),
-                            Gap(cx.responsive(cx.height/60, cx.height/50, cx.height/40)),
+                            Gap(cx.responsive(cx.height / 60, cx.height / 50,
+                                cx.height / 40)),
                             Container(
                               height: cx.height / 15,
                               child: Obx(
@@ -326,7 +353,6 @@ class _LeaguePageState extends State<LeaguePage> {
                                     CategoryModel item =
                                         mycontroller.myList[index];
 
-                                    debugPrint("Hello");
                                     // if (index == 0) {
                                     //   LeagueList.sportid.value = item.id.toString();
                                     //   LeagueList.sportsUpdate(LeagueList.sportid.value);
@@ -336,13 +362,16 @@ class _LeaguePageState extends State<LeaguePage> {
                                       padding: EdgeInsets.only(
                                         left:
                                             index == 0 ? cx.height / 44.47 : 0,
-                                        right: index == mycontroller.myList.length-1
+                                        right: index ==
+                                                mycontroller.myList.length - 1
                                             ? cx.height / 44.47
                                             : 0,
                                       ),
-                                      child:Row(
-                                        mainAxisAlignment: MainAxisAlignment.center,
-                                        crossAxisAlignment: CrossAxisAlignment.center,
+                                      child: Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.center,
                                         children: [
                                           Container(
                                             child: InkWell(
@@ -351,50 +380,63 @@ class _LeaguePageState extends State<LeaguePage> {
                                                 // domeListController.getTask2();
                                                 // domeListController.getTask3();
                                                 // debugPrint("Hello");
-                                                LeagueList.sportid.value =
+                                                mycontroller.sportid.value =
                                                     item.id.toString();
                                                 LeagueList.sportsUpdate(
-                                                    LeagueList.sportid.value);
+                                                    mycontroller.sportid.value);
 
-                                                print(LeagueList.sportid.value);
+                                                print(
+                                                    mycontroller.sportid.value);
+                                                cx.write(LKeys.paginationLeagueSportId, item.id.toString());
 
                                                 setState(() {
                                                   vollyIndex = index;
-                                                  initialCategoryId = item.id;
+                                                  mycontroller
+                                                      .currentCategoryId
+                                                      .value = item.id;
                                                 });
                                               },
                                               child: Padding(
                                                 padding: EdgeInsets.only(
-                                                  left: cx.responsive(6,4, 2),
-                                                  right: cx.responsive(6,4, 2),
+                                                  left: cx.responsive(6, 4, 2),
+                                                  right: cx.responsive(6, 4, 2),
                                                 ),
                                                 child: Container(
-                                                  height: cx.responsive(65,53, 44),
+                                                  height:
+                                                      cx.responsive(65, 53, 44),
                                                   width: cx.width / 2.75,
                                                   decoration: BoxDecoration(
                                                     borderRadius:
-                                                    BorderRadius.circular(100),
+                                                        BorderRadius.circular(
+                                                            100),
                                                   ),
                                                   // height: cx.height/cx.height/66.7,
                                                   child: Row(
                                                     mainAxisAlignment:
-                                                    MainAxisAlignment.start,
+                                                        MainAxisAlignment.start,
                                                     crossAxisAlignment:
-                                                    CrossAxisAlignment.center,
+                                                        CrossAxisAlignment
+                                                            .center,
                                                     children: [
                                                       Padding(
-                                                        padding: EdgeInsets.only(
-                                                            left: cx.height / 83.375),
+                                                        padding:
+                                                            EdgeInsets.only(
+                                                                left:
+                                                                    cx.height /
+                                                                        83.375),
                                                         child: CircleAvatar(
-                                                          radius:
-                                                          cx.responsive(30,22, 17),
-                                                          backgroundColor:Colors.transparent,
-
+                                                          radius: cx.responsive(
+                                                              30, 22, 17),
+                                                          backgroundColor:
+                                                              Colors
+                                                                  .transparent,
                                                           child: Image.network(
                                                             item.image,
-                                                            color: index == vollyIndex
-                                                                ?Colors.white
-                                                                : AppColor.darkGreen,
+                                                            color: index ==
+                                                                    vollyIndex
+                                                                ? Colors.white
+                                                                : AppColor
+                                                                    .darkGreen,
                                                           ),
                                                         ),
                                                       ),
@@ -403,15 +445,19 @@ class _LeaguePageState extends State<LeaguePage> {
                                                         width: cx.width / 5.3,
                                                         child: NunitoText(
                                                           text: item.name,
-                                                          fontSize: cx.height > 800
-                                                              ? 18
-                                                              : 16,
-                                                          fontWeight: FontWeight.w700,
-                                                          color:index == vollyIndex
+                                                          fontSize:
+                                                              cx.height > 800
+                                                                  ? 18
+                                                                  : 16,
+                                                          fontWeight:
+                                                              FontWeight.w700,
+                                                          color: index ==
+                                                                  vollyIndex
                                                               ? Colors.white
                                                               : Colors.black,
                                                           textOverflow:
-                                                          TextOverflow.ellipsis,
+                                                              TextOverflow
+                                                                  .ellipsis,
                                                           maxLines: 1,
                                                         ),
                                                       ),
@@ -423,9 +469,12 @@ class _LeaguePageState extends State<LeaguePage> {
                                             decoration: BoxDecoration(
                                                 color: index == vollyIndex
                                                     ? AppColor.darkGreen
-                                                    : Colors.white.withOpacity(0.15),
-                                                borderRadius: BorderRadius.circular(100),
-                                                border: Border.all(color: Color(0xFFD4D4D4))),
+                                                    : Colors.white
+                                                        .withOpacity(0.15),
+                                                borderRadius:
+                                                    BorderRadius.circular(100),
+                                                border: Border.all(
+                                                    color: Color(0xFFD4D4D4))),
                                           ),
                                           SizedBox(
                                             width: cx.width / 50,
@@ -445,40 +494,4 @@ class _LeaguePageState extends State<LeaguePage> {
       ),
     );
   }
-  Future<Position> _getGeoLocationPosition() async {
-    bool serviceEnabled;
-    LocationPermission permission;
-    serviceEnabled = await Geolocator.isLocationServiceEnabled();
-    if (!serviceEnabled) {
-      await Geolocator.openLocationSettings();
-      return Future.error('Location services are disabled.');
-    }
-    permission = await Geolocator.checkPermission();
-    if (permission == LocationPermission.denied) {
-      permission = await Geolocator.requestPermission();
-      if (permission == LocationPermission.denied) {
-        return Future.error('Location permissions are denied');
-      }
-    }
-    if (permission == LocationPermission.deniedForever) {
-      return Future.error(
-          'Location permissions are permanently denied, we cannot request permissions.');
-    }
-    return await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.high);
-  }
-
-  Future<void> GetAddressFromLatLong(Position position) async {
-    List<Placemark> placemarks =
-    await placemarkFromCoordinates(position.latitude, position.longitude);
-    debugPrint("++++++" + placemarks.toString());
-    Placemark place = placemarks[0];
-    Address =
-    '${place.street}, ${place.subLocality}, ${place.locality}, ${place.postalCode}, ${place.country}';
-
-    cx.searchDome.value = place.locality! + "," + place.country.toString();
-
-    debugPrint(cx.searchDome.value.toString());
-  }
-
 }

@@ -18,6 +18,9 @@ class DomesDetailsModel {
     required this.benefits,
     required this.sportsList,
     required this.domeImages,
+    this.closedDays,
+    this.currentTime,
+
   });
 
   int id;
@@ -38,6 +41,8 @@ class DomesDetailsModel {
   List<Benefit> benefits;
   List<SportsList> sportsList;
   List<DomeImage> domeImages;
+  List<int>? closedDays;
+  DateTime? currentTime;
 
   factory DomesDetailsModel.fromJson(Map<String, dynamic> json) => DomesDetailsModel(
     id: json["id"],
@@ -53,11 +58,13 @@ class DomesDetailsModel {
     description: json["description"],
     lat: json["lat"],
     lng: json["lng"],
-    benefitsDescription: json["benefits_description"],
+    benefitsDescription: json["benefits_description"]??"hey test",
     rattingData: RattingData.fromJson(json["ratting_data"]),
     benefits: List<Benefit>.from(json["benefits"].map((x) => Benefit.fromJson(x))),
     sportsList: List<SportsList>.from(json["sports_list"].map((x) => SportsList.fromJson(x))),
     domeImages: List<DomeImage>.from(json["dome_images"].map((x) => DomeImage.fromJson(x))),
+    closedDays: json["closed_days"] == null ? [] : List<int>.from(json["closed_days"]!.map((x) => x)),
+    currentTime: json["current_time"] == null ? null : DateTime.parse(json["current_time"]),
   );
 
   Map<String, dynamic> toJson() => {
@@ -69,7 +76,6 @@ class DomesDetailsModel {
     "address": address,
     "city": city,
     "state": state,
-    "address": address,
     "start_time": startTime,
     "end_time": endTime,
     "description": description,
@@ -80,6 +86,9 @@ class DomesDetailsModel {
     "benefits": List<dynamic>.from(benefits.map((x) => x.toJson())),
     "sports_list": List<dynamic>.from(sportsList.map((x) => x.toJson())),
     "dome_images": List<dynamic>.from(domeImages.map((x) => x.toJson())),
+    "closed_days": closedDays == null ? [] : List<dynamic>.from(closedDays!.map((x) => x)),
+    "current_time": currentTime?.toIso8601String(),
+
   };
 }
 
@@ -172,5 +181,25 @@ class SportsList {
     "sport_id": sportId,
     "sport_name": sportName,
     "sport_image": sportImage,
+  };
+}
+
+class WorkingHour {
+  String? day;
+  int? isClosed;
+
+  WorkingHour({
+    this.day,
+    this.isClosed,
+  });
+
+  factory WorkingHour.fromJson(Map<String, dynamic> json) => WorkingHour(
+    day: json["day"],
+    isClosed: json["is_closed"],
+  );
+
+  Map<String, dynamic> toJson() => {
+    "day": day,
+    "is_closed": isClosed,
   };
 }

@@ -10,8 +10,6 @@ class DomesDetailsController extends GetxController {
 
   var myList = List<DomesDetailsModel>.empty(growable: true).obs;
   var isDataProcessing = false.obs;
-
-  ScrollController scrollController = ScrollController();
   StreamSubscription? subscription;
   var isoffline = false.obs;
   // var did=''.obs;
@@ -38,7 +36,6 @@ class DomesDetailsController extends GetxController {
 
   @override
   void onInit() {
-    print("SOHAM");
     print(domeId.value);
 
     // TODO: implement onInit
@@ -47,7 +44,6 @@ class DomesDetailsController extends GetxController {
   }
   Future<void> setDid(String domeid,bool isFav, {bool isFavPage = false})async {
     domeId.value=domeid;
-    print("DIWAKAR");
     print(domeId.value);
     await getTask(isFav);
 
@@ -60,14 +56,11 @@ class DomesDetailsController extends GetxController {
 
       if (isoffline.value == false) {
         print(domeId.value);
-        print("domeId.valueeeee1");
         await TaskProvider().getDomesDetails(did: domeId.value).then((resp) {
           if(resp!=null) {
-            print("domeId.valueeeee");
             isDataProcessing.value = false;
             myList.clear();
             myList.addAll(resp);
-            print("did.images");
 
             print(myList[0].domeImages.toList().toString());
             // Get.to(

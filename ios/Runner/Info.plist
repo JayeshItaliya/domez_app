@@ -72,7 +72,7 @@
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>NSCameraUsageDescription</key>
-	<string>This app requires access to the photo library to upload your profile photo.</string>
+	<string>This app requires access to the photo library to upload user profile photo and uniquely identify the user</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
     <string>This app needs access to location to show nearby Domes List of user.</string>
     <key>NSLocationAlwaysUsageDescription</key>
@@ -82,9 +82,9 @@
 	<key>NSMicrophoneUsageDescription</key>
 	<string>This app requires library access to show your profile photo</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>
-	<string>This app requires access to the save photo into phone's library.</string>
+	<string>This app requires library access to uniquely identify the user when they come to play in domes</string>
 	<key>NSPhotoLibraryUsageDescription</key>
-	<string>This app requires library access to upload and save the library photo</string>
+	<string>This app requires library access to uniquely identify the user when they come to play in domes</string>
 	<key>FirebaseDynamicLinksCustomDomains</key>
 	<array>
 	    <string>https://domez.io</string>

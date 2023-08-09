@@ -9,26 +9,31 @@ import 'package:flutter/material.dart';
 import 'package:ticket_widget/ticket_widget.dart';
 import '../../../../controller/commonController.dart';
 import '../../../../main_page.dart';
-import '../../../commonModule/Constant.dart';
 import '../../../commonModule/Strings.dart';
-import '../../../commonModule/deepLinkRoute.dart';
+import '../../../commonModule/utils.dart';
 import '../../../commonModule/widget/common/mySeperator.dart';
 import '../../../commonModule/widget/common/textInter.dart';
 import '../../../commonModule/widget/common/textNunito.dart';
 import '../../../commonModule/widget/common/textSentic.dart';
 
-class SplitReceipt extends StatefulWidget {
-  String email;
-  String image;
-  String paymentLink;
-  String bookingId;
 
+class SplitReceipt extends StatefulWidget {
+  final String email;
+  final String image;
+  final String paymentLink;
+  final String bookingId;
+  final DateTime? bookingTime;
+  final DateTime? currentTime;
   SplitReceipt(
       {Key? key,
       required this.email,
       required this.image,
       required this.paymentLink,
-      required this.bookingId})
+      required this.bookingId,
+      required this.bookingTime,
+      required this.currentTime,
+
+      })
       : super(key: key);
 
   @override
@@ -74,99 +79,104 @@ class _SplitReceiptState extends State<SplitReceipt> {
   bool isTimerAvailable = true;
   String paymentStatus = 'In Progress';
   bool isDefaultTime = true;
+  List<int> errorDomeImage = [];
 
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
+    currentTime=widget.currentTime??DateTime.now();
+    todayTime=widget.currentTime??DateTime.now();
+    print(currentTime);
 
-    setState(() {
-      print("Timing Details");
-      print(cx.read(Keys.fullDate));
-      print(cx.read(Keys.startTime).toString().substring(0, 2));
+    WidgetsBinding.instance.addPostFrameCallback((_) {
 
-      startTime = cx.read(Keys.startTime).toString().substring(0, 2);
+        print(cx.read(Keys.fullDate));
+        print(cx.read(Keys.startTime).toString().substring(0, 2));
 
-      print(cx.read(Keys.startTime).toString().substring(6, 8));
-      if (cx.read(Keys.startTime).toString().substring(6, 8) == "PM") {
-        print("startTime1");
-        if (cx.read(Keys.startTime).toString().substring(0, 2) != "12") {
-          startTime = (int.parse(startTime) + 12).toString();
+        startTime = cx.read(Keys.startTime).toString().substring(0, 2);
+
+        print(cx.read(Keys.startTime).toString().substring(6, 8));
+        if (cx.read(Keys.startTime).toString().substring(6, 8) == "PM") {
+          print("startTime1");
+          if (cx.read(Keys.startTime).toString().substring(0, 2) != "12") {
+            startTime = (int.parse(startTime) + 12).toString();
+          }
+        } else {
+          if (cx.read(Keys.startTime).toString().substring(0, 2) == "12") {
+            startTime = "00";
+          }
         }
-      } else {
-        if (cx.read(Keys.startTime).toString().substring(0, 2) == "12") {
-          startTime = "00";
+        print("startTime2");
+        print(startTime);
+
+        timeRemaining = cx.read(Keys.fullDate) + ' ' + startTime + ":${cx.read(Keys.startTime).toString().substring(3, 5)}:00";
+
+        print(timeRemaining);
+        bookingTime = DateTime.parse(timeRemaining);
+        // todayTime.add(Duration(days: 1));
+
+        print(bookingTime);
+        print(todayTime.add(Duration(hours: 2)));
+
+        print("Default Time?");
+
+        print(bookingTime.millisecondsSinceEpoch);
+        print(todayTime.add(Duration(hours: 2)).millisecondsSinceEpoch);
+        if (bookingTime.millisecondsSinceEpoch <=
+            todayTime.add(Duration(hours: 2)).millisecondsSinceEpoch) {
+          dur = bookingTime.difference(widget.currentTime??DateTime.now());
+          print(dur);
+          // dur = calDuration - dur;
+          //
+          // print(dur);
+          print("Duration");
+
+          print("Difference");
+          print(dur.inHours);
+          print(dur.inMinutes);
+          print(dur.inSeconds);
+
+          startTimer();
+          isDefaultTime = false;
+          isCancelAvailable = false;
+          // isTimerAvailable=true;
+        } else {
+          print("Time is bigger");
+          isDefaultTime = true;
+          startTimer1();
+          print(myDuration.inHours);
+          print(myDuration.inMinutes);
+          print(myDuration.inSeconds);
         }
-      }
-      print("startTime2");
-      print(startTime);
 
-      timeRemaining = cx.read(Keys.fullDate) + ' ' + startTime + ":${cx.read(Keys.startTime).toString().substring(3, 5)}:00";
-
-      print(timeRemaining);
-      bookingTime = DateTime.parse(timeRemaining);
-      // todayTime.add(Duration(days: 1));
-
-      print(bookingTime);
-      print(todayTime.add(Duration(hours: 2)));
-
-      print("Default Time?");
-
-      print(bookingTime.millisecondsSinceEpoch);
-      print(todayTime.add(Duration(hours: 2)).millisecondsSinceEpoch);
-      if (bookingTime.millisecondsSinceEpoch <=
-          todayTime.add(Duration(hours: 2)).millisecondsSinceEpoch) {
-        dur = bookingTime.difference(currentTime);
-        print(dur);
-        // dur = calDuration - dur;
+        //--------24 hours default timer ,Otherwise remaining time---------//
+        // print(bookingTime.millisecondsSinceEpoch);
+        // print(todayTime.add(Duration(days: 1)).millisecondsSinceEpoch);
+        // if (bookingTime.millisecondsSinceEpoch <=
+        //     todayTime.add(Duration(days: 1)).millisecondsSinceEpoch) {
+        //   dur = currentTime.difference(bookingTime);
+        //   print(dur);
+        //   dur = calDuration - dur;
         //
-        // print(dur);
-        print("Duration");
+        //   print(dur);
+        //   print("Duration");
+        //
+        //
+        //   print("Difference");
+        //   print(dur.inHours);
+        //   print(dur.inMinutes);
+        //   print(dur.inSeconds);
+        //
+        //   startTimer();
+        //   isDefaultTime = false;
+        // } else {
+        //   print("Time is bigger");
+        //   isDefaultTime = true;
+        //
+        //   startTimer1();
+        // }
 
-        print("Difference");
-        print(dur.inHours);
-        print(dur.inMinutes);
-        print(dur.inSeconds);
-
-        startTimer();
-        isDefaultTime = false;
-        isCancelAvailable = false;
-        // isTimerAvailable=true;
-      } else {
-        print("Time is bigger");
-        isDefaultTime = true;
-        startTimer1();
-        print(myDuration.inHours);
-        print(myDuration.inMinutes);
-        print(myDuration.inSeconds);
-      }
-
-      //--------24 hours default timer ,Otherwise remaining time---------//
-      // print(bookingTime.millisecondsSinceEpoch);
-      // print(todayTime.add(Duration(days: 1)).millisecondsSinceEpoch);
-      // if (bookingTime.millisecondsSinceEpoch <=
-      //     todayTime.add(Duration(days: 1)).millisecondsSinceEpoch) {
-      //   dur = currentTime.difference(bookingTime);
-      //   print(dur);
-      //   dur = calDuration - dur;
-      //
-      //   print(dur);
-      //   print("Duration");
-      //
-      //
-      //   print("Difference");
-      //   print(dur.inHours);
-      //   print(dur.inMinutes);
-      //   print(dur.inSeconds);
-      //
-      //   startTimer();
-      //   isDefaultTime = false;
-      // } else {
-      //   print("Time is bigger");
-      //   isDefaultTime = true;
-      //
-      //   startTimer1();
-      // }
     });
   }
 
@@ -215,13 +225,13 @@ class _SplitReceiptState extends State<SplitReceipt> {
     }
 
     //-----Before 2 hours of Booking Time-----
-    if (DateTime.now().millisecondsSinceEpoch >=
+    if ((widget.currentTime??DateTime.now()).millisecondsSinceEpoch >=
         bookingTime.subtract(Duration(hours: 2)).millisecondsSinceEpoch) {
       isCancelAvailable = false;
     }
 
     //-----Booking Time Passed-----
-    if (DateTime.now().millisecondsSinceEpoch >=
+    if ((widget.currentTime??DateTime.now()).millisecondsSinceEpoch >=
         bookingTime.millisecondsSinceEpoch) {
       isTimerAvailable = false;
       isCancelAvailable = false;
@@ -258,23 +268,53 @@ class _SplitReceiptState extends State<SplitReceipt> {
                             clipBehavior: Clip.none,
                             children: [
                               Container(
-                                margin:
-                                    EdgeInsets.only(left: 8, right: 8, top: 8),
+                                decoration: errorDomeImage
+                                    .contains(cx.read(Keys.domeId))
+                                    ? BoxDecoration(
+                                    borderRadius:
+                                    BorderRadius.circular(20),
+                                    gradient: backShadowContainer(),
+                                    image: DecorationImage(
+                                      image: AssetImage(
+                                        Image1.domesAround,
+                                      ),
+                                      fit: BoxFit.cover,
+                                    ))
+                                    : BoxDecoration(
+                                    borderRadius: BorderRadius.all(
+                                        Radius.circular(cx.height / 26.68)),
+                                    image: DecorationImage(
+                                      image: NetworkImage(
+                                        (cx.read(
+                                          Keys.image,
+                                        )).isEmpty
+                                            ? "https://thumbs.dreamstime.com/b/indoor-stadium-view-behind-wicket-cricket-160851985.jpg"
+                                            : cx.read(
+                                          Keys.image,
+                                        ),
+                                        scale:
+                                        cx.height > 800 ? 1.8 : 2.4,
+                                      ),
+                                      fit: BoxFit.cover,
+                                      onError: (Object e,
+                                          StackTrace? stackTrace) {
+                                        setState(() {
+                                          errorDomeImage
+                                              .add(cx.read(Keys.domeId));
+                                        });
+                                      },
+                                    )
+                                ),
+                                margin: EdgeInsets.only(
+                                    left: 8, right: 8, top: 8),
                                 width: MediaQuery.of(context).size.width,
                                 height: cx.height / 4.3,
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.all(
-                                      Radius.circular(cx.height / 26.68)),
-                                  image: DecorationImage(
-                                      image:
-                                          AssetImage("assets/images/step.png"),
-                                      fit: BoxFit.cover),
-                                ),
                               ),
                             ],
                           ),
                         ),
                       ),
+
                       isTimerAvailable
                           ? Padding(
                               padding: EdgeInsets.only(
@@ -439,16 +479,18 @@ class _SplitReceiptState extends State<SplitReceipt> {
                                                                       .bookingId
                                                                       .toString())
                                                               .then((value) {
-                                                            setState(() {
-                                                              paymentStatus =
-                                                                  "Cancelled";
-                                                              isCancelAvailable =
-                                                                  false;
-                                                              isTimerAvailable =
-                                                                  false;
-                                                            });
-                                                            // mycontroller.setBid();
-                                                          });
+                                                                if(value==1){
+                                                                  setState(() {
+                                                                    paymentStatus =
+                                                                    "Cancelled";
+                                                                    isCancelAvailable =
+                                                                    false;
+                                                                    isTimerAvailable =
+                                                                    false;
+                                                                  });
+                                                                }
+
+                                                              });
                                                         });
                                                   },
                                                   child: Column(

@@ -1,0 +1,10 @@
+[
+    {
+        "merged": "/Users/SMIINFOTECH/Downloads/domez/build/stripe_android/intermediates/merged_res/release/layout-sw600dp-v13/design_layout_snackbar.xml",
+        "source": "/Users/SMIINFOTECH/.gradle/caches/transforms-3/fe3f0f464b810136ae8bbd131690639c/transformed/material-1.8.0/res/layout-sw600dp-v13/design_layout_snackbar.xml"
+    },
+    {
+        "merged": "/Users/SMIINFOTECH/Downloads/domez/build/stripe_android/intermediates/merged_res/release/layout-sw600dp-v13/mtrl_layout_snackbar.xml",
+        "source": "/Users/SMIINFOTECH/.gradle/caches/transforms-3/fe3f0f464b810136ae8bbd131690639c/transformed/material-1.8.0/res/layout-sw600dp-v13/mtrl_layout_snackbar.xml"
+    }
+]

@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../commonModule/Constant.dart';
 import 'package:gap/gap.dart';
+import '../../commonModule/utils.dart';
 import '../../commonModule/widget/common/textSentic.dart';
 import '../../commonModule/widget/search/customButton.dart';
 import '../../controller/commonController.dart';
@@ -22,13 +23,6 @@ class ChangePassword extends StatefulWidget {
 class _ChangePasswordState extends State<ChangePassword> {
   CommonController cx = Get.put(CommonController());
 
-  double start = 0.0;
-  double end = 200.0;
-
-  double start1 = 0.0;
-  double end1 = 50.0;
-  double minPrice = 0.0;
-  double maxPrice = 200.0;
   RangeLabels labels =RangeLabels('1', "500");
   TextEditingController oldpasscontroller = TextEditingController();
   TextEditingController newpasscontroller = TextEditingController();

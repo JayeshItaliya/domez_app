@@ -15,6 +15,8 @@ import '../authPage/signIn.dart';
 import '../bookSteps/DomePage.dart';
 import '../league/leaguePageDetails.dart';
 import '../menuPage/filters.dart';
+import '../../commonModule/utils.dart';
+
 
 class BottomSheetSearch extends StatefulWidget {
   BottomSheetSearch({
@@ -29,7 +31,6 @@ class _BottomSheetSearchState extends State<BottomSheetSearch> {
   CommonController cx = Get.put(CommonController());
 
   FilterListController mycontroller = Get.put(FilterListController());
-  final dx = Get.put(DomesDetailsController());
   List<int> errorSearch = [];
 
   @override
@@ -171,6 +172,7 @@ class _BottomSheetSearchState extends State<BottomSheetSearch> {
                                                               BorderRadius.all(
                                                             Radius.circular(20),
                                                           ),
+                                                          gradient: backShadowContainer(),
                                                           image:
                                                           errorSearch.contains(item.id)?
                                                           DecorationImage(
@@ -451,9 +453,9 @@ class _BottomSheetSearchState extends State<BottomSheetSearch> {
                                                     } else {
                                                       print(index);
                                                       Get.to(
-                                                          SignIn(curIndex: 3));
+                                                          SignIn(curIndex: 3,noOfPopTime: 1,));
                                                       onAlertSignIn(
-                                                          context: context);
+                                                          context: context,currentIndex: 3,noOfPopTimes: 1);
                                                     }
                                                   },
                                                 ),

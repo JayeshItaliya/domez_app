@@ -1,0 +1,26 @@
+[
+    {
+        "merged": "/Users/SMIINFOTECH/Downloads/domez/build/flutter_statusbarcolor_ns/intermediates/merged_res/release/layout/notification_action.xml",
+        "source": "/Users/SMIINFOTECH/.gradle/caches/transforms-3/347c304377591f46544dcf24cebb2078/transformed/core-1.6.0/res/layout/notification_action.xml"
+    },
+    {
+        "merged": "/Users/SMIINFOTECH/Downloads/domez/build/flutter_statusbarcolor_ns/intermediates/merged_res/release/layout/notification_template_part_time.xml",
+        "source": "/Users/SMIINFOTECH/.gradle/caches/transforms-3/347c304377591f46544dcf24cebb2078/transformed/core-1.6.0/res/layout/notification_template_part_time.xml"
+    },
+    {
+        "merged": "/Users/SMIINFOTECH/Downloads/domez/build/flutter_statusbarcolor_ns/intermediates/merged_res/release/layout/notification_action_tombstone.xml",
+        "source": "/Users/SMIINFOTECH/.gradle/caches/transforms-3/347c304377591f46544dcf24cebb2078/transformed/core-1.6.0/res/layout/notification_action_tombstone.xml"
+    },
+    {
+        "merged": "/Users/SMIINFOTECH/Downloads/domez/build/flutter_statusbarcolor_ns/intermediates/merged_res/release/layout/custom_dialog.xml",
+        "source": "/Users/SMIINFOTECH/.gradle/caches/transforms-3/347c304377591f46544dcf24cebb2078/transformed/core-1.6.0/res/layout/custom_dialog.xml"
+    },
+    {
+        "merged": "/Users/SMIINFOTECH/Downloads/domez/build/flutter_statusbarcolor_ns/intermediates/merged_res/release/layout/notification_template_icon_group.xml",
+        "source": "/Users/SMIINFOTECH/.gradle/caches/transforms-3/347c304377591f46544dcf24cebb2078/transformed/core-1.6.0/res/layout/notification_template_icon_group.xml"
+    },
+    {
+        "merged": "/Users/SMIINFOTECH/Downloads/domez/build/flutter_statusbarcolor_ns/intermediates/merged_res/release/layout/notification_template_part_chronometer.xml",
+        "source": "/Users/SMIINFOTECH/.gradle/caches/transforms-3/347c304377591f46544dcf24cebb2078/transformed/core-1.6.0/res/layout/notification_template_part_chronometer.xml"
+    }
+]

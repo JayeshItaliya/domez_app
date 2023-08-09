@@ -1,0 +1,18 @@
+[
+    {
+        "merged": "/Users/SMIINFOTECH/Downloads/domez/build/image_gallery_saver/intermediates/merged_res/release/drawable/notification_icon_background.xml",
+        "source": "/Users/SMIINFOTECH/.gradle/caches/transforms-3/347c304377591f46544dcf24cebb2078/transformed/core-1.6.0/res/drawable/notification_icon_background.xml"
+    },
+    {
+        "merged": "/Users/SMIINFOTECH/Downloads/domez/build/image_gallery_saver/intermediates/merged_res/release/drawable/notification_bg_low.xml",
+        "source": "/Users/SMIINFOTECH/.gradle/caches/transforms-3/347c304377591f46544dcf24cebb2078/transformed/core-1.6.0/res/drawable/notification_bg_low.xml"
+    },
+    {
+        "merged": "/Users/SMIINFOTECH/Downloads/domez/build/image_gallery_saver/intermediates/merged_res/release/drawable/notification_tile_bg.xml",
+        "source": "/Users/SMIINFOTECH/.gradle/caches/transforms-3/347c304377591f46544dcf24cebb2078/transformed/core-1.6.0/res/drawable/notification_tile_bg.xml"
+    },
+    {
+        "merged": "/Users/SMIINFOTECH/Downloads/domez/build/image_gallery_saver/intermediates/merged_res/release/drawable/notification_bg.xml",
+        "source": "/Users/SMIINFOTECH/.gradle/caches/transforms-3/347c304377591f46544dcf24cebb2078/transformed/core-1.6.0/res/drawable/notification_bg.xml"
+    }
+]

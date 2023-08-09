@@ -14,8 +14,6 @@ class TimeSlotsController extends GetxController {
 
   var myList = List<TimeSlotsModel>.empty(growable: true).obs;
   var isDataProcessing = false.obs;
-
-  ScrollController scrollController = ScrollController();
   StreamSubscription? subscription;
   var isoffline = false.obs;
 
@@ -59,32 +57,22 @@ class TimeSlotsController extends GetxController {
       isDataProcessing.value = true;
 
       if (isoffline.value == false) {
-        print("sriti");
 
         TaskProvider().getAvailableSlots(cx.read(Keys.domeId).toString(),cx.read(Keys.sportId).toString()).then((resp) {
-          print("Heyyylooow");
-          
           if(resp!=null&&resp.length!=0) {
-
-            print("Heyyylooow");
             myList.clear();
-
-            
-            DateTime today =
-            DateTime.now();
+            DateTime today =resp[0].currentTime;
             String curDate =
             DateFormat(
                 "yyyy-MM-dd")
                 .format(today);
-            int curHour =
-                today.hour;
+            int curHour =today.hour;
 
             print(curDate);
             print(cx.read(Keys.fullDate));
 
            
             if(cx.read(Keys.fullDate) ==curDate){
-              print("Cur Date");
               resp.asMap().forEach((index,element) {
                 int startTime =
                 int.parse(element.slot
@@ -116,40 +104,26 @@ class TimeSlotsController extends GetxController {
                   }
                 }
                 print(curDate);
-
-
                   if (startTime <=
                       curHour) {
-                    print(
-                        "expire time");
                     print(startTime);
                   }
                   else{
                     myList.add(element);
                   }
-
                   if(resp.length-1==index){
                     isDataProcessing.value = false;
                   }
-
               });
-
             }
             else{
               isDataProcessing.value = false;
               myList.addAll(resp);
             }
-
-
-
           }
           else{
-
             isDataProcessing.value = false;
-
           }
-
-
         }, onError: (err) {
           isDataProcessing.value = false;
           showSnackbar("Error", err.toString(), Colors.red);

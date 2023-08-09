@@ -1,19 +1,26 @@
 import 'dart:async';
 import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:domez/controller/commonController.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import '../commonModule/Strings.dart';
 import '../model/categoryModel.dart';
 import '../service/getAPI.dart';
+import 'domesListController.dart';
+import 'leaguesListController.dart';
 
 class CategoryController extends GetxController {
 
   var myList = List<CategoryModel>.empty(growable: true).obs;
   var isDataProcessing = false.obs;
-
-  ScrollController scrollController = ScrollController();
   StreamSubscription? subscription;
   var isoffline = false.obs;
-
+  DomesListController mycontroller = Get.put(DomesListController());
+  LeagueListController leagueListController = Get.put(LeagueListController());
+  CommonController cx =Get.put(CommonController());
+  var sportid="1".obs;
+  var initialCategoryId = 0.obs;
+  var currentCategoryId = 0.obs;
 
   checkNetwork() {
     subscription = Connectivity()
@@ -52,7 +59,27 @@ class CategoryController extends GetxController {
           isDataProcessing.value = false;
           if(resp!=null){
             myList.clear();
-            myList.addAll(resp!);
+            myList.addAll(resp);
+            initialCategoryId.value=myList[0].id;
+            currentCategoryId.value=myList[0].id;
+
+            if(cx.curIndex==0){
+              print("Hey Soham League sporty Id");
+              print(myList[0].id.toString());
+
+              cx.write(Keys.paginationDomeSportId,myList[0].id.toString());
+              mycontroller.getTask1(myList[0].id.toString());
+              mycontroller.getTask2(myList[0].id.toString());
+              mycontroller.getTask3(myList[0].id.toString());
+            }
+            else if(cx.curIndex==2){
+              print("Hey Soham League sporty Id");
+              print(myList[0].id.toString());
+              cx.write(LKeys.paginationLeagueSportId,myList[0].id.toString());
+
+              leagueListController.getTask2(myList[0].id.toString());
+              leagueListController.getTask3(myList[0].id.toString());
+            }
           }
 
 

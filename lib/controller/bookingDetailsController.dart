@@ -3,8 +3,6 @@ import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../model/bookingDetailsModel.dart';
-import '../model/domesDetailsModel.dart';
-import '../screens/bookSteps/DomePage.dart';
 import '../screens/menuPage/bookinDetailsDomesSplit.dart';
 import '../screens/menuPage/bookingDetailsDomesFull.dart';
 import '../screens/menuPage/bookingtDetailsleague.dart';
@@ -15,7 +13,6 @@ class BookingDetailsController extends GetxController {
   var myList = List<BookingDetailsModel>.empty(growable: true).obs;
   var isDataProcessing = false.obs;
 
-  ScrollController scrollController = ScrollController();
   StreamSubscription? subscription;
   var isoffline = false.obs;
   var bookId = ''.obs;
@@ -40,7 +37,6 @@ class BookingDetailsController extends GetxController {
 
   @override
   void onInit() {
-    print("SOHAM");
     print(bookId.value);
 
     // TODO: implement onInit
@@ -48,38 +44,35 @@ class BookingDetailsController extends GetxController {
     checkNetwork();
   }
 
-  Future<void> setBid(String bookId, int type,bool isActive,bool isNavigate,{ bool? linkAccess,bool? isLinkTimerExpire}) async{
-    print("DIWAKAR");
-    await getTask(bookId, type,isActive,isNavigate,linkAccess:  linkAccess,isLinkTimerExpire: isLinkTimerExpire);
+  Future<void> setBid(String bookId, int type,bool isActive,bool isNavigate,{ bool? linkAccess,}) async{
+    await getTask(bookId, type,isActive,isNavigate,linkAccess:  linkAccess,);
   }
 
   Future<void> getTask(String bookId, int type,bool isActive,bool isNavigate,
-      {bool? linkAccess,bool? isLinkTimerExpire}) async {
+      {bool? linkAccess,}) async {
     try {
+      print(linkAccess);
       isDataProcessing.value = true;
 
       if (isoffline.value == false) {
         print(bookId);
-        print("bookId.valueeeee1");
         TaskProvider().getBookingDetails(bid: bookId).then((resp) {
           if (resp != null) {
-            print("bookId.valueeeee");
 
             isDataProcessing.value = false;
             myList.clear();
             myList.addAll(resp);
             print(type.toString());
-            print("type.toString()");
+            print("timeExpire");
+            print(myList[0].bookingStatus=="cancelled");
+
             if(isNavigate){
-
-
-              if(isLinkTimerExpire??false){
-                print("Hey Hey Hey");
+              if(myList[0].bookingStatus=="cancelled"){
                 Get.to(TimeExpirePage());
               }
               else{
                 if (type == 1) {
-                  Get.to(BookingDetailsDomesFull(linkAccess: linkAccess,));
+                  Get.to(BookingDetailsDomesFull(linkAccess: linkAccess,isActive: isActive,));
                 } else if (type == 2) {
                   Get.to(BookingDetailsDomesSplit(isActive: isActive,linkAccess: linkAccess??false,));
                 } else {

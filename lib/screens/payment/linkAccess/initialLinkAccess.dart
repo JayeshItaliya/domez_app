@@ -1,6 +1,5 @@
 import 'package:domez/commonModule/AppColor.dart';
-import 'package:domez/commonModule/Constant.dart';
-import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../controller/bookingDetailsController.dart';
@@ -24,17 +23,13 @@ class _InitialLinkAccessState extends State<InitialLinkAccess> {
       isDataProcessing=false;
     });
   }
-  Future<void> getData()async{
-
-
+  Future<void> getData() async{
     await mycontroller.setBid(
-        // Constant.linkBookingId,
         widget.bId.toString(),
         2,
         false,
         true,
         linkAccess: true,
-      // isLinkTimerExpire: true
     );
   }
 

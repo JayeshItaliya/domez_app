@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'package:domez/commonModule/widget/common/webView.dart';
+import 'package:domez/controller/bookingDetailsController.dart';
 import 'package:domez/screens/authPage/signIn.dart';
 import 'package:domez/screens/authPage/signUp.dart';
 import 'package:domez/screens/bookSteps/reviewAndConfirm.dart';
@@ -27,11 +28,12 @@ import '../../commonModule/widget/common/textNunito.dart';
 import '../../commonModule/widget/common/textSentic.dart';
 import '../../commonModule/widget/search/simplecircularIcon.dart';
 import '../../controller/commonController.dart';
+import '../../service/getAPI.dart';
 import '../payment/PayInFull/bookingReceipt.dart';
 import 'package:http/http.dart' as http;
 import '../payment/SplitAmount/bookingReceiptSplit.dart';
-import '../payment/stripePayment.dart';
 import 'dart:math' as math;
+import '../../commonModule/utils.dart';
 
 class Receipt extends StatefulWidget {
   const Receipt({Key? key}) : super(key: key);
@@ -42,6 +44,7 @@ class Receipt extends StatefulWidget {
 
 class _ReceiptState extends State<Receipt> {
   CommonController cx = Get.put(CommonController());
+  BookingDetailsController bx = Get.put(BookingDetailsController());
   bool fav = false;
   bool emailCorrect = false;
   TextEditingController bottomEmailController = TextEditingController();
@@ -49,6 +52,7 @@ class _ReceiptState extends State<Receipt> {
   final GlobalKey<FormState> bottomEmailKey = GlobalKey<FormState>();
   final GlobalKey<FormState> initialDepositKey = GlobalKey<FormState>();
   final ScrollController _scroller = ScrollController();
+  List<int> errorDomeImage = [];
 
   TextEditingController controller = TextEditingController(text: "");
   String currentText = "";
@@ -80,11 +84,11 @@ class _ReceiptState extends State<Receipt> {
   String? _linkMessage;
   bool _isCreatingLink = false;
 
-
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
+
     setState(() {
       startTime = cx.read(Keys.startTime).substring(0, 2);
       if (cx.read(Keys.startTime).substring(3, 5) == "PM") {
@@ -121,7 +125,7 @@ class _ReceiptState extends State<Receipt> {
 
       totalAmount = cx.read(Keys.total);
       defaultAmount = totalAmount / cx.read(Keys.players);
-      cx.write(Keys.initialDeposit,defaultAmount);
+      cx.write(Keys.initialDeposit, defaultAmount);
       initialDeposit = '';
 
       remainingAmount = totalAmount - defaultAmount;
@@ -130,999 +134,1163 @@ class _ReceiptState extends State<Receipt> {
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      bottom:true,
-      top:false,
-      child: Scaffold(
-        resizeToAvoidBottomInset: true,
-        extendBodyBehindAppBar: false,
-        backgroundColor: AppColor.bg,
+    return GetBuilder<CommonController>(builder: (controller) {
+      return SafeArea(
+        bottom: true,
+        top: false,
+        child: Scaffold(
+          resizeToAvoidBottomInset: true,
+          extendBodyBehindAppBar: false,
+          backgroundColor: AppColor.bg,
 
-        extendBody: false,
-        body: ListView(
-          shrinkWrap: true,
-          physics: BouncingScrollPhysics(),
-
-          children: [
-            Container(
-              height: cx.read("islogin") ? cx.height * 1.15 : cx.height * 1.35,
-              decoration: BoxDecoration(
-                color: AppColor.bg,
-                borderRadius: BorderRadius.only(
-                    bottomLeft:
-                        Radius.elliptical(cx.height / 16.7, cx.height / 23.82),
-                    bottomRight:
-                        Radius.elliptical(cx.height / 16.7, cx.height / 23.82)),
-              ),
-              child: ListView(
-                shrinkWrap: true,
-                physics: BouncingScrollPhysics(),
-                children: [
-                  Stack(
-                    children: [
-                      Center(
-                        child: SizedBox(
-                          width: MediaQuery.of(context).size.width * 0.9,
-                          height: cx.read("islogin")?
-                          isExpandCancellation?cx.height * 1.72: cx.height * 1.62:
-                          isExpandCancellation?cx.height * 2.05: cx.height * 1.95,
-                          child: Stack(
-                            clipBehavior: Clip.none,
-                            children: [
-                              Container(
-                                margin:
-                                    EdgeInsets.only(left: 8, right: 8, top: 8),
-                                width: MediaQuery.of(context).size.width,
-                                height: cx.height / 4.3,
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.all(
-                                      Radius.circular(cx.height / 26.68)),
-                                  image: DecorationImage(
-                                      image: AssetImage("assets/images/step.png"),
-                                      fit: BoxFit.cover),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                      Positioned(
-                        left: cx.responsive(60,47, 37),
-                        top: cx.responsive(33,25, 20),
-                        child: InkWell(
-                          onTap: () {
-                            Get.back();
-                          },
-                          child: CircleAvatar(
-                            backgroundColor: Colors.white,
-                            radius: cx.responsive(30,25, 22),
-                            child: SimpleCircularIconButton(
-                              iconData: Icons.arrow_back_ios_new,
-                              iconColor: fav ? AppColor.darkGreen : Colors.black,
-                              radius: cx.responsive(60,47, 37),
-                            ),
-                          ),
-                        ),
-                      ),
-                      Positioned(
-                        top: cx.height / 6.06,
-                        right: 4,
-                        left: 4,
-                        child: Padding(
-                          padding: EdgeInsets.only(
-                              top: 0,
-                              left: cx.width * 0.09,
-                              right: cx.width * 0.09,
-                              bottom: 10),
-                          child: SingleChildScrollView(
-                            controller: _scroller,
-                            child: Container(
-                              height: cx.height * 1.6,
-                              decoration: BoxDecoration(
-                                  color: AppColor.bg,
-                                  borderRadius:
-                                      BorderRadius.circular(cx.height / 44.47)),
-                              child: ListView(
-                                shrinkWrap: true,
-                                physics: ClampingScrollPhysics(),
-                                children: [
-                                  Padding(
-                                    padding: EdgeInsets.only(
-                                        top: 0,
-                                        left:0,
-                                        right:0,
-                                        bottom: 10),
-                                        child: Column(
-                                      children: [
-                                        Container(
-                                          decoration: BoxDecoration(
-                                              color: Colors.white,
-                                              borderRadius: BorderRadius.only(
-                                                  topLeft: Radius.circular(
-                                                      cx.height / 37.06),
-                                                  topRight: Radius.circular(
-                                                      cx.height / 37.06))),
-                                          child: Column(
-                                            mainAxisAlignment: MainAxisAlignment.end,
-                                            crossAxisAlignment: CrossAxisAlignment.end,
-                                            children: [
-                                              Container(
-                                                decoration: BoxDecoration(
-                                                    color: Color.fromRGBO(
-                                                        241, 247, 236, 0.6),
-                                                    borderRadius: BorderRadius.circular(
-                                                        cx.height / 44.47)),
-                                                child: ListTile(
-                                                  dense: true,
-                                                  contentPadding: EdgeInsets.fromLTRB(
-                                                      20,
-                                                      cx.height / 55.58,
-                                                      cx.height / 44.47,
-                                                      0),
-                                                  title: SenticText(
-                                                    text: cx.read(Keys.domeName),
-                                                    fontSize: cx.height > 800 ? 24 : 21,
-                                                    fontWeight: FontWeight.w600,
-                                                    color: Color(0xFF222222),
-                                                  ),
-                                                  trailing: InkWell(
-                                                    onTap: () {
-                                                      Get.to(ReviewConfirm());
-                                                    },
-                                                    child: SenticText(
-                                                      text: "Change",
-                                                      fontSize:
-                                                          cx.height > 800 ? 17 : 14,
-                                                      fontWeight: FontWeight.w600,
-                                                      color: AppColor.darkGreen,
-                                                    ),
-                                                  ),
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                        TicketWidget(
-                                          color: AppColor.ticketWidget,
-                                          width: MediaQuery.of(context).size.width,
-                                          isCornerRounded: false,
-                                          padding: const EdgeInsets.all(0),
-                                          height: cx.height * 0.7,
-                                          child: Column(
-                                            // shrinkWrap: true,
-                                            // physics: ClampingScrollPhysics(),
-                                            children: [
-                                              Container(
-                                                height: cx.height * 0.345,
-                                                child: Column(
-                                                  mainAxisAlignment:
-                                                      MainAxisAlignment.start,
-                                                  crossAxisAlignment:
-                                                      CrossAxisAlignment.start,
-                                                  children: [
-                                                    Padding(
-                                                      padding: EdgeInsets.only(
-                                                          left: 20,
-                                                          top: cx.height / 44.47),
-                                                      child: Row(
-                                                        children: [
-                                                          Container(
-                                                            width: cx.width * 0.23,
-                                                            child: Column(
-                                                              crossAxisAlignment:
-                                                                  CrossAxisAlignment
-                                                                      .start,
-                                                              children: [
-                                                                NunitoText(
-                                                                    text: "Field",
-                                                                    fontSize:
-                                                                        cx.height > 800
-                                                                            ? 18
-                                                                            : 16,
-                                                                    fontWeight:
-                                                                        FontWeight.w600,
-                                                                    color:
-                                                                        AppColor.grey),
-                                                                Container(
-                                                                  width:
-                                                                      cx.width * 0.345,
-                                                                  child: NunitoText(
-                                                                    text: cx.read(
-                                                                        Keys.fieldName),
-                                                                    fontSize:
-                                                                        cx.height > 800
-                                                                            ? 17
-                                                                            : 15,
-                                                                    fontWeight:
-                                                                        FontWeight.w700,
-                                                                    color: Color(
-                                                                        0xFF414141),
-                                                                    textOverflow:
-                                                                        TextOverflow
-                                                                            .ellipsis,
-                                                                    maxLines: 1,
-                                                                  ),
-                                                                ),
-                                                                const SizedBox(
-                                                                  width: 40,
-                                                                ),
-                                                                NunitoText(
-                                                                    text: "Players",
-                                                                    fontSize:
-                                                                        cx.height > 800
-                                                                            ? 18
-                                                                            : 16,
-                                                                    fontWeight:
-                                                                        FontWeight.w600,
-                                                                    color:
-                                                                        AppColor.grey),
-                                                                NunitoText(
-                                                                    text: cx
-                                                                        .read(Keys
-                                                                            .players)
-                                                                        .toString(),
-                                                                    fontSize:
-                                                                        cx.height > 800
-                                                                            ? 17
-                                                                            : 15,
-                                                                    fontWeight:
-                                                                        FontWeight.w700,
-                                                                    color: Color(
-                                                                        0xFF414141)),
-                                                              ],
-                                                            ),
-                                                          ),
-                                                          Container(
-                                                            child: Column(
-                                                              crossAxisAlignment:
-                                                                  CrossAxisAlignment
-                                                                      .start,
-                                                              children: [
-                                                                NunitoText(
-                                                                    text: "Date",
-                                                                    fontSize:
-                                                                        cx.height > 800
-                                                                            ? 18
-                                                                            : 16,
-                                                                    fontWeight:
-                                                                        FontWeight.w600,
-                                                                    color:
-                                                                        AppColor.grey),
-                                                                NunitoText(
-                                                                    text: cx.selMonth
-                                                                            .value +
-                                                                        ' ' +
-                                                                        cx.selDate
-                                                                            .value +
-                                                                        ', ' +
-                                                                        cx.selYear
-                                                                            .value,
-                                                                    fontSize:
-                                                                        cx.height > 800
-                                                                            ? 17
-                                                                            : 15,
-                                                                    fontWeight:
-                                                                        FontWeight.w700,
-                                                                    color: Color(
-                                                                        0xFF414141)),
-                                                                const SizedBox(
-                                                                  width: 40,
-                                                                ),
-                                                                NunitoText(
-                                                                    text: "Time",
-                                                                    fontSize:
-                                                                        cx.height > 800
-                                                                            ? 18
-                                                                            : 16,
-                                                                    fontWeight:
-                                                                        FontWeight.w600,
-                                                                    color:
-                                                                        AppColor.grey),
-                                                                NunitoText(
-                                                                    text: cx
-                                                                            .read(Keys
-                                                                                .startTime)
-                                                                            .toString()
-                                                                            .substring(
-                                                                                0, 8) +
-                                                                        " To " +
-                                                                        cx
-                                                                            .read(Keys
-                                                                                .endTime)
-                                                                            .toString()
-                                                                            .substring(
-                                                                                11, 19),
-                                                                    fontSize:
-                                                                        cx.height > 800
-                                                                            ? 17
-                                                                            : 15,
-                                                                    fontWeight:
-                                                                        FontWeight.w700,
-                                                                    color: Color(
-                                                                        0xFF414141)),
-                                                              ],
-                                                            ),
-                                                          ),
-                                                        ],
-                                                      ),
-                                                    ),
-                                                    Padding(
-                                                      padding: EdgeInsets.only(
-                                                          left: 20,
-                                                          top: cx.height / 44.47),
-                                                      child: Column(
-                                                        mainAxisAlignment:
-                                                            MainAxisAlignment.start,
-                                                        crossAxisAlignment:
-                                                            CrossAxisAlignment.start,
-                                                        children: [
-                                                          NunitoText(
-                                                              text: "Address",
-                                                              fontSize: cx.height > 800
-                                                                  ? 18
-                                                                  : 16,
-                                                              fontWeight:
-                                                                  FontWeight.w600,
-                                                              color: AppColor.grey),
-                                                          Container(
-                                                            width: cx.width * 0.7,
-                                                            child: NunitoText(
-                                                                text: cx
-                                                                    .read(Keys.address),
-                                                                fontSize:
-                                                                    cx.height > 800
-                                                                        ? 17
-                                                                        : 15,
-                                                                maxLines: cx.height > 800?3:2,
-                                                                textOverflow:
-                                                                    TextOverflow
-                                                                        .ellipsis,
-                                                                fontWeight:
-                                                                    FontWeight.w700,
-                                                                color:
-                                                                    Color(0xFF414141)),
-                                                          ),
-                                                        ],
-                                                      ),
-                                                    ),
-                                                  ],
-                                                ),
-                                              ),
-                                              MySeparator(
-                                                color: Color.fromRGBO(231, 244, 239, 1),
-                                              ),
-                                              Container(
-                                                height: cx.height * 0.33,
-                                                child: Column(
-                                                  children: [
-                                                    SizedBox(
-                                                      height: MediaQuery.of(context)
-                                                              .size
-                                                              .height /
-                                                          20,
-                                                    ),
-                                                    Padding(
-                                                      padding: const EdgeInsets.only(
-                                                          right: 20.0),
-                                                      child: Row(
-                                                        mainAxisAlignment:
-                                                            MainAxisAlignment
-                                                                .spaceBetween,
-                                                        children: [
-                                                          Padding(
-                                                            padding: EdgeInsets.only(
-                                                                left: cx.height / 33.5,
-                                                                top: cx.height / 66.7),
-                                                            child: Container(
-                                                              child: Column(
-                                                                mainAxisAlignment:
-                                                                    MainAxisAlignment
-                                                                        .start,
-                                                                crossAxisAlignment:
-                                                                    CrossAxisAlignment
-                                                                        .start,
-                                                                children: [
-                                                                  NunitoText(
-                                                                      text: "Sub Total",
-                                                                      fontSize:
-                                                                          cx.responsive(
-                                                                              25,20, 17),
-                                                                      fontWeight:
-                                                                          FontWeight
-                                                                              .w600,
-                                                                      color: AppColor
-                                                                          .grey),
-                                                                  Gap(6),
-                                                                  NunitoText(
-                                                                      text:
-                                                                          "Service Fee",
-                                                                      fontSize:
-                                                                          cx.responsive(
-                                                                              25,20, 17),
-                                                                      fontWeight:
-                                                                          FontWeight
-                                                                              .w600,
-                                                                      color: AppColor
-                                                                          .grey),
-                                                                  Gap(6),
-                                                                  Row(
-                                                                    children: [
-                                                                      NunitoText(
-                                                                          text: "HST  ",
-                                                                          fontSize:
-                                                                          cx.responsive(
-                                                                              25,20, 17),                                                                          fontWeight:
-                                                                              FontWeight
-                                                                                  .w600,
-                                                                          color: AppColor
-                                                                              .grey),
-
-                                                                    ],
-                                                                  ),
-                                                                ],
-                                                              ),
-                                                            ),
-                                                          ),
-                                                          Padding(
-                                                            padding: EdgeInsets.only(
-                                                              left: cx.responsive(4,3, 2),
-                                                              top: cx.responsive(15,10, 7),
-                                                            ),
-                                                            child: Container(
-                                                              child: Column(
-                                                                mainAxisAlignment:
-                                                                    MainAxisAlignment
-                                                                        .end,
-                                                                crossAxisAlignment:
-                                                                    CrossAxisAlignment
-                                                                        .end,
-                                                                children: [
-                                                                  NunitoText(
-                                                                      textAlign:
-                                                                          TextAlign.end,
-                                                                      text: "\$" +
-                                                                          cx
-                                                                              .read(
-                                                                                  Keys
-                                                                                      .price)
-                                                                              .toStringAsFixed(
-                                                                                  2),
-                                                                      fontSize:
-                                                                          cx.responsive(
-                                                                              25,20, 17),
-                                                                      fontWeight:
-                                                                          FontWeight
-                                                                              .w700,
-                                                                      color: Color(
-                                                                          0xFF757575)),
-                                                                  Gap(4),
-                                                                  NunitoText(
-                                                                      textAlign:
-                                                                          TextAlign.end,
-                                                                      text: "+ \$" +
-                                                                          serviceFee
-                                                                              .toStringAsFixed(
-                                                                                  2),
-                                                                      fontSize:
-                                                                          cx.responsive(
-                                                                              25,20, 17),
-                                                                      fontWeight:
-                                                                          FontWeight
-                                                                              .w700,
-                                                                      color: Color(
-                                                                          0xFF757575)),
-                                                                  Gap(4),
-                                                                  NunitoText(
-                                                                      textAlign:
-                                                                          TextAlign.end,
-                                                                      text: "+ \$" +
-                                                                          cx
-                                                                              .read(
-                                                                                  Keys
-                                                                                      .totalHST)
-                                                                              .toStringAsFixed(
-                                                                                  2),
-                                                                      fontSize:
-                                                                          cx.responsive(
-                                                                              25,20, 17),
-                                                                      fontWeight:
-                                                                          FontWeight
-                                                                              .w700,
-                                                                      color: Color(
-                                                                          0xFF757575)),
-                                                                ],
-                                                              ),
-                                                            ),
-                                                          ),
-                                                        ],
-                                                      ),
-                                                    ),
-                                                    Gap(6),
-                                                    Padding(
-                                                      padding: EdgeInsets.fromLTRB(
-                                                          20.0, 0, 20, 0),
-                                                      child: const Divider(
-                                                        color: Color(0xFFE7F4EF),
-                                                        thickness: 2,
-                                                      ),
-                                                    ),
-                                                    Gap(7),
-                                                    Padding(
-                                                      padding: EdgeInsets.fromLTRB(
-                                                          cx.height / 55.58, 4, 15, 8),
-                                                      child: Row(
-                                                        mainAxisAlignment:
-                                                            MainAxisAlignment
-                                                                .spaceBetween,
-                                                        // crossAxisAlignment:
-                                                        // CrossAxisAlignment.center,
-                                                        children: [
-                                                          NunitoText(
-                                                              text: "  Total",
-                                                              fontSize:
-                                                              cx.responsive(
-                                                                  27,22, 19),                                                                 fontWeight:
-                                                                  FontWeight.w700,
-                                                              color: Color(0xFF757575)),
-                                                          SenticText(
-                                                              textAlign:
-                                                                  TextAlign.start,
-                                                              text: "\$" +
-                                                                  total.toStringAsFixed(
-                                                                      2),
-                                                              fontSize:
-                                                              cx.responsive(
-                                                                  29,24, 21),                                                                   fontWeight:
-                                                                  FontWeight.w600,
-                                                              color: Color(0xFF07261A)),
-                                                        ],
-                                                      ),
-                                                    ),
-                                                  ],
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                        Container(
-                                          height: 10,
-                                          decoration: BoxDecoration(
-                                              color: Colors.white,
-                                              borderRadius: BorderRadius.only(
-                                                  bottomLeft: Radius.circular(
-                                                      cx.height / 37.06),
-                                                  bottomRight: Radius.circular(
-                                                      cx.height / 37.06))),
-                                          child: ListTile(
-                                            dense: true,
-                                            contentPadding: EdgeInsets.fromLTRB(
-                                                20,
-                                                cx.height / 55.58,
-                                                cx.height / 44.47,
-                                                0),
-                                          ),
-                                        ),
-                                        Container(
-                                            height:25,
-                                          color: AppColor.bg,
-                                        ),
-                                        Container(
-                                            decoration: BoxDecoration(
-                                                color: Colors.white,
-                                                borderRadius: BorderRadius.all(
-                                                    Radius.circular(15))),
-                                            child: Padding(
-                                              padding: const EdgeInsets.fromLTRB(
-                                                  12, 0, 2, 0.0),
-                                              child: Column(
-                                                crossAxisAlignment:
-                                                CrossAxisAlignment.start,
-                                                children: [
-                                                  InkWell(
-                                                    onTap: () {
-                                                      setState((){
-                                                        isExpandCancellation=!isExpandCancellation;
-                                                      });
-                                                    },
-                                                    child: Row(
-                                                      mainAxisAlignment:
-                                                      MainAxisAlignment.spaceBetween,
-                                                      children: [
-                                                        InterText(
-                                                          text: "Cancellation Policy",
-                                                          fontWeight: FontWeight.w700,
-                                                          fontSize:
-                                                          cx.height > 800 ? 16 : 14,
-                                                          color: Color(0xFF444444),
-                                                        ),
-                                                        Icon(
-                                                          isExpandCancellation
-                                                              ? Icons
-                                                              .arrow_drop_up_rounded
-                                                              : Icons
-                                                              .arrow_drop_down_rounded,
-                                                          color: Color(0xFF444444),
-                                                          size: 45,
-                                                        ),
-                                                      ],
-                                                    ),
-                                                  ),
-                                                  Container(
-                                                      child: NunitoText(
-                                                        text:
-                                                        isExpandCancellation?"You can cancel this booking within two hours. Cancellation charges will be applied. Cancellations less than two hours of deadline are non-refundable":
-                                                        "You can cancel this booking within two hours.",
-                                                        color: Color(0xFFA8A8A8),
-                                                        fontSize: cx.responsive(25,19, 16),
-                                                        maxLines: 5,
-                                                        fontWeight: FontWeight.w400,
-                                                      )),
-                                                  Gap(15),
-                                                  InkWell(
-                                                    onTap: () {
-                                                      Get.to(WebViewClass(
-                                                          "Cancellation Policy",
-                                                          Constant.cancelUrl));
-                                                    },
-                                                    child: NunitoText(
-                                                      text:
-                                                      "Read full cancellation policy",
-                                                      color: Color(0xFF7C98D0),
-                                                      textAlign: TextAlign.left,
-                                                      fontSize: cx.responsive(25,19, 16),
-                                                      fontWeight: FontWeight.w800,
-                                                    ),
-                                                  ),
-                                                  Gap(20),
-                                                ],
-                                              ),
-                                            )),
-                                      ],
-                                    ),
-                                  ),
-
-                                ],
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-
-                      // Positioned(
-                      //     bottom: cx.read("islogin")?56:180,
-                      //
-                      //   child: Container(
-                      //     width:cx.width,
-                      //     child: Row(
-                      //       mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      //       children: [
-                      //         SvgPicture.asset("assets/svg/leftBottomNavigation.svg",
-                      //             color: AppColor.darkGreen),
-                      //         SvgPicture.asset("assets/svg/rightBottomNavigation.svg",
-                      //             color: AppColor.darkGreen),
-                      //
-                      //       ],
-                      //     ),
-                      //   ),
-                      // ),
-                    ],
-                  ),
-                ],
-              ),
-              
-            ),
-          ],
-        ),
-        floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-        //
-        floatingActionButton: Container(
-          width: cx.width,
-          child: Form(
-            key: bottomEmailKey,
-            autovalidateMode: AutovalidateMode.onUserInteraction,
-            child: Container(
-              width: cx.width,
-              height: cx.read("islogin") ? cx.height / 8 : cx.height / 3.4,
-              color: AppColor.darkGreen,
-              child: Padding(
-                padding: EdgeInsets.fromLTRB(cx.height / 44.47, cx.height / 44.47,
-                    cx.height / 44.47, cx.height / 44.47),
-                child: Container(
-                  height: cx.height * 0.45,
-                  width: cx.width,
-                  child: Column(
-                    mainAxisAlignment:MainAxisAlignment.center,
-                    children: [
-                      !cx.read("islogin")
-                          ? Column(
-                        children: [
-                          TextFormField(
-                            controller: bottomEmailController,
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: cx.responsive(25,20, 15),
-                            ),
-                            onTap: () async {},
-                            cursorColor: Colors.white,
-                            keyboardType: TextInputType.text,
-                            autofocus: false,
-                            decoration: InputDecoration(
-                              focusedErrorBorder: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(
-                                      cx.height / 6.67),
-                                  borderSide: BorderSide(
-                                    width: 1,
-                                    color: Color(0xFF81B5A1),
-                                  )),
-                              errorBorder: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(
-                                      cx.height / 6.67),
-                                  borderSide: BorderSide(
-                                    width: 1,
-                                    color: Color(0xFF81B5A1),
-                                  )),
-                              fillColor: Color(0xFF29795A),
-                              hintText: "Email Here",
-                              hintStyle: TextStyle(
-                                fontSize: cx.responsive(25,20, 15),
-                                color: Color(0xFFAFCCC1),
-                              ),
-                              border: OutlineInputBorder(
-                                borderRadius:
-                                BorderRadius.circular(cx.height / 6.67),
-                                borderSide: BorderSide(
-                                  width: 0.5,
-                                  color: Color(0xFF24A875),
-                                ),
-                              ),
-                              enabledBorder: OutlineInputBorder(
-                                borderRadius:
-                                BorderRadius.circular(cx.height / 6.67),
-                                borderSide: BorderSide(
-                                  width: 0.5,
-                                  color: Color(0xFF24A875),
-                                ),
-                              ),
-                              disabledBorder: OutlineInputBorder(
-                                borderRadius:
-                                BorderRadius.circular(cx.height / 6.67),
-                                borderSide: BorderSide(
-                                  width: 0.5,
-                                  color: Color(0xFF24A875),
-                                ),
-                              ),
-                              focusedBorder: OutlineInputBorder(
-                                borderRadius:
-                                BorderRadius.circular(cx.height / 6.67),
-                                borderSide: BorderSide(
-                                  width: 0.5,
-                                  color: Color(0xFF24A875),
-                                ),
-                              ),
-                              filled: true,
-                              contentPadding: EdgeInsets.fromLTRB(
-                                cx.height / 23,
-                                cx.responsive(23,15, 10),
-                                cx.height / 66.67,
-                                cx.responsive(23,15, 10),
-                              ),
-                            ),
-                            onChanged: (value) {
-                              String pattern =
-                                  r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+";
-                              RegExp regex = RegExp(pattern);
-                              if (value.isEmpty || !regex.hasMatch(value)) {
-                                setState(() {
-                                  emailCorrect = false;
-                                });
-                                print(emailCorrect);
-                              } else {
-                                setState(() {
-                                  emailCorrect = true;
-                                });
-                                print(emailCorrect);
-                              }
-                            },
-                          ),
-                          Padding(
-                            padding: EdgeInsets.fromLTRB(cx.height / 25.65,
-                                15, cx.height / 25.65, 15),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              crossAxisAlignment: CrossAxisAlignment.center,
+          extendBody: false,
+          body: ListView(
+            shrinkWrap: true,
+            physics: BouncingScrollPhysics(),
+            children: [
+              Container(
+                height:
+                    cx.read("islogin") ? cx.height * 1.15 : cx.height * 1.35,
+                decoration: BoxDecoration(
+                  color: AppColor.bg,
+                  borderRadius: BorderRadius.only(
+                      bottomLeft: Radius.elliptical(
+                          cx.height / 16.7, cx.height / 23.82),
+                      bottomRight: Radius.elliptical(
+                          cx.height / 16.7, cx.height / 23.82)),
+                ),
+                child: ListView(
+                  shrinkWrap: true,
+                  physics: BouncingScrollPhysics(),
+                  children: [
+                    Stack(
+                      children: [
+                        Center(
+                          child: SizedBox(
+                            width: MediaQuery.of(context).size.width * 0.9,
+                            height: cx.read("islogin")
+                                ? isExpandCancellation
+                                    ? cx.height * 1.72
+                                    : cx.height * 1.62
+                                : isExpandCancellation
+                                    ? cx.height * 2.05
+                                    : cx.height * 1.95,
+                            child: Stack(
+                              clipBehavior: Clip.none,
                               children: [
-                                NunitoText(
-                                  text: "Have An Account?\t",
-                                  fontWeight: FontWeight.w500,
-                                  fontSize: cx.height / 47.64,
-                                  color: Color(0xFF92B8AA),
-                                ),
-                                InkWell(
-                                  onTap: () {
-                                    Get.to(SignIn(curIndex: 0));
-                                  },
-                                  child: NunitoText(
-                                    text: "Login",
-                                    fontWeight: FontWeight.w700,
-                                    fontSize: cx.height / 47.64,
-                                    color: Color(0xFF92B8AA),
+                                Container(
+                                  decoration: errorDomeImage
+                                      .contains(cx.read(Keys.domeId))
+                                      ? BoxDecoration(
+                                      borderRadius:
+                                      BorderRadius.circular(20),
+                                      gradient: backShadowContainer(),
+                                      image: DecorationImage(
+                                        image: AssetImage(
+                                          Image1.domesAround,
+                                        ),
+                                        fit: BoxFit.cover,
+                                      ))
+                                      : BoxDecoration(
+                                      borderRadius: BorderRadius.all(
+                                          Radius.circular(cx.height / 26.68)),
+                                      image: DecorationImage(
+                                        image: NetworkImage(
+                                          (cx.read(
+                                            Keys.image,
+                                          )).isEmpty
+                                              ? "https://thumbs.dreamstime.com/b/indoor-stadium-view-behind-wicket-cricket-160851985.jpg"
+                                              : cx.read(
+                                            Keys.image,
+                                          ),
+                                          scale:
+                                          cx.height > 800 ? 1.8 : 2.4,
+                                        ),
+                                        fit: BoxFit.cover,
+                                        onError: (Object e,
+                                            StackTrace? stackTrace) {
+                                          setState(() {
+                                            errorDomeImage
+                                                .add(cx.read(Keys.domeId));
+                                          });
+                                        },
+                                      )
                                   ),
+                                  margin: EdgeInsets.only(
+                                      left: 8, right: 8, top: 8),
+                                  width: MediaQuery.of(context).size.width,
+                                  height: cx.height / 4.3,
                                 ),
                               ],
                             ),
                           ),
-                        ],
-                      )
-                          : Container(),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          AbsorbPointer(
-                            absorbing: !emailCorrect && !cx.read("islogin"),
-                            child: Container(
-                              height: cx.height / 15,
-                              width: cx.width / 2.4,
-                              child: InkWell(
-                                onTap: () {
-                                  if (cx.read("islogin")) {
-                                    print("No Verification Required");
-                                    setState(() {
-                                      cx.write(Keys.tempEmail,
-                                          bottomEmailController.text);
-                                    });
-                                    cx.isSplitAmount.value = true;
-                                    initialDepositController.text =
-                                        defaultAmount.toStringAsFixed(2);
-                                    initialDeposit =
-                                        initialDepositController.text;
-                                    remainingAmount = totalAmount - defaultAmount;
-
-                                    showDialog(
-                                        barrierDismissible:false,
-                                        context: context,
-                                        builder: (BuildContext context) {
-                                          return splitDialog();
-                                        });
-                                  } else {
-                                    emailOtp();
-                                    cx.isSplitAmount.value = true;
-                                  }
-                                },
-                                child: Container(
-                                  width: cx.width / 3.5,
-                                  decoration: BoxDecoration(
-                                      color: emailCorrect || cx.read("islogin")
-                                          ? Color(0xFF8AB8A7)
-                                          : Color(0xFF4E9479),
-                                      borderRadius: BorderRadius.circular(50),
-                                      border: Border.all(
-                                          width: 1.3,
-                                          color:
-                                          emailCorrect || cx.read("islogin")
-                                              ? Colors.white
-                                              : Color(0xFF92B8AA))),
-                                  padding: EdgeInsets.all(10),
-                                  child: Center(
-                                    child: isSplitPaymentAPICalling?
-                                    Container(
-                                      height:25,
-                                      width:25,
-                                      child: CircularProgressIndicator(
-                                        color: AppColor.darkGreen,
-                                        // strokeWidth: 10,
+                        ),
+                        Positioned(
+                          left: cx.responsive(60, 47, 37),
+                          top: cx.responsive(33, 25, 20),
+                          child: InkWell(
+                            onTap: () {
+                              Get.back();
+                            },
+                            child: CircleAvatar(
+                              backgroundColor: Colors.white,
+                              radius: cx.responsive(30, 25, 22),
+                              child: SimpleCircularIconButton(
+                                iconData: Icons.arrow_back_ios_new,
+                                iconColor:
+                                    fav ? AppColor.darkGreen : Colors.black,
+                                radius: cx.responsive(60, 47, 37),
+                              ),
+                            ),
+                          ),
+                        ),
+                        Positioned(
+                          top: cx.height / 6.06,
+                          right: 4,
+                          left: 4,
+                          child: Padding(
+                            padding: EdgeInsets.only(
+                                top: 0,
+                                left: cx.width * 0.09,
+                                right: cx.width * 0.09,
+                                bottom: 10),
+                            child: SingleChildScrollView(
+                              controller: _scroller,
+                              child: Container(
+                                height: cx.height * 1.6,
+                                decoration: BoxDecoration(
+                                    color: AppColor.bg,
+                                    borderRadius: BorderRadius.circular(
+                                        cx.height / 44.47)),
+                                child: ListView(
+                                  shrinkWrap: true,
+                                  physics: ClampingScrollPhysics(),
+                                  children: [
+                                    Padding(
+                                      padding: EdgeInsets.only(
+                                          top: 0,
+                                          left: 0,
+                                          right: 0,
+                                          bottom: 10),
+                                      child: Column(
+                                        children: [
+                                          Container(
+                                            decoration: BoxDecoration(
+                                                color: Colors.white,
+                                                borderRadius: BorderRadius.only(
+                                                    topLeft: Radius.circular(
+                                                        cx.height / 37.06),
+                                                    topRight: Radius.circular(
+                                                        cx.height / 37.06))),
+                                            child: Column(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.end,
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.end,
+                                              children: [
+                                                Container(
+                                                  decoration: BoxDecoration(
+                                                      color: Color.fromRGBO(
+                                                          241, 247, 236, 0.6),
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                              cx.height /
+                                                                  44.47)),
+                                                  child: ListTile(
+                                                    dense: true,
+                                                    contentPadding:
+                                                        EdgeInsets.fromLTRB(
+                                                            20,
+                                                            cx.height / 55.58,
+                                                            cx.height / 44.47,
+                                                            0),
+                                                    title: SenticText(
+                                                      text: cx
+                                                          .read(Keys.domeName),
+                                                      fontSize: cx.height > 800
+                                                          ? 24
+                                                          : 21,
+                                                      fontWeight:
+                                                          FontWeight.w600,
+                                                      color: Color(0xFF222222),
+                                                    ),
+                                                    trailing: InkWell(
+                                                      onTap: () {
+                                                        Get.to(ReviewConfirm());
+                                                      },
+                                                      child: SenticText(
+                                                        text: "Change",
+                                                        fontSize:
+                                                            cx.height > 800
+                                                                ? 17
+                                                                : 14,
+                                                        fontWeight:
+                                                            FontWeight.w600,
+                                                        color:
+                                                            AppColor.darkGreen,
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                          TicketWidget(
+                                            color: AppColor.ticketWidget,
+                                            width: MediaQuery.of(context)
+                                                .size
+                                                .width,
+                                            isCornerRounded: false,
+                                            padding: const EdgeInsets.all(0),
+                                            height: cx.height * 0.7,
+                                            child: Column(
+                                              // shrinkWrap: true,
+                                              // physics: ClampingScrollPhysics(),
+                                              children: [
+                                                Container(
+                                                  height: cx.height * 0.345,
+                                                  child: Column(
+                                                    mainAxisAlignment:
+                                                        MainAxisAlignment.start,
+                                                    crossAxisAlignment:
+                                                        CrossAxisAlignment
+                                                            .start,
+                                                    children: [
+                                                      Padding(
+                                                        padding:
+                                                            EdgeInsets.only(
+                                                                left: 20,
+                                                                top: cx.height /
+                                                                    44.47),
+                                                        child: Row(
+                                                          children: [
+                                                            Container(
+                                                              width: cx.width *
+                                                                  0.23,
+                                                              child: Column(
+                                                                crossAxisAlignment:
+                                                                    CrossAxisAlignment
+                                                                        .start,
+                                                                children: [
+                                                                  NunitoText(
+                                                                      text:
+                                                                          "Field",
+                                                                      fontSize: cx.height >
+                                                                              800
+                                                                          ? 18
+                                                                          : 16,
+                                                                      fontWeight:
+                                                                          FontWeight
+                                                                              .w600,
+                                                                      color: AppColor
+                                                                          .grey),
+                                                                  Container(
+                                                                    width:
+                                                                        cx.width *
+                                                                            0.345,
+                                                                    child:
+                                                                        NunitoText(
+                                                                      text: cx.read(
+                                                                          Keys.fieldName),
+                                                                      fontSize: cx.height >
+                                                                              800
+                                                                          ? 17
+                                                                          : 15,
+                                                                      fontWeight:
+                                                                          FontWeight
+                                                                              .w700,
+                                                                      color: Color(
+                                                                          0xFF414141),
+                                                                      textOverflow:
+                                                                          TextOverflow
+                                                                              .ellipsis,
+                                                                      maxLines:
+                                                                          1,
+                                                                    ),
+                                                                  ),
+                                                                  const SizedBox(
+                                                                    width: 40,
+                                                                  ),
+                                                                  NunitoText(
+                                                                      text:
+                                                                          "Players",
+                                                                      fontSize: cx.height >
+                                                                              800
+                                                                          ? 18
+                                                                          : 16,
+                                                                      fontWeight:
+                                                                          FontWeight
+                                                                              .w600,
+                                                                      color: AppColor
+                                                                          .grey),
+                                                                  NunitoText(
+                                                                      text: cx
+                                                                          .read(Keys
+                                                                              .players)
+                                                                          .toString(),
+                                                                      fontSize: cx.height >
+                                                                              800
+                                                                          ? 17
+                                                                          : 15,
+                                                                      fontWeight:
+                                                                          FontWeight
+                                                                              .w700,
+                                                                      color: Color(
+                                                                          0xFF414141)),
+                                                                ],
+                                                              ),
+                                                            ),
+                                                            Container(
+                                                              child: Column(
+                                                                crossAxisAlignment:
+                                                                    CrossAxisAlignment
+                                                                        .start,
+                                                                children: [
+                                                                  NunitoText(
+                                                                      text:
+                                                                          "Date",
+                                                                      fontSize: cx.height >
+                                                                              800
+                                                                          ? 18
+                                                                          : 16,
+                                                                      fontWeight:
+                                                                          FontWeight
+                                                                              .w600,
+                                                                      color: AppColor
+                                                                          .grey),
+                                                                  NunitoText(
+                                                                      text: cx.selMonth.value +
+                                                                          ' ' +
+                                                                          cx.selDate
+                                                                              .value +
+                                                                          ', ' +
+                                                                          cx.selYear
+                                                                              .value,
+                                                                      fontSize: cx.height >
+                                                                              800
+                                                                          ? 17
+                                                                          : 15,
+                                                                      fontWeight:
+                                                                          FontWeight
+                                                                              .w700,
+                                                                      color: Color(
+                                                                          0xFF414141)),
+                                                                  const SizedBox(
+                                                                    width: 40,
+                                                                  ),
+                                                                  NunitoText(
+                                                                      text:
+                                                                          "Time",
+                                                                      fontSize: cx.height >
+                                                                              800
+                                                                          ? 18
+                                                                          : 16,
+                                                                      fontWeight:
+                                                                          FontWeight
+                                                                              .w600,
+                                                                      color: AppColor
+                                                                          .grey),
+                                                                  NunitoText(
+                                                                      text: cx.read(Keys.startTime).toString().substring(
+                                                                              0,
+                                                                              8) +
+                                                                          " To " +
+                                                                          cx.read(Keys.endTime).toString().substring(
+                                                                              11,
+                                                                              19),
+                                                                      fontSize: cx.height >
+                                                                              800
+                                                                          ? 17
+                                                                          : 15,
+                                                                      fontWeight:
+                                                                          FontWeight
+                                                                              .w700,
+                                                                      color: Color(
+                                                                          0xFF414141)),
+                                                                ],
+                                                              ),
+                                                            ),
+                                                          ],
+                                                        ),
+                                                      ),
+                                                      Padding(
+                                                        padding:
+                                                            EdgeInsets.only(
+                                                                left: 20,
+                                                                top: cx.height /
+                                                                    44.47),
+                                                        child: Column(
+                                                          mainAxisAlignment:
+                                                              MainAxisAlignment
+                                                                  .start,
+                                                          crossAxisAlignment:
+                                                              CrossAxisAlignment
+                                                                  .start,
+                                                          children: [
+                                                            NunitoText(
+                                                                text: "Address",
+                                                                fontSize:
+                                                                    cx.height >
+                                                                            800
+                                                                        ? 18
+                                                                        : 16,
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .w600,
+                                                                color: AppColor
+                                                                    .grey),
+                                                            Container(
+                                                              width: cx.width *
+                                                                  0.7,
+                                                              child: NunitoText(
+                                                                  text: cx.read(Keys
+                                                                      .address),
+                                                                  fontSize:
+                                                                      cx.height > 800
+                                                                          ? 17
+                                                                          : 15,
+                                                                  maxLines:
+                                                                      cx.height >
+                                                                              800
+                                                                          ? 3
+                                                                          : 2,
+                                                                  textOverflow:
+                                                                      TextOverflow
+                                                                          .ellipsis,
+                                                                  fontWeight:
+                                                                      FontWeight
+                                                                          .w700,
+                                                                  color: Color(
+                                                                      0xFF414141)),
+                                                            ),
+                                                          ],
+                                                        ),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ),
+                                                MySeparator(
+                                                  color: Color.fromRGBO(
+                                                      231, 244, 239, 1),
+                                                ),
+                                                Container(
+                                                  height: cx.height * 0.33,
+                                                  child: Column(
+                                                    children: [
+                                                      SizedBox(
+                                                        height: MediaQuery.of(
+                                                                    context)
+                                                                .size
+                                                                .height /
+                                                            20,
+                                                      ),
+                                                      Padding(
+                                                        padding:
+                                                            const EdgeInsets
+                                                                    .only(
+                                                                right: 20.0),
+                                                        child: Row(
+                                                          mainAxisAlignment:
+                                                              MainAxisAlignment
+                                                                  .spaceBetween,
+                                                          children: [
+                                                            Padding(
+                                                              padding: EdgeInsets.only(
+                                                                  left:
+                                                                      cx.height /
+                                                                          33.5,
+                                                                  top:
+                                                                      cx.height /
+                                                                          66.7),
+                                                              child: Container(
+                                                                child: Column(
+                                                                  mainAxisAlignment:
+                                                                      MainAxisAlignment
+                                                                          .start,
+                                                                  crossAxisAlignment:
+                                                                      CrossAxisAlignment
+                                                                          .start,
+                                                                  children: [
+                                                                    NunitoText(
+                                                                        text:
+                                                                            "Sub Total",
+                                                                        fontSize: cx.responsive(
+                                                                            25,
+                                                                            20,
+                                                                            17),
+                                                                        fontWeight:
+                                                                            FontWeight
+                                                                                .w600,
+                                                                        color: AppColor
+                                                                            .grey),
+                                                                    Gap(6),
+                                                                    NunitoText(
+                                                                        text:
+                                                                            "Service Fee",
+                                                                        fontSize: cx.responsive(
+                                                                            25,
+                                                                            20,
+                                                                            17),
+                                                                        fontWeight:
+                                                                            FontWeight
+                                                                                .w600,
+                                                                        color: AppColor
+                                                                            .grey),
+                                                                    Gap(6),
+                                                                    Row(
+                                                                      children: [
+                                                                        NunitoText(
+                                                                            text:
+                                                                                "HST  ",
+                                                                            fontSize: cx.responsive(
+                                                                                25,
+                                                                                20,
+                                                                                17),
+                                                                            fontWeight:
+                                                                                FontWeight.w600,
+                                                                            color: AppColor.grey),
+                                                                      ],
+                                                                    ),
+                                                                  ],
+                                                                ),
+                                                              ),
+                                                            ),
+                                                            Padding(
+                                                              padding:
+                                                                  EdgeInsets
+                                                                      .only(
+                                                                left: cx
+                                                                    .responsive(
+                                                                        4,
+                                                                        3,
+                                                                        2),
+                                                                top: cx
+                                                                    .responsive(
+                                                                        15,
+                                                                        10,
+                                                                        7),
+                                                              ),
+                                                              child: Container(
+                                                                child: Column(
+                                                                  mainAxisAlignment:
+                                                                      MainAxisAlignment
+                                                                          .end,
+                                                                  crossAxisAlignment:
+                                                                      CrossAxisAlignment
+                                                                          .end,
+                                                                  children: [
+                                                                    NunitoText(
+                                                                        textAlign:
+                                                                            TextAlign
+                                                                                .end,
+                                                                        text: "\$" +
+                                                                            cx.read(Keys.price).toStringAsFixed(
+                                                                                2),
+                                                                        fontSize: cx.responsive(
+                                                                            25,
+                                                                            20,
+                                                                            17),
+                                                                        fontWeight:
+                                                                            FontWeight
+                                                                                .w700,
+                                                                        color: Color(
+                                                                            0xFF757575)),
+                                                                    Gap(4),
+                                                                    NunitoText(
+                                                                        textAlign:
+                                                                            TextAlign
+                                                                                .end,
+                                                                        text: "+ \$" +
+                                                                            serviceFee.toStringAsFixed(
+                                                                                2),
+                                                                        fontSize: cx.responsive(
+                                                                            25,
+                                                                            20,
+                                                                            17),
+                                                                        fontWeight:
+                                                                            FontWeight
+                                                                                .w700,
+                                                                        color: Color(
+                                                                            0xFF757575)),
+                                                                    Gap(4),
+                                                                    NunitoText(
+                                                                        textAlign:
+                                                                            TextAlign
+                                                                                .end,
+                                                                        text: "+ \$" +
+                                                                            cx.read(Keys.totalHST).toStringAsFixed(
+                                                                                2),
+                                                                        fontSize: cx.responsive(
+                                                                            25,
+                                                                            20,
+                                                                            17),
+                                                                        fontWeight:
+                                                                            FontWeight
+                                                                                .w700,
+                                                                        color: Color(
+                                                                            0xFF757575)),
+                                                                  ],
+                                                                ),
+                                                              ),
+                                                            ),
+                                                          ],
+                                                        ),
+                                                      ),
+                                                      Gap(6),
+                                                      Padding(
+                                                        padding:
+                                                            EdgeInsets.fromLTRB(
+                                                                20.0, 0, 20, 0),
+                                                        child: const Divider(
+                                                          color:
+                                                              Color(0xFFE7F4EF),
+                                                          thickness: 2,
+                                                        ),
+                                                      ),
+                                                      Gap(7),
+                                                      Padding(
+                                                        padding:
+                                                            EdgeInsets.fromLTRB(
+                                                                cx.height /
+                                                                    55.58,
+                                                                4,
+                                                                15,
+                                                                8),
+                                                        child: Row(
+                                                          mainAxisAlignment:
+                                                              MainAxisAlignment
+                                                                  .spaceBetween,
+                                                          // crossAxisAlignment:
+                                                          // CrossAxisAlignment.center,
+                                                          children: [
+                                                            NunitoText(
+                                                                text: "  Total",
+                                                                fontSize: cx
+                                                                    .responsive(
+                                                                        27,
+                                                                        22,
+                                                                        19),
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .w700,
+                                                                color: Color(
+                                                                    0xFF757575)),
+                                                            SenticText(
+                                                                textAlign:
+                                                                    TextAlign
+                                                                        .start,
+                                                                text: "\$" +
+                                                                    total.toStringAsFixed(
+                                                                        2),
+                                                                fontSize: cx
+                                                                    .responsive(
+                                                                        29,
+                                                                        24,
+                                                                        21),
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .w600,
+                                                                color: Color(
+                                                                    0xFF07261A)),
+                                                          ],
+                                                        ),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                          Container(
+                                            height: 10,
+                                            decoration: BoxDecoration(
+                                                color: Colors.white,
+                                                borderRadius: BorderRadius.only(
+                                                    bottomLeft: Radius.circular(
+                                                        cx.height / 37.06),
+                                                    bottomRight:
+                                                        Radius.circular(
+                                                            cx.height /
+                                                                37.06))),
+                                            child: ListTile(
+                                              dense: true,
+                                              contentPadding:
+                                                  EdgeInsets.fromLTRB(
+                                                      20,
+                                                      cx.height / 55.58,
+                                                      cx.height / 44.47,
+                                                      0),
+                                            ),
+                                          ),
+                                          Container(
+                                            height: 25,
+                                            color: AppColor.bg,
+                                          ),
+                                          Container(
+                                              decoration: BoxDecoration(
+                                                  color: Colors.white,
+                                                  borderRadius:
+                                                      BorderRadius.all(
+                                                          Radius.circular(15))),
+                                              child: Padding(
+                                                padding:
+                                                    const EdgeInsets.fromLTRB(
+                                                        12, 0, 2, 0.0),
+                                                child: Column(
+                                                  crossAxisAlignment:
+                                                      CrossAxisAlignment.start,
+                                                  children: [
+                                                    InkWell(
+                                                      onTap: () {
+                                                        setState(() {
+                                                          isExpandCancellation =
+                                                              !isExpandCancellation;
+                                                        });
+                                                      },
+                                                      child: Row(
+                                                        mainAxisAlignment:
+                                                            MainAxisAlignment
+                                                                .spaceBetween,
+                                                        children: [
+                                                          InterText(
+                                                            text:
+                                                                "Cancellation Policy",
+                                                            fontWeight:
+                                                                FontWeight.w700,
+                                                            fontSize:
+                                                                cx.height > 800
+                                                                    ? 16
+                                                                    : 14,
+                                                            color: Color(
+                                                                0xFF444444),
+                                                          ),
+                                                          Icon(
+                                                            isExpandCancellation
+                                                                ? Icons
+                                                                    .arrow_drop_up_rounded
+                                                                : Icons
+                                                                    .arrow_drop_down_rounded,
+                                                            color: Color(
+                                                                0xFF444444),
+                                                            size: 45,
+                                                          ),
+                                                        ],
+                                                      ),
+                                                    ),
+                                                    Container(
+                                                        child: NunitoText(
+                                                      text: isExpandCancellation
+                                                          ? "You can cancel this booking within two hours. Cancellation charges will be applied. Cancellations less than two hours of deadline are non-refundable"
+                                                          : "You can cancel this booking within two hours.",
+                                                      color: Color(0xFFA8A8A8),
+                                                      fontSize: cx.responsive(
+                                                          25, 19, 16),
+                                                      maxLines: 5,
+                                                      fontWeight:
+                                                          FontWeight.w400,
+                                                    )),
+                                                    Gap(15),
+                                                    InkWell(
+                                                      onTap: () {
+                                                        Get.to(WebViewClass(
+                                                            "Cancellation Policy",
+                                                            Constant
+                                                                .cancelUrl));
+                                                      },
+                                                      child: NunitoText(
+                                                        text:
+                                                            "Read full cancellation policy",
+                                                        color:
+                                                            Color(0xFF7C98D0),
+                                                        textAlign:
+                                                            TextAlign.left,
+                                                        fontSize: cx.responsive(
+                                                            25, 19, 16),
+                                                        fontWeight:
+                                                            FontWeight.w800,
+                                                      ),
+                                                    ),
+                                                    Gap(20),
+                                                  ],
+                                                ),
+                                              )),
+                                        ],
                                       ),
-                                    ):NunitoText(
-                                      text: "Split Amount",
-                                      fontWeight: FontWeight.w700,
-                                      fontSize: cx.responsive(26,20, 16),
-                                      color: emailCorrect || cx.read("islogin")
-                                          ? Colors.white
-                                          : Color(0xFFA2C7B9),
                                     ),
-                                  ),
+                                  ],
                                 ),
                               ),
                             ),
                           ),
-                          AbsorbPointer(
-                            absorbing: !emailCorrect && !cx.read("islogin"),
-                            child: Container(
-                              height: cx.height / 15,
-                              width: cx.width / 2.4,
-                              child: InkWell(
-                                onTap: () {
-                                  if (mounted) {
+                        ),
+
+                        // Positioned(
+                        //     bottom: cx.read("islogin")?56:180,
+                        //
+                        //   child: Container(
+                        //     width:cx.width,
+                        //     child: Row(
+                        //       mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        //       children: [
+                        //         SvgPicture.asset("assets/svg/leftBottomNavigation.svg",
+                        //             color: AppColor.darkGreen),
+                        //         SvgPicture.asset("assets/svg/rightBottomNavigation.svg",
+                        //             color: AppColor.darkGreen),
+                        //
+                        //       ],
+                        //     ),
+                        //   ),
+                        // ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          floatingActionButtonLocation:
+              FloatingActionButtonLocation.centerDocked,
+          //
+          floatingActionButton: Container(
+            width: cx.width,
+            child: Form(
+              key: bottomEmailKey,
+              autovalidateMode: AutovalidateMode.onUserInteraction,
+              child: Container(
+                width: cx.width,
+                height: cx.read("islogin") ? cx.height / 8 : cx.height / 3.4,
+                color: AppColor.darkGreen,
+                child: Padding(
+                  padding: EdgeInsets.fromLTRB(cx.height / 44.47,
+                      cx.height / 44.47, cx.height / 44.47, cx.height / 44.47),
+                  child: Container(
+                    height: cx.height * 0.45,
+                    width: cx.width,
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        !cx.read("islogin")
+                            ? Column(
+                                children: [
+                                  TextFormField(
+                                    controller: bottomEmailController,
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: cx.responsive(25, 20, 15),
+                                    ),
+                                    onTap: () async {},
+                                    cursorColor: Colors.white,
+                                    keyboardType: TextInputType.text,
+                                    autofocus: false,
+                                    decoration: InputDecoration(
+                                      focusedErrorBorder: OutlineInputBorder(
+                                          borderRadius: BorderRadius.circular(
+                                              cx.height / 6.67),
+                                          borderSide: BorderSide(
+                                            width: 1,
+                                            color: Color(0xFF81B5A1),
+                                          )),
+                                      errorBorder: OutlineInputBorder(
+                                          borderRadius: BorderRadius.circular(
+                                              cx.height / 6.67),
+                                          borderSide: BorderSide(
+                                            width: 1,
+                                            color: Color(0xFF81B5A1),
+                                          )),
+                                      fillColor: Color(0xFF29795A),
+                                      hintText: "Email Here",
+                                      hintStyle: TextStyle(
+                                        fontSize: cx.responsive(25, 20, 15),
+                                        color: Color(0xFFAFCCC1),
+                                      ),
+                                      border: OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(
+                                            cx.height / 6.67),
+                                        borderSide: BorderSide(
+                                          width: 0.5,
+                                          color: Color(0xFF24A875),
+                                        ),
+                                      ),
+                                      enabledBorder: OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(
+                                            cx.height / 6.67),
+                                        borderSide: BorderSide(
+                                          width: 0.5,
+                                          color: Color(0xFF24A875),
+                                        ),
+                                      ),
+                                      disabledBorder: OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(
+                                            cx.height / 6.67),
+                                        borderSide: BorderSide(
+                                          width: 0.5,
+                                          color: Color(0xFF24A875),
+                                        ),
+                                      ),
+                                      focusedBorder: OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(
+                                            cx.height / 6.67),
+                                        borderSide: BorderSide(
+                                          width: 0.5,
+                                          color: Color(0xFF24A875),
+                                        ),
+                                      ),
+                                      filled: true,
+                                      contentPadding: EdgeInsets.fromLTRB(
+                                        cx.height / 23,
+                                        cx.responsive(23, 15, 10),
+                                        cx.height / 66.67,
+                                        cx.responsive(23, 15, 10),
+                                      ),
+                                    ),
+                                    onChanged: (value) {
+                                      String pattern =
+                                          r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+";
+                                      RegExp regex = RegExp(pattern);
+                                      if (value.isEmpty ||
+                                          !regex.hasMatch(value)) {
+                                        setState(() {
+                                          emailCorrect = false;
+                                        });
+                                        print(emailCorrect);
+                                      } else {
+                                        setState(() {
+                                          emailCorrect = true;
+                                        });
+                                        print(emailCorrect);
+                                      }
+                                    },
+                                  ),
+                                  Padding(
+                                    padding: EdgeInsets.fromLTRB(
+                                        cx.height / 25.65,
+                                        15,
+                                        cx.height / 25.65,
+                                        15),
+                                    child: Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.center,
+                                      children: [
+                                        NunitoText(
+                                          text: "Have An Account?\t",
+                                          fontWeight: FontWeight.w500,
+                                          fontSize: cx.height / 47.64,
+                                          color: Colors.white,
+                                        ),
+                                        InkWell(
+                                          onTap: () {
+                                            Get.to(SignIn(
+                                              curIndex: 0,
+                                              noOfPopTime: 1,
+                                            ));
+                                          },
+                                          child: NunitoText(
+                                            text: "Login",
+                                            fontWeight: FontWeight.w700,
+                                            fontSize: cx.height / 47.64,
+                                            color: Colors.white,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              )
+                            : Container(),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            AbsorbPointer(
+                              absorbing: !emailCorrect && !cx.read("islogin")||isSplitPaymentAPICalling,
+                              child: Container(
+                                height: cx.height / 15,
+                                width: cx.width / 2.4,
+                                child: InkWell(
+                                  onTap: () {
                                     if (cx.read("islogin")) {
                                       print("No Verification Required");
                                       setState(() {
                                         cx.write(Keys.tempEmail,
                                             bottomEmailController.text);
-                                        print("Pay in Full");
                                       });
-                                      cx.isSplitAmount.value = false;
+                                      cx.isSplitAmount.value = true;
+                                      initialDepositController.text =
+                                          defaultAmount.toStringAsFixed(2);
+                                      initialDeposit =
+                                          initialDepositController.text;
+                                      remainingAmount =
+                                          totalAmount - defaultAmount;
 
-                                      print(startBookingTime
-                                          .subtract(Duration(hours: 4)));
-                                      print(DateTime.now());
-                                      print(startBookingTime
-                                          .subtract(Duration(hours: 4))
-                                          .millisecondsSinceEpoch);
-                                      print(
-                                          DateTime.now().millisecondsSinceEpoch);
-                                      if (!isDataProcesssing) {
-                                        makePayment();
-                                      }
-
-                                      // bookingAlert(
-                                      //     context: context,
-                                      //     type: (startBookingTime.subtract(Duration(hours:4)).millisecondsSinceEpoch<=DateTime.now().millisecondsSinceEpoch)?2:1);
-
+                                      showDialog(
+                                          barrierDismissible: true,
+                                          context: context,
+                                          builder: (BuildContext context) {
+                                            return splitDialog();
+                                          });
                                     } else {
+                                      cx.write("islogin",false);
                                       setState(() {
                                         cx.write(Keys.tempEmail,
                                             bottomEmailController.text);
                                       });
-
-                                      print("No Verification Required");
-                                      emailOtp();
-                                      cx.isSplitAmount.value = false;
-
+                                      setState(() {
+                                        emailOtp();
+                                        cx.isSplitAmount.value = true;
+                                      });
                                       print("Verification Required");
+
                                     }
-                                  }
-                                },
-                                child: Container(
-                                  width: cx.width / 3.5,
-                                  decoration: BoxDecoration(
-                                      color: emailCorrect || cx.read("islogin")
-                                          ? Colors.white
-                                          : Color(0xFFA2C7B9),
-                                      borderRadius: BorderRadius.circular(
-                                        cx.height / 13.34,
-                                      ),
-                                      border: Border.all(
-                                          width: 1.3,
-                                          color:
-                                          emailCorrect || cx.read("islogin")
-                                              ? Colors.white
-                                              : Color(0xFF92B8AA))),
-                                  padding: EdgeInsets.all(10),
-                                  child: Center(
-                                    child:isFullPaymentAPICalling?
-                                    Container(
-                                      height:25,
-                                      width:25,
-                                      child: CircularProgressIndicator(
-                                        color: AppColor.darkGreen,
-                                        // strokeWidth: 10,
-                                      ),
-                                    ): NunitoText(
-                                      text: "Pay in Full",
-                                      fontWeight:
-                                      emailCorrect || cx.read("islogin")
-                                          ? FontWeight.w700
-                                          : FontWeight.w800,
-                                      fontSize: cx.responsive(26,20, 16),
-                                      color: emailCorrect || cx.read("islogin")
-                                          ? Colors.black
-                                          : Color(0xFF265A46),
+                                  },
+                                  child: Container(
+                                    width: cx.width / 3.5,
+                                    decoration: BoxDecoration(
+                                        color:
+                                            emailCorrect || cx.read("islogin")
+                                                ? Color(0xFF8AB8A7)
+                                                : Color(0xFF4E9479),
+                                        borderRadius: BorderRadius.circular(50),
+                                        border: Border.all(
+                                            width: 1.3,
+                                            color: emailCorrect ||
+                                                    cx.read("islogin")
+                                                ? Colors.white
+                                                : Color(0xFF92B8AA))),
+                                    padding: EdgeInsets.all(10),
+                                    child: Center(
+                                      child: isSplitPaymentAPICalling
+                                          ? Container(
+                                              height: 25,
+                                              width: 25,
+                                              child: CircularProgressIndicator(
+                                                color: AppColor.darkGreen,
+                                                // strokeWidth: 10,
+                                              ),
+                                            )
+                                          : NunitoText(
+                                              text: "Split Amount",
+                                              fontWeight: FontWeight.w700,
+                                              fontSize:
+                                                  cx.responsive(26, 20, 16),
+                                              color: emailCorrect ||
+                                                      cx.read("islogin")
+                                                  ? Colors.white
+                                                  : Color(0xFFA2C7B9),
+                                            ),
                                     ),
                                   ),
                                 ),
                               ),
                             ),
-                          ),
-                        ],
-                      ),
-                    ],
+                            AbsorbPointer(
+                              absorbing: !emailCorrect && !cx.read("islogin")||isFullPaymentAPICalling,
+                              child: Container(
+                                height: cx.height / 15,
+                                width: cx.width / 2.4,
+                                child: InkWell(
+                                  onTap: () {
+                                    print(isDataProcesssing);
+
+                                    if(!isDataProcesssing){
+                                      if (mounted) {
+                                        if (cx.read("islogin")) {
+                                          print("No Verification Required");
+                                          setState(() {
+                                            cx.write(Keys.tempEmail,
+                                                bottomEmailController.text);
+                                            print("Pay in Full");
+                                          });
+                                          cx.isSplitAmount.value = false;
+
+                                          print(startBookingTime
+                                              .subtract(Duration(hours: 4)));
+                                          print(DateTime.now());
+                                          print(startBookingTime
+                                              .subtract(Duration(hours: 4))
+                                              .millisecondsSinceEpoch);
+                                          print(DateTime.now()
+                                              .millisecondsSinceEpoch);
+                                          if (!isDataProcesssing) {
+                                            makePayment(isSplit: false);
+                                          }
+
+                                          // bookingAlert(
+                                          //     context: context,
+                                          //     type: (startBookingTime.subtract(Duration(hours:4)).millisecondsSinceEpoch<=DateTime.now().millisecondsSinceEpoch)?2:1);
+                                        } else {
+                                          cx.write("islogin",false);
+                                          setState(() {
+                                            cx.write(Keys.tempEmail,
+                                                bottomEmailController.text);
+                                          });
+
+                                          emailOtp();
+                                          cx.isSplitAmount.value = false;
+
+                                          print("Verification Required");
+                                        }
+                                      }
+
+                                    }
+                                  },
+                                  child: Container(
+                                    width: cx.width / 3.5,
+                                    decoration: BoxDecoration(
+                                        color:
+                                            emailCorrect || cx.read("islogin")
+                                                ? Colors.white
+                                                : Color(0xFFA2C7B9),
+                                        borderRadius: BorderRadius.circular(
+                                          cx.height / 13.34,
+                                        ),
+                                        border: Border.all(
+                                            width: 1.3,
+                                            color: emailCorrect ||
+                                                    cx.read("islogin")
+                                                ? Colors.white
+                                                : Color(0xFF92B8AA))),
+                                    padding: EdgeInsets.all(10),
+                                    child: Center(
+                                      child: isFullPaymentAPICalling
+                                          ? Container(
+                                              height: 25,
+                                              width: 25,
+                                              child: CircularProgressIndicator(
+                                                color: AppColor.darkGreen,
+                                                // strokeWidth: 10,
+                                              ),
+                                            )
+                                          : NunitoText(
+                                              text: "Pay in Full",
+                                              fontWeight: emailCorrect ||
+                                                      cx.read("islogin")
+                                                  ? FontWeight.w700
+                                                  : FontWeight.w800,
+                                              fontSize:
+                                                  cx.responsive(26, 20, 16),
+                                              color: emailCorrect ||
+                                                      cx.read("islogin")
+                                                  ? Colors.black
+                                                  : Color(0xFF265A46),
+                                            ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),
             ),
           ),
         ),
-      ),
-    );
+      );
+    });
   }
 
   Widget emailVerifyDialog() => StatefulBuilder(builder: (BuildContext context,
@@ -1186,7 +1354,8 @@ class _ReceiptState extends State<Receipt> {
                                 ? cx.read("useremail")
                                 : bottomEmailController.text
                             : "Received On Your Email",
-                        fontWeight:  isconfirm?FontWeight.w500:FontWeight.w700,
+                        fontWeight:
+                            isconfirm ? FontWeight.w500 : FontWeight.w700,
                         fontSize: cx.height > 800 ? 16 : 14,
                         color: Color(0xFFA8A8A8),
                       ),
@@ -1205,11 +1374,10 @@ class _ReceiptState extends State<Receipt> {
                   onLongPress: () async {
                     ClipboardData? data = await Clipboard.getData('text/plain');
                     print(data?.text);
-                    if(data!.text!.toString().isNotEmpty){
-                      setState((){
-                        controller.text=data!.text.toString().substring(0,4);
+                    if (data!.text!.toString().isNotEmpty) {
+                      setState(() {
+                        controller.text = data!.text.toString().substring(0, 4);
                       });
-
 
                       print("DONE ${controller.text}");
                       print("DONE CONTROLLER ${controller.text}");
@@ -1237,8 +1405,7 @@ class _ReceiptState extends State<Receipt> {
 
                             showDialog(
                                 context: context,
-                                barrierDismissible:false,
-
+                                barrierDismissible: true,
                                 builder: (BuildContext context) {
                                   return splitDialog();
                                 });
@@ -1249,8 +1416,7 @@ class _ReceiptState extends State<Receipt> {
 
                             showDialog(
                                 context: context,
-                                barrierDismissible:false,
-
+                                barrierDismissible: false,
                                 builder: (BuildContext context) {
                                   return createAcDialog();
                                 });
@@ -1318,8 +1484,7 @@ class _ReceiptState extends State<Receipt> {
 
                             showDialog(
                                 context: context,
-                                barrierDismissible:false,
-
+                                barrierDismissible: true,
                                 builder: (BuildContext context) {
                                   return splitDialog();
                                 });
@@ -1330,8 +1495,7 @@ class _ReceiptState extends State<Receipt> {
 
                             showDialog(
                                 context: context,
-                                barrierDismissible:false,
-
+                                barrierDismissible: false,
                                 builder: (BuildContext context) {
                                   return createAcDialog();
                                 });
@@ -1352,7 +1516,7 @@ class _ReceiptState extends State<Receipt> {
                     wrapAlignment: WrapAlignment.spaceAround,
                     pinBoxDecoration: defaultPinBoxDecoration,
                     pinTextStyle: GoogleFonts.nunito(
-                      fontSize: cx.responsive(55,43, 33),
+                      fontSize: cx.responsive(55, 43, 33),
                       fontWeight: FontWeight.w800,
                       color: isfailed ? Color(0xFF9A5C5C) : Color(0xFF628477),
                       decorationStyle: TextDecorationStyle.solid,
@@ -1361,7 +1525,8 @@ class _ReceiptState extends State<Receipt> {
                     pinTextAnimatedSwitcherTransition:
                         ProvidedPinBoxTextAnimation.scalingTransition,
 //                    pinBoxColor: Colors.green[100],
-                    pinTextAnimatedSwitcherDuration: Duration(milliseconds: 300),
+                    pinTextAnimatedSwitcherDuration:
+                        Duration(milliseconds: 300),
 //                    highlightAnimation: true,
                     highlightAnimationBeginColor: Colors.black,
                     highlightAnimationEndColor: Colors.white12,
@@ -1434,7 +1599,8 @@ class _ReceiptState extends State<Receipt> {
                     // }):Get.back();
                   },
                   child: Container(
-                    height: cx.responsive(cx.height / 11,cx.height / 11, cx.height / 10),
+                    height: cx.responsive(
+                        cx.height / 11, cx.height / 11, cx.height / 10),
                     decoration: BoxDecoration(
                         color: isconfirm
                             ? Colors.black
@@ -1457,27 +1623,27 @@ class _ReceiptState extends State<Receipt> {
                             ? Icon(
                                 Icons.check,
                                 color: Colors.white,
-                                size: cx.responsive(40,36, 32),
+                                size: cx.responsive(40, 36, 32),
                               )
                             : isprocessing
                                 ? CupertinoActivityIndicator(
                                     color: Colors.white,
-                                    radius: cx.responsive(15,14, 13),
+                                    radius: cx.responsive(15, 14, 13),
                                   )
                                 : isuccessful
                                     ? SvgPicture.asset(
                                         "assets/svg/smile.svg",
-                                        height: cx.responsive(35,29, 27),
+                                        height: cx.responsive(35, 29, 27),
                                       )
                                     : isfailed
                                         ? SvgPicture.asset(
                                             "assets/svg/sad.svg",
-                                            height: cx.responsive(35,29, 27),
+                                            height: cx.responsive(35, 29, 27),
                                           )
                                         : Icon(
                                             Icons.check,
                                             color: Colors.white,
-                                            size: cx.responsive(43,36, 32),
+                                            size: cx.responsive(43, 36, 32),
                                           ),
                         NunitoText(
                           textAlign: TextAlign.center,
@@ -1507,7 +1673,6 @@ class _ReceiptState extends State<Receipt> {
   Widget splitDialog() => StatefulBuilder(builder: (BuildContext context,
           StateSetter setState /*You can rename this!*/) {
         return Dialog(
-
           shape:
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)),
           //this right here
@@ -1523,7 +1688,19 @@ class _ReceiptState extends State<Receipt> {
                   mainAxisAlignment: MainAxisAlignment.end,
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: <Widget>[
-                    Gap(cx.height / 30),
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: IconButton(
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                        },
+                        icon: Icon(
+                          Icons.cancel,
+                          color: Colors.red,
+                          size: 30,
+                        ),
+                      ),
+                    ),
                     SenticText(
                         height: 1.2,
                         text: 'Enter Initial Deposit',
@@ -1589,20 +1766,18 @@ class _ReceiptState extends State<Receipt> {
                               ? totalAmount.toStringAsFixed(0).length + 3
                               : totalAmount.toStringAsFixed(0).length + 1),
 
-
-
-
-
                           // NumericalRangeFormatter(min: 0, max: totalAmount),
                         ],
                         style: GoogleFonts.nunito(
-                          fontSize: cx.responsive(27,21, 18),
+                          fontSize: cx.responsive(27, 21, 18),
                           fontWeight: FontWeight.w800,
                           color: AppColor.darkGreen,
                         ),
                         cursorColor: AppColor.darkGreen,
                         cursorHeight: 20,
-                        keyboardType: Platform.isIOS?TextInputType.numberWithOptions(decimal: true):TextInputType.number,
+                        keyboardType: Platform.isIOS
+                            ? TextInputType.numberWithOptions(decimal: true)
+                            : TextInputType.number,
                         autofocus: false,
                         // textInputAction: TextInputAction.number,
                         decoration: InputDecoration(
@@ -1657,10 +1832,10 @@ class _ReceiptState extends State<Receipt> {
                           filled: true,
 
                           contentPadding: EdgeInsets.fromLTRB(
-                            cx.responsive(30,24, 20),
-                            cx.responsive(17,13, 10),
-                            cx.responsive(33,25, 20),
-                            cx.responsive(13,8, 6),
+                            cx.responsive(30, 24, 20),
+                            cx.responsive(17, 13, 10),
+                            cx.responsive(33, 25, 20),
+                            cx.responsive(13, 8, 6),
                           ),
                         ),
                         validator: (value) {
@@ -1697,10 +1872,10 @@ class _ReceiptState extends State<Receipt> {
                       children: [
                         Padding(
                           padding: EdgeInsets.fromLTRB(
-                            cx.responsive(43,35, 30),
-                            cx.responsive(7,5, 3),
-                            cx.responsive(43,35, 30),
-                            cx.responsive(11,8, 6),
+                            cx.responsive(43, 35, 30),
+                            cx.responsive(7, 5, 3),
+                            cx.responsive(43, 35, 30),
+                            cx.responsive(11, 8, 6),
                           ),
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -1725,10 +1900,10 @@ class _ReceiptState extends State<Receipt> {
                         ),
                         Padding(
                           padding: EdgeInsets.fromLTRB(
-                            cx.responsive(43,35, 30),
-                            cx.responsive(7,5, 3),
-                            cx.responsive(43,35, 30),
-                            cx.responsive(11,8, 6),
+                            cx.responsive(43, 35, 30),
+                            cx.responsive(7, 5, 3),
+                            cx.responsive(43, 35, 30),
+                            cx.responsive(11, 8, 6),
                           ),
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -1756,10 +1931,10 @@ class _ReceiptState extends State<Receipt> {
                         ),
                         Padding(
                           padding: EdgeInsets.fromLTRB(
-                            cx.responsive(43,35, 30),
-                            cx.responsive(7,5, 3),
-                            cx.responsive(43,35, 30),
-                            cx.responsive(11,8, 6),
+                            cx.responsive(43, 35, 30),
+                            cx.responsive(7, 5, 3),
+                            cx.responsive(43, 35, 30),
+                            cx.responsive(11, 8, 6),
                           ),
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -1791,10 +1966,10 @@ class _ReceiptState extends State<Receipt> {
                         ),
                         Padding(
                           padding: EdgeInsets.fromLTRB(
-                            cx.responsive(43,35, 30),
-                            cx.responsive(7,5, 3),
-                            cx.responsive(43,35, 30),
-                            cx.responsive(11,8, 6),
+                            cx.responsive(43, 35, 30),
+                            cx.responsive(7, 5, 3),
+                            cx.responsive(43, 35, 30),
+                            cx.responsive(11, 8, 6),
                           ),
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -1839,13 +2014,12 @@ class _ReceiptState extends State<Receipt> {
                           Get.back();
                           if (cx.read("islogin")) {
                             if (!isDataProcesssing) {
-                              makePayment();
+                              makePayment(isSplit: true);
                             }
                           } else {
                             showDialog(
                                 context: context,
-                                barrierDismissible:false,
-
+                                barrierDismissible: false,
                                 builder: (BuildContext context) {
                                   return createAcDialog();
                                 });
@@ -1857,7 +2031,8 @@ class _ReceiptState extends State<Receipt> {
                         }
                       },
                       child: Container(
-                        height: cx.responsive(cx.height / 11,cx.height / 11, cx.height / 10),
+                        height: cx.responsive(
+                            cx.height / 11, cx.height / 11, cx.height / 10),
                         decoration: BoxDecoration(
                             color: Colors.black,
                             borderRadius: BorderRadius.only(
@@ -1919,14 +2094,12 @@ class _ReceiptState extends State<Receipt> {
         });
         showDialog(
             context: context,
-            barrierDismissible:false,
-
+            barrierDismissible: false,
             builder: (BuildContext context) => emailVerifyDialog());
         // showDialog(
         //     context: context,
         //     builder: (BuildContext context) =>
         //         createAcDialog());
-
       } else {
         onAlert(context: context, type: 3, msg: jsonBody['message']);
 
@@ -1965,8 +2138,15 @@ class _ReceiptState extends State<Receipt> {
                 Padding(
                     padding: EdgeInsets.fromLTRB(8.0, 0, 8, 0),
                     child: InkWell(
-                      onTap: () {
-                        Get.to(SignUp(), transition: Transition.rightToLeft);
+                      onTap: () async {
+                        var result = await Get.to(SignUp(curIndex: 0, noOfPopTime: 99),
+                            transition: Transition.rightToLeft);
+
+                        if(result!=null){
+                          Get.back();
+                          makePayment();
+                        }
+
                       },
                       child: Padding(
                         padding: const EdgeInsets.all(8.0),
@@ -1980,7 +2160,7 @@ class _ReceiptState extends State<Receipt> {
                             child: NunitoText(
                               text: "Create Account",
                               fontWeight: FontWeight.w700,
-                              fontSize: cx.responsive(23,19, 17),
+                              fontSize: cx.responsive(23, 19, 17),
                               color: Colors.white,
                             ),
                           ),
@@ -2010,7 +2190,7 @@ class _ReceiptState extends State<Receipt> {
                             child: NunitoText(
                               text: "Continue as a Guest",
                               fontWeight: FontWeight.w800,
-                              fontSize: cx.responsive(23,19, 17),
+                              fontSize: cx.responsive(23, 19, 17),
                               color: Colors.black,
                             ),
                           ),
@@ -2038,7 +2218,11 @@ class _ReceiptState extends State<Receipt> {
     ),
   );
 
-  Future<void> makePayment() async {
+  Future<void> makePayment({bool? isSplit}) async {
+    if(isSplit!=null){
+      cx.isSplitAmount.value=isSplit;
+    }
+
     setState(() {
       isDataProcesssing = true;
     });
@@ -2102,7 +2286,6 @@ class _ReceiptState extends State<Receipt> {
               billingDetails: billingDetails,
               customerId: paymentIntent!['customer'],
               allowsDelayedPaymentMethods: true,
-
               applePay: PaymentSheetApplePay(
                 merchantCountryCode: 'CA',
                 buttonType: PlatformButtonType.pay,
@@ -2124,7 +2307,6 @@ class _ReceiptState extends State<Receipt> {
         });
 
         ///now finally display payment sheeet
-
       } catch (e, s) {
         print('exception:$e$s');
         ScaffoldMessenger.of(context).showSnackBar(
@@ -2140,19 +2322,22 @@ class _ReceiptState extends State<Receipt> {
   }) async {
     try {
       await Stripe.instance.presentPaymentSheet().then((value) async {
-        if(!cx.isSplitAmount.value){
-          setState((){
-            isFullPaymentAPICalling=true;
+        if (!cx.isSplitAmount.value) {
+          setState(() {
+            isFullPaymentAPICalling = true;
+          });
+        } else {
+          setState(() {
+            isSplitPaymentAPICalling = true;
           });
         }
-        else{
-          setState((){
-            isSplitPaymentAPICalling=true;
-          });
-        }
-
 
         debugPrint("After payment intent2");
+        print(cx.read("islogin"));
+        print(cx.read(
+          Keys.tempEmail,
+        ));
+
         debugPrint(DateTime.now().toString());
         print(paymentIntent);
         confirmPayment();
@@ -2164,72 +2349,64 @@ class _ReceiptState extends State<Receipt> {
         // print(bookingStartTime.toString()+"bookingStartTime");
         // print(bookingStartTime.toUtc().toString()+"bookingStartTime");
 
-        StripeService.paymentSuccessfulAPI(
-                booking_type: "1",
-                // card_cvv: '365',
-                // card_exp_month: '11',
-                // card_exp_year: '29',
-                // card_number: '4242424242424242',
-                customerEmail: cx.read("islogin")
-                    ? ""
-                    : cx.read(
-                        Keys.tempEmail,),
-                date: cx.read(Keys.fullDate).toString(),
-                dome_id: cx.read(Keys.domeId).toString(),
-                end_time: cx.read(Keys.endTime).substring(11, 19),
-                field_id: cx.read(Keys.fieldId).toString(),
-                league_id: "",
-                paid_amount: cx.isSplitAmount.value
-                    ? cx.read(Keys.splitPaidAmount).toString()
-                    : cx.read(Keys.total).toString(),
-                payment_method: "1",
-                payment_type: cx.isSplitAmount.value ? "2" : "1",
-                players: cx.read(Keys.players).toString(),
-                slots: cx.read(Keys.slotsList),
-                sport_id: cx.read(Keys.sportId).toString(),
-                // start_time: cx.read(Keys.startTime).substring(0,8),
-                start_time: cx.read(Keys.startTime).substring(0, 8),
-                team_name: "",
-                total_amount: cx.read(Keys.total).toString(),
-                transaction_id: paymentIntent!['id'],
-                user_id: cx.read("id").toString(),
-                context: context,
-                customerName: "",
-                customerPhone: "",
-                due_amount: cx.isSplitAmount.value
-                    ? cx.read(Keys.splitRemainingAmount).toString()
-                    : "0.0",
-                hst: cx.read(Keys.totalHST).toString(),
-                service_fee: cx.read(Keys.serviceFee).toString(),
-                sub_total: cx.read(Keys.price).toString(),
-                createdAt: DateTime.now().toString(),
-                minSplitAmount: cx.isSplitAmount.value
-                    ? (cx.read(Keys.splitRemainingAmount)/(cx.read(Keys.players)-1)).toString()
-                    : "",
-        )
-            .then((value) {
-
-
-          if(!cx.isSplitAmount.value){
-            setState((){
-              isFullPaymentAPICalling=false;
+        TaskProvider.paymentSuccessfulAPI(
+          booking_type: "1",
+          // card_cvv: '365',
+          // card_exp_month: '11',
+          // card_exp_year: '29',
+          // card_number: '4242424242424242',
+          customerEmail: cx.read("islogin")==true
+              ? ""
+              : cx.read(
+                  Keys.tempEmail,
+                ),
+          date: cx.read(Keys.fullDate).toString(),
+          dome_id: cx.read(Keys.domeId).toString(),
+          end_time: cx.read(Keys.endTime).substring(11, 19),
+          field_id: cx.read(Keys.fieldId).toString(),
+          league_id: "",
+          paid_amount: cx.isSplitAmount.value
+              ? cx.read(Keys.splitPaidAmount).toString()
+              : cx.read(Keys.total).toString(),
+          payment_method: "1",
+          payment_type: cx.isSplitAmount.value ? "2" : "1",
+          players: cx.read(Keys.players).toString(),
+          slots: cx.read(Keys.slotsList),
+          sport_id: cx.read(Keys.sportId).toString(),
+          // start_time: cx.read(Keys.startTime).substring(0,8),
+          start_time: cx.read(Keys.startTime).substring(0, 8),
+          team_name: "",
+          total_amount: cx.read(Keys.total).toString(),
+          transaction_id: paymentIntent!['id'],
+          user_id: cx.read("id").toString(),
+          context: context,
+          customerName: "",
+          customerPhone: "",
+          due_amount: cx.isSplitAmount.value
+              ? cx.read(Keys.splitRemainingAmount).toString()
+              : "0.0",
+          hst: cx.read(Keys.totalHST).toString(),
+          service_fee: cx.read(Keys.serviceFee).toString(),
+          sub_total: cx.read(Keys.price).toString(),
+          createdAt: DateTime.now().toString(),
+          minSplitAmount: cx.isSplitAmount.value
+              ? (cx.read(Keys.splitRemainingAmount) /
+                      (cx.read(Keys.players) - 1))
+                  .toString()
+              : "",
+        ).then((value) async {
+          if (!cx.isSplitAmount.value) {
+            setState(() {
+              isFullPaymentAPICalling = false;
+            });
+          } else {
+            setState(() {
+              isSplitPaymentAPICalling = false;
             });
           }
-          else{
-            setState((){
-              isSplitPaymentAPICalling=false;
-            });
-          }
 
-
-          print(value?.bookingId.toString());
-          _createDynamicLink(true,"/domeBooking",value?.bookingId.toString()??"");
-
-          print("payment Link");
-          print(value!.paymentLink.toString());
-
-          print("email");
-          print(cx.read("useremail"));
+          bx.setBid(value?.bookingId.toString() ?? "",
+              cx.isSplitAmount.value ? 2 : 1, true, false);
           cx.read("islogin")
               ? cx.read('useremail')
               : cx.read(
@@ -2239,35 +2416,49 @@ class _ReceiptState extends State<Receipt> {
 
           print(cx.read("islogin"));
           print(cx.read('useremail'));
-          print(cx.read(
-            Keys.tempEmail,
-          ));
-          Timer(du, () {
-            Get.offAll(
-                cx.isSplitAmount.value
-                    ? SplitReceipt(
-                        email: cx.read("islogin")
-                            ? cx.read('useremail')
-                            : cx.read(
-                                Keys.tempEmail,
-                              ),
-                        image: cx.image.value,
-                        paymentLink: _linkMessage.toString(),
-                        // paymentLink: value.paymentLink.toString(),
-                        bookingId: value.bookingId.toString(),
-                      )
-                    : BookingReceipt(
-                        email: cx.read("islogin")
-                            ? cx.read('useremail')
-                            : cx.read(
-                                Keys.tempEmail,
-                              ),
-                        image: cx.image.value,
-                        bookingId: value.bookingId.toString(),
-                        paymentLink: value.paymentLink.toString(),
+          print(cx.read(Keys.tempEmail,));
+
+
+          if(cx.isSplitAmount.value){
+            await _createDynamicLink(
+                true, "/domeBooking", value?.bookingId.toString() ?? "").then((data) {
+              Duration du1 = const Duration(seconds: 2);
+              Timer(du1, () {
+                Get.offAll( SplitReceipt(
+                      email: cx.read("islogin")
+                          ? cx.read('useremail')
+                          : cx.read(
+                        Keys.tempEmail,
                       ),
-                transition: Transition.rightToLeft);
-          });
+                      image: cx.image.value,
+                      paymentLink: _linkMessage.toString(),
+                      bookingId: value?.bookingId.toString() ?? "",
+                      bookingTime: value?.currentTime,
+                      currentTime: value?.bookingCreatedAt,
+                    ),
+                    transition: Transition.rightToLeft);
+              });
+            });
+          }
+          else{
+            Timer(du, () {
+              Get.offAll( BookingReceipt(
+                    email: cx.read("islogin")
+                        ? cx.read('useremail')
+                        : cx.read(
+                      Keys.tempEmail,
+                    ),
+                    image: cx.image.value,
+                    bookingId: value?.bookingId.toString() ?? "",
+                    paymentLink: value?.paymentLink ?? "",
+                    currentTime: value?.currentTime,
+                    bookingTime: value?.bookingCreatedAt,
+                  ),
+                  transition: Transition.rightToLeft);
+            });
+
+          }
+
 
           setState(() {
             paymentIntent = null;
@@ -2299,8 +2490,6 @@ class _ReceiptState extends State<Receipt> {
 
   void confirmPayment() async {
     try {
-      print("data.toString()");
-
       var data = await Stripe.instance.confirmPayment(
         paymentIntentClientSecret: paymentIntent!['client_secret'],
         data: PaymentMethodParams.card(
@@ -2314,33 +2503,18 @@ class _ReceiptState extends State<Receipt> {
       );
       print("data.toString()");
       print(data.toString());
-
-      // PaymentIntentResult paymentIntentResult =
-      // await Stripe.instance.confirmPaymentIntent(PaymentIntent(
-      //   clientSecret: _clientSecret,
-      //   paymentMethodId: _paymentMethodId,
-      // ));
-      //
-      // if (paymentIntentResult.status == PaymentStatus.succeeded) {
-      //   // Payment completed successfully
-      // } else {
-      //   // Payment failed
-      // }
-    } catch (e) {
-      // Error occurred during payment processing
-    }
+    } catch (e) {}
   }
 
   _onAlertWithCustomContentPressed(context) {
     showDialog(
       context: context,
-      barrierDismissible:false,
-
+      barrierDismissible: false,
       builder: (BuildContext context) =>
           AbsorbPointer(absorbing: true, child: reserveSuccessful()),
     );
     Timer(du, () {
-      if(!_isCreatingLink){
+      if (!_isCreatingLink) {
         Get.back();
       }
     });
@@ -2358,8 +2532,7 @@ class _ReceiptState extends State<Receipt> {
       var response = await http.post(
         Uri.parse('https://api.stripe.com/v1/payment_intents'),
         headers: {
-          'Authorization':
-          'Bearer ${Constant.stripeSecretKey}',
+          'Authorization': 'Bearer ${Constant.stripeSecretKey}',
           'Content-Type': 'application/x-www-form-urlencoded'
         },
         body: body,
@@ -2416,7 +2589,7 @@ class _ReceiptState extends State<Receipt> {
             "Booking Alert",
             style: TextStyle(
                 color: Colors.black,
-                fontSize: cx.responsive(25,21, 18),
+                fontSize: cx.responsive(25, 21, 18),
                 fontWeight: FontWeight.w700),
           ),
           Gap(cx.height / 60),
@@ -2426,7 +2599,7 @@ class _ReceiptState extends State<Receipt> {
                 : "You can cancel this booking before 2 hours of your playing time",
             textAlign: TextAlign.center,
             style: TextStyle(
-                fontSize: cx.responsive(23,19, 16),
+                fontSize: cx.responsive(23, 19, 16),
                 fontWeight: FontWeight.w400,
                 color: Color(0xFFA8A8A8)),
           ),
@@ -2456,7 +2629,7 @@ class _ReceiptState extends State<Receipt> {
                 child: NunitoText(
                   text: "Continue Booking",
                   fontWeight: FontWeight.w700,
-                  fontSize: cx.responsive(25,21, 18),
+                  fontSize: cx.responsive(25, 21, 18),
                   color: Colors.white,
                 ),
               ),
@@ -2472,7 +2645,7 @@ class _ReceiptState extends State<Receipt> {
               "Read Cancellation Policy",
               textAlign: TextAlign.center,
               style: TextStyle(
-                  fontSize: cx.responsive(23,18, 15),
+                  fontSize: cx.responsive(23, 18, 15),
                   fontWeight: FontWeight.w600,
                   color: Color(0xFF7C98D0)),
             ),
@@ -2537,19 +2710,15 @@ class _ReceiptState extends State<Receipt> {
         borderRadius: BorderRadius.circular(10));
   };
 
-
-  Future<void> _createDynamicLink(bool short, String link,String bookingId) async {
+  Future<void> _createDynamicLink(
+      bool short, String link, String bookingId) async {
     setState(() {
       _isCreatingLink = true;
     });
     final DynamicLinkParameters parameters = DynamicLinkParameters(
       uriPrefix: Constant.kUriPrefix,
-      // link: Uri.parse(Constant.kUriPrefix + link+'?bookingId=45'),
-      link: Uri.parse("https://www.domez.io/domeBooking?bookingId=${bookingId}"),
-      // link: Uri.parse(Constant.kUriPrefix + link),
-      // longDynamicLink: Uri.parse(
-      //   'https://flutterfiretests.page.link?efr=0&ibi=io.flutter.plugins.firebase.dynamiclinksexample&apn=io.flutter.plugins.firebase.dynamiclinksexample&imv=0&amv=0&link=https%3A%2F%2Fexample%2Fhelloworld&ofl=https://ofl-example.com',
-      // ),
+      link:
+          Uri.parse("https://www.domez.io/domeBooking?bookingId=${bookingId}"),
       androidParameters: const AndroidParameters(
         packageName: 'domez.io',
         minimumVersion: 0,
@@ -2559,7 +2728,7 @@ class _ReceiptState extends State<Receipt> {
     Uri url;
     if (short) {
       final ShortDynamicLink shortLink =
-      await dynamicLinks.buildShortLink(parameters);
+          await dynamicLinks.buildShortLink(parameters);
       url = shortLink.shortUrl;
     } else {
       url = await dynamicLinks.buildLink(parameters);
@@ -2569,8 +2738,7 @@ class _ReceiptState extends State<Receipt> {
       _linkMessage = url.toString();
       _isCreatingLink = false;
     });
-    print("Hey NORA"+_linkMessage.toString());
-
+    print("Hey NORA" + _linkMessage.toString());
   }
 }
 
@@ -2633,5 +2801,4 @@ class DecimalTextInputFormatter extends TextInputFormatter {
     }
     return newValue;
   }
-
 }

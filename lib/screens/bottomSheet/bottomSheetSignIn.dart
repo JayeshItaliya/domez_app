@@ -17,15 +17,19 @@ import '../../commonModule/widget/common/textSentic.dart';
 import '../../commonModule/widget/search/customButton.dart';
 import '../../controller/commonController.dart';
 import '../../main_page.dart';
+import '../../service/getAPI.dart';
 import '../authPage/forgotPassword.dart';
 import '../authPage/signUp.dart';
+import '../../commonModule/utils.dart';
+
 import 'package:http/http.dart' as http;
 
 
 class BottomSheetSignIn extends StatefulWidget {
   final int curIndex;
+  int noOfPopTime;
 
-  BottomSheetSignIn({Key? key,    required this.curIndex}) : super(key: key);
+  BottomSheetSignIn({Key? key,this.noOfPopTime=-1,required this.curIndex}) : super(key: key);
 
   @override
   State<BottomSheetSignIn> createState() => _BottomSheetSignInState();
@@ -40,7 +44,13 @@ class _BottomSheetSignInState extends State<BottomSheetSignIn> {
   Map _userObj = {};
   CommonController cx = Get.put(CommonController());
 
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    print(widget.curIndex);
 
+  }
   @override
   Widget build(BuildContext context) {
     // FlutterStatusbarcolor.setStatusBarColor(Colors.transparent);
@@ -418,12 +428,15 @@ class _BottomSheetSignInState extends State<BottomSheetSignIn> {
                         print(userData);
 
 
-                        appleSignInAPI(
+                        TaskProvider.appleSignInAPI(
                           email: userData?.providerData[0].email.toString()!=null?userData?.email.toString():"",
                           // name: userData?.displayName.toString()!=null?userData?.displayName.toString():"",
                           name: userData?.providerData[0].displayName.toString()!=null?userData?.providerData[0].displayName.toString():"",
                           phone: userData?.providerData[0].phoneNumber.toString()!=null?userData?.phoneNumber.toString():"",
                           uid: userData?.providerData[0].uid.toString()!=null?userData?.uid.toString():"",
+                          context:context,
+                            curIndex: widget.curIndex,
+                            noOfPopTime: widget.noOfPopTime
                         );
 
                         // print("credential3");
@@ -483,11 +496,14 @@ class _BottomSheetSignInState extends State<BottomSheetSignIn> {
                             });
                             // print(_userObj);
                             // print(_userObj['name']);
-                            facebooSignInAPI(
+                            TaskProvider.facebooSignInAPI(
                               image: _userObj['picture']['data']['url'],
                               name: _userObj['name'],
                               email:_userObj['email'],
                               uid: _userObj['id'],
+                              context: context,
+                                curIndex: widget.curIndex,
+                                noOfPopTime: widget.noOfPopTime
 
                             );
                           });
@@ -516,7 +532,7 @@ class _BottomSheetSignInState extends State<BottomSheetSignIn> {
                     ),
                     InkWell(
                       onTap: () {
-                        Get.off(SignUp(),
+                        Get.off(SignUp(noOfPopTime: widget.noOfPopTime,curIndex: widget.curIndex),
                         transition: Transition.rightToLeft);
                       },
                       child: NunitoText(
@@ -557,95 +573,32 @@ class _BottomSheetSignInState extends State<BottomSheetSignIn> {
       print("${FirebaseAuth.instance.currentUser?.toString()}");
       setState(() {
         name = FirebaseAuth.instance.currentUser?.displayName;
-        cx.profilePicture.value=FirebaseAuth.instance.currentUser!.photoURL!;
+        if(FirebaseAuth.instance.currentUser?.photoURL!=null){
+          cx.profilePicture.value=FirebaseAuth.instance.currentUser!.photoURL!;
+        }
 
         print(name);
         print(FirebaseAuth.instance.currentUser?.photoURL);
 
-
       });
 
       final userData=FirebaseAuth.instance.currentUser;
-      googleSignInAPI(
+      TaskProvider.googleSignInAPI(
         email: userData?.providerData[0].email.toString()??"",
         name: userData?.providerData[0].displayName.toString()??"",
         phone: userData?.providerData[0].phoneNumber??"",
         uid: userData?.providerData[0].uid.toString()??"",
         is_verified: userData?.emailVerified.toString()??"",
         image: userData?.providerData[0].photoURL.toString()??"",
+        context: context,
+        curIndex: widget.curIndex,
+        noOfPopTime: widget.noOfPopTime
       );
 
 
     } else {
       onAlert(context: context,type: 3,msg: "Google SignIn Failed");
       print("Unable to sign in");
-    }
-  }
-  Future googleSignInAPI({String? email,String? name,String? phone,String? image,String? uid,String? is_verified,}) async {
-
-
-    try {
-      var request = http.MultipartRequest('POST', Uri.parse(Constant.googleSignIn));
-      request.fields.addAll({
-        'email': email.toString(),
-        'name': name.toString(),
-        'phone': phone.toString(),
-        'image': image.toString(),
-        'uid': uid.toString(),
-        'is_verified': is_verified.toString(),
-        'fcm_token': Constant.fcmToken.isEmpty?"test":Constant.fcmToken,
-
-      });
-      print(request.fields);
-
-      final response = await request.send();
-      final respStr = await response.stream.bytesToString();
-      final jsonBody = await jsonDecode(respStr);
-
-      if (jsonBody['status'] == 1) {
-        print("SUCCESSY");
-        print("1");
-        print(jsonBody.toString());
-        cx.write('username',jsonBody['userdata']['name']??"");
-        cx.write('useremail',jsonBody['userdata']['email']??"");
-        cx.write('phone',jsonBody['userdata']['phone']==null?"":jsonBody['userdata']['phone']);
-        cx.write('countrycode',jsonBody['userdata']['countrycode']??"");
-        cx.write('image',jsonBody['userdata']['image']??"");
-        cx.write('id',jsonBody['userdata']['id']??0);
-        cx.write('islogin',true);
-        cx.write('isVerified',true);
-
-        cx.id.value=cx.read("id");
-        cx.email.value=cx.read("useremail");
-        cx.phone.value=cx.read("phone");
-        cx.countrycode.value=cx.read("countrycode");
-        cx.image.value=cx.read("image");
-        cx.isLogin.value=cx.read("islogin");
-        cx.name.value=cx.read("username");
-        cx.isVerified.value=cx.read("isVerified");
-
-        print("JENNY");
-        print(cx.read("phone"));
-        print(jsonBody['userdata']['phone']==null?"":jsonBody['userdata']['phone']);
-        print("");
-
-        onAlert(context: context,type: 2,msg: jsonBody['message']);
-        Duration du=Duration(seconds: 2);
-        Timer(du, () {
-          Get.offAll(WonderEvents());
-          cx.curIndex.value=0;
-        });
-
-      } else {
-        print("0");
-        onAlert(context: context,type: 3,msg: jsonBody['message']);
-        print(jsonBody);
-      }
-    } catch (e) {
-      print(e.toString());
-      if (e is SocketException) {
-        showLongToast("Could not connect to internet!!");
-      }
     }
   }
 
@@ -725,9 +678,27 @@ class _BottomSheetSignInState extends State<BottomSheetSignIn> {
         onAlert(context: context,type: 2,msg: jsonBody['message']);
         Duration du=Duration(seconds: 2);
         Timer(du, () {
-          // cx.curIndex.value=currentIndex;
 
-          Get.offAll(WonderEvents(curIndex: currentIndex,));
+          //Navigation from receipt
+          if(widget.noOfPopTime==99){
+            widget.noOfPopTime=1;
+            Get.back();
+            while(widget.noOfPopTime!=0){
+              widget.noOfPopTime--;
+              Get.back(result: true);
+            }
+          }
+          else if(widget.noOfPopTime!=-1){
+            while(widget.noOfPopTime!=0){
+             widget.noOfPopTime--;
+             Get.back();
+            }
+          }
+          else{
+            Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (context) =>
+                WonderEvents(curIndex: widget.curIndex,)),
+                  (Route<dynamic> route) => false,);
+          }
         });
 
       } else {
@@ -742,131 +713,5 @@ class _BottomSheetSignInState extends State<BottomSheetSignIn> {
       }
     }
   }
-  Future facebooSignInAPI({String? email,String? name,String? phone,String? image,String? uid,String? is_verified,}) async {
-    onAlert(context: context,type: 1,msg: "Loading...");
 
-    try {
-      var request = http.MultipartRequest('POST', Uri.parse(Constant.facebookSignIn));
-      request.fields.addAll({
-        'email': email.toString(),
-        'name': name.toString(),
-        'uid': uid.toString(),
-        'image': image.toString(),
-        'fcm_token': Constant.fcmToken.isEmpty?"test":Constant.fcmToken,
-
-
-      });
-      print(request.fields);
-
-      final response = await request.send();
-      final respStr = await response.stream.bytesToString();
-      final jsonBody = await jsonDecode(respStr);
-
-      if (jsonBody['status'] == 1) {
-        print("SUCCESS");
-        print("1");
-        cx.write('username',jsonBody['userdata']['name']);
-        cx.write('useremail',jsonBody['userdata']['email']);
-        cx.write('phone',jsonBody['userdata']['phone']);
-        cx.write('countrycode',jsonBody['userdata']['countrycode']);
-        cx.write('image',jsonBody['userdata']['image']);
-        cx.write('id',jsonBody['userdata']['id']);
-        cx.write('islogin',true);
-        cx.write('isVerified',true);
-
-        cx.id.value=cx.read("id");
-        cx.email.value=cx.read("useremail");
-        cx.phone.value=cx.read("phone");
-        cx.countrycode.value=cx.read("countrycode");
-        cx.image.value=cx.read("image");
-        cx.isLogin.value=cx.read("islogin");
-        cx.name.value=cx.read("username");
-        cx.isVerified.value=cx.read("isVerified");
-        print(jsonBody.toString());
-
-        onAlert(context: context,type: 2,msg: jsonBody['message']);
-        Duration du=Duration(seconds: 2);
-        Timer(du, () {
-          Get.offAll(WonderEvents());
-          cx.curIndex.value=0;
-        });
-
-      } else {
-        print("0");
-        onAlert(context: context,type: 3,msg: jsonBody['message']);
-        print(jsonBody);
-      }
-    } catch (e) {
-      print(e.toString());
-      if (e is SocketException) {
-        showLongToast("Could not connect to internet!!");
-      }
-    }
-  }
-  Future appleSignInAPI({String? email,String? name,String? phone, String? uid,}) async {
-    onAlert(context: context,type: 1,msg: "Loading...");
-    print("userdata");
-    print(email);
-    print(name);
-    print(uid);
-    print(phone);
-    print("Constant.fcmToken");
-    print(Constant.fcmToken);
-
-    try {
-      var request = http.MultipartRequest('POST', Uri.parse(Constant.appleSignIn));
-      request.fields.addAll({
-        'email': email.toString(),
-        'name': name.toString()=="null"?"Domez User":name.toString(),
-        'phone': phone.toString()=="null"?"":phone.toString(),
-        'uid': uid.toString(),
-        'fcm_token': Constant.fcmToken.isEmpty?"test":Constant.fcmToken,
-      });
-      print("Requested Fields");
-      print(request.fields);
-      final response = await request.send();
-      final respStr = await response.stream.bytesToString();
-      final jsonBody = await jsonDecode(respStr);
-
-      if (jsonBody['status'] == 1) {
-        print("SUCCESS");
-        print("1");
-        cx.write('username',jsonBody['userdata']['name']);
-        cx.write('useremail',jsonBody['userdata']['email']);
-        cx.write('phone',jsonBody['userdata']['phone']);
-        cx.write('countrycode',jsonBody['userdata']['countrycode']);
-        cx.write('image',jsonBody['userdata']['image']);
-        cx.write('id',jsonBody['userdata']['id']);
-        cx.write('islogin',true);
-        cx.write('isVerified',true);
-
-        cx.id.value=cx.read("id");
-        cx.email.value=cx.read("useremail");
-        cx.phone.value=cx.read("phone");
-        cx.countrycode.value=cx.read("countrycode");
-        cx.image.value=cx.read("image");
-        cx.isLogin.value=cx.read("islogin");
-        cx.name.value=cx.read("username");
-        cx.isVerified.value=cx.read("isVerified");
-        print(jsonBody.toString());
-
-        onAlert(context: context,type: 2,msg: jsonBody['message']);
-        Duration du=Duration(seconds: 2);
-        Timer(du, () {
-          Get.offAll(WonderEvents());
-          cx.curIndex.value=0;
-        });
-
-      } else {
-        print("0");
-        onAlert(context: context,type: 3,msg: jsonBody['message']);
-        print(jsonBody);
-      }
-    } catch (e) {
-      print(e.toString());
-      if (e is SocketException) {
-        showLongToast("Could not connect to internet!!");
-      }
-    }
-  }
 }

@@ -6,6 +6,8 @@ import '../../../commonModule/AppColor.dart';
 import 'package:flutter/material.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
+import '../../commonModule/utils.dart';
+
 import 'package:get/get.dart';
 import 'package:google_place/google_place.dart';
 import '../../commonModule/Constant.dart';
@@ -44,23 +46,20 @@ class _HomePageState extends State<HomePage> {
   ScrollController _scrollController = ScrollController();
 
   int vollyIndex = 0;
-  int initialCategoryId = 6;
   final GlobalKey<ScaffoldState> _scaffoldkey = new GlobalKey<ScaffoldState>();
 
   @override
   void initState() {
     super.initState();
 
-
     googlePlace = GooglePlace(Constant.mapkey);
+    mycontroller.currentCategoryId.value =
+        mycontroller.initialCategoryId.value;
+
     if (cx.read("image") == null) cx.write('image', Constant.dummyProfileUrl);
     if (cx.image.value == '') cx.image.value = Constant.dummyProfileUrl;
     // print(cx.profilePicture);
     // print(cx.isLoggedIn.value);
-
-    domeListController.getTask1(domeListController.sportid.value);
-    domeListController.getTask2(domeListController.sportid.value);
-    domeListController.getTask3(domeListController.sportid.value);
 
     print("initState");
     print(cx.read("username"));
@@ -69,10 +68,6 @@ class _HomePageState extends State<HomePage> {
     print(cx.read("image"));
     print(cx.read("islogin"));
     print(cx.read("phone"));
-
-
-
-
 
     //Checking internet
     _networkConnectivity.initialise();
@@ -83,58 +78,51 @@ class _HomePageState extends State<HomePage> {
       switch (_source.keys.toList()[0]) {
         case ConnectivityResult.mobile:
           string =
-          _source.values.toList()[0] ? 'Mobile: Online' : 'Mobile: Offline';
+              _source.values.toList()[0] ? 'Mobile: Online' : 'Mobile: Offline';
           break;
         case ConnectivityResult.wifi:
           string =
-          _source.values.toList()[0] ? 'WiFi: Online' : 'WiFi: Offline';
+              _source.values.toList()[0] ? 'WiFi: Online' : 'WiFi: Offline';
           break;
         case ConnectivityResult.none:
         default:
           string = 'Offline';
       }
-      // 2.
-      // 3.
-      // ScaffoldMessenger.of(context).showSnackBar(
-      //   SnackBar(
-      //     content: Text(
-      //       string,
-      //       style: TextStyle(fontSize: 30),
-      //     ),
-      //   ),
-      // );
     });
   }
 
   @override
   Widget build(BuildContext context) {
-
     return WillPopScope(
       onWillPop: () async {
-        print("initial category"+initialCategoryId.toString());
+        print("initial category" +
+            mycontroller.initialCategoryId.value.toString());
+        print("initial category" +
+            mycontroller.currentCategoryId.value.toString());
 
-        if (initialCategoryId!=6) {
+        if (mycontroller.currentCategoryId.value !=
+            mycontroller.initialCategoryId.value) {
+          mycontroller.currentCategoryId.value =
+              mycontroller.initialCategoryId.value;
+          print("different sport Id");
+
+          mycontroller.currentCategoryId.value =
+              mycontroller.initialCategoryId.value;
           setState(() {
             vollyIndex = 0;
-            _scrollController.jumpTo(0);
-            initialCategoryId=6;
+
+            //TODO NOT DONE
+            // _scrollController.initialScrollOffset;
+            // _scrollController.jumpTo(0.0);
           });
 
           domeListController
-              .sportsUpdate(initialCategoryId.toString())
+              .sportsUpdate(mycontroller.initialCategoryId.value.toString())
               .then((value) {});
-          print("different sport Id");
           return false;
-          // Get.off(WonderEvents());
-
-        }
-        // else if(!cx.isReset.value){
-        //   cx.isReset.value=true;
-        //   print("Reset HomePaqe");
-        //   DraggableScrollableActuator.reset(context);
-        //   return false;
-        // }
-        else{
+        } else {
+          print('close app');
+          Get.back();
           return true;
         }
       },
@@ -156,16 +144,18 @@ class _HomePageState extends State<HomePage> {
                     ],
                     colors: [
                       AppColor.bg,
-                           domeListController.isDataProcessing1.value||
-                          domeListController.isDataProcessing2.value||
-                          domeListController.isDataProcessing3.value
+                      domeListController.isDataProcessing1.value ||
+                              domeListController.isDataProcessing2.value ||
+                              domeListController.isDataProcessing3.value
                           ? AppColor.bg
                           : domeListController.isoffline.value
                               ? AppColor.bg
                               : Colors.white,
-                    ])
-            ),
-            child: Obx(()=> mycontroller.isoffline.value||string=="Mobile: Offline"||string=="Wifi: Offline"
+                    ])),
+            child: Obx(
+              () => mycontroller.isoffline.value ||
+                      string == "Mobile: Offline" ||
+                      string == "Wifi: Offline"
                   ? noInternetLottie()
                   : ListView(
                       shrinkWrap: true,
@@ -189,7 +179,7 @@ class _HomePageState extends State<HomePage> {
                                         text: "Find A Dome",
                                         fontWeight: FontWeight.w500,
                                         color: Color(0xFF70A792),
-                                        fontSize: cx.responsive(30,24,20),
+                                        fontSize: cx.responsive(30, 24, 20),
                                         height: 0.15,
                                       ),
                                       Gap(cx.height / 95.29),
@@ -197,7 +187,7 @@ class _HomePageState extends State<HomePage> {
                                         text: "Near You",
                                         color: Colors.black,
                                         fontWeight: FontWeight.w500,
-                                        fontSize: cx.responsive(42,36, 32),
+                                        fontSize: cx.responsive(42, 36, 32),
                                       ),
                                     ],
                                   ),
@@ -218,7 +208,7 @@ class _HomePageState extends State<HomePage> {
                                         padding: EdgeInsets.only(
                                             right: cx.height / 41.7),
                                         child: CircleAvatar(
-                                          radius: cx.responsive(25,22.5, 20),
+                                          radius: cx.responsive(25, 22.5, 20),
                                           backgroundColor: Colors.white,
                                           child: CachedNetworkImage(
                                             imageUrl: cx.image.value,
@@ -227,9 +217,9 @@ class _HomePageState extends State<HomePage> {
                                                     CircleAvatar(
                                               backgroundColor:
                                                   Colors.transparent,
-                                              radius: cx.responsive(25,20, 17),
+                                              radius: cx.responsive(25, 20, 17),
                                               backgroundImage: NetworkImage(
-                                                  cx.image.value,
+                                                cx.image.value,
                                               ),
                                             ),
                                             fit: BoxFit.cover,
@@ -237,7 +227,7 @@ class _HomePageState extends State<HomePage> {
                                                 CircleAvatar(
                                               backgroundColor:
                                                   Colors.transparent,
-                                              radius: cx.responsive(25,20, 17),
+                                              radius: cx.responsive(25, 20, 17),
                                               backgroundImage: AssetImage(
                                                 Image1.anime,
                                               ),
@@ -247,7 +237,7 @@ class _HomePageState extends State<HomePage> {
                                                     CircleAvatar(
                                               backgroundColor:
                                                   Colors.transparent,
-                                              radius: cx.responsive(25,20, 17),
+                                              radius: cx.responsive(25, 20, 17),
                                               backgroundImage: AssetImage(
                                                 Image1.anime,
                                               ),
@@ -257,18 +247,18 @@ class _HomePageState extends State<HomePage> {
                                       ),
                                     ),
                                     Positioned(
-                                      top: cx.responsive(3.5,2, 0.1),
+                                      top: cx.responsive(3.5, 2, 0.1),
                                       right: cx.height / 33,
                                       child: CircleAvatar(
                                         backgroundColor: Colors.white,
-                                        radius: cx.responsive(13,6, 4.5),
+                                        radius: cx.responsive(13, 6, 4.5),
                                         child: Container(
                                           decoration: BoxDecoration(
                                             color: Color(0xFFFF5C5C),
                                             borderRadius:
                                                 BorderRadius.circular(50),
                                           ),
-                                          height:cx.responsive(20,17, 13),
+                                          height: cx.responsive(20, 17, 13),
                                           width: double.infinity,
                                         ),
                                       ),
@@ -304,7 +294,7 @@ class _HomePageState extends State<HomePage> {
                                           )),
                                       padding: const EdgeInsets.fromLTRB(
                                           15.0, 4, 15, 4),
-                                      height: cx.responsive(90,70, 55),
+                                      height: cx.responsive(90, 70, 55),
                                       child: Row(
                                         mainAxisAlignment:
                                             MainAxisAlignment.spaceBetween,
@@ -317,7 +307,7 @@ class _HomePageState extends State<HomePage> {
                                           InkWell(
                                             onTap: () async {
                                               Position position =
-                                                  await _getGeoLocationPosition();
+                                                  await getGeoLocationPosition();
                                               location =
                                                   'Lat1: ${position.latitude} , Long: ${position.longitude}';
                                               GetAddressFromLatLong(position);
@@ -363,131 +353,160 @@ class _HomePageState extends State<HomePage> {
                                 ],
                               ),
                             ),
-                            Gap(cx.responsive(cx.height/60, cx.height/50, cx.height/40)),
+                            Gap(cx.responsive(cx.height / 60, cx.height / 50,
+                                cx.height / 40)),
                           ],
                         ),
                         Container(
                           height: cx.height / 15,
                           child: Obx(
-                            () => ListView.builder(
-                              controller: _scrollController,
-                              shrinkWrap: true,
-                              physics: BouncingScrollPhysics(),
-                              scrollDirection: Axis.horizontal,
-                              itemCount: mycontroller.myList.length,
-                              itemBuilder: (context, index) {
-                                CategoryModel item = mycontroller.myList[index];
-                                // if (index == 0) {
-                                //   domeListController.sportid.value =
-                                //       item.id.toString();
-                                //   domeListController.sportsUpdate(
-                                //       domeListController.sportid.value);
-                                //
-                                //   print(domeListController.sportid.value);
-                                // }
-                                return Padding(
-                                  padding: EdgeInsets.only(
-                                    left:
-                                    index == 0 ? cx.height / 44.47 : 0,
-                                    right: index == mycontroller.myList.length-1
-                                        ? cx.height / 44.47
-                                        : 0,
-                                  ),
-                                  child: Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    crossAxisAlignment: CrossAxisAlignment.center,
-                                    children: [
-                                      Container(
-                                        child: InkWell(
-                                          onTap: () {
-                                            // domeListController.getTask1();
-                                            // domeListController.getTask2();
-                                            // domeListController.getTask3();
-                                            // debugPrint("Hello");
-                                            domeListController.sportid.value =
-                                                item.id.toString();
-                                            domeListController
-                                                .sportsUpdate(item.id.toString());
-
-                                            print(domeListController.sportid.value);
-
-                                            setState(() {
-                                              vollyIndex = index;
-                                              initialCategoryId = item.id;
-                                            });
-                                          },
-                                          child: Padding(
-                                            padding: EdgeInsets.only(
-                                              left: cx.responsive(6,4, 2),
-                                              right: cx.responsive(6,4, 2),
-                                            ),
-                                            child: Container(
-                                              height: cx.responsive(65,53, 44),
-                                              width: cx.width / 2.75,
-                                              decoration: BoxDecoration(
-                                                borderRadius:
-                                                BorderRadius.circular(100),
-                                              ),
-                                              // height: cx.height/cx.height/66.7,
-                                              child: Row(
-                                                mainAxisAlignment:
-                                                MainAxisAlignment.start,
-                                                crossAxisAlignment:
-                                                CrossAxisAlignment.center,
-                                                children: [
-                                                  Padding(
-                                                    padding: EdgeInsets.only(
-                                                        left: cx.height / 83.375),
-                                                    child: CircleAvatar(
-                                                      radius:
-                                                      cx.responsive(30,22, 17),
-                                                      backgroundColor:Colors.transparent,
-
-                                                      child: Image.network(
-                                                        item.image,
-                                                        color: index == vollyIndex
-                                                            ?Colors.white
-                                                            : AppColor.darkGreen,
-                                                      ),
-                                                    ),
-                                                  ),
-                                                  Gap(5),
-                                                  Container(
-                                                    width: cx.width / 5.3,
-                                                    child: NunitoText(
-                                                      text: item.name,
-                                                      fontSize: cx.height > 800
-                                                          ? 18
-                                                          : 16,
-                                                      fontWeight: FontWeight.w700,
-                                                      color:index == vollyIndex
-                                                          ? Colors.white
-                                                          : Colors.black,
-                                                      textOverflow:
-                                                      TextOverflow.ellipsis,
-                                                      maxLines: 1,
-                                                    ),
-                                                  ),
-                                                ],
-                                              ),
-                                            ),
-                                          ),
+                            () => mycontroller.isDataProcessing.value
+                                ? Container()
+                                : ListView.builder(
+                                    controller: _scrollController,
+                                    shrinkWrap: true,
+                                    physics: BouncingScrollPhysics(),
+                                    scrollDirection: Axis.horizontal,
+                                    itemCount: mycontroller.myList.length,
+                                    itemBuilder: (context, index) {
+                                      CategoryModel item =
+                                          mycontroller.myList[index];
+                                      return Padding(
+                                        padding: EdgeInsets.only(
+                                          left: index == 0
+                                              ? cx.height / 44.47
+                                              : 0,
+                                          right: index ==
+                                                  mycontroller.myList.length - 1
+                                              ? cx.height / 44.47
+                                              : 0,
                                         ),
-                                        decoration: BoxDecoration(
-                                            color: index == vollyIndex
-                                                ? AppColor.darkGreen
-                                                : Colors.white.withOpacity(0.15),
-                                            borderRadius: BorderRadius.circular(100),
-                                            border: Border.all(color: Color(0xFFD4D4D4))),
-                                      ),
-                                      SizedBox(
-                                        width: cx.width / 50,
-                                      )
-                                    ],
+                                        child: Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.center,
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.center,
+                                          children: [
+                                            Container(
+                                              child: InkWell(
+                                                onTap: () {
+                                                  // domeListController.getTask1();
+                                                  // domeListController.getTask2();
+                                                  // domeListController.getTask3();
+                                                  // debugPrint("Hello");
+
+                                                  mycontroller.sportid.value =
+                                                      item.id.toString();
+                                                  domeListController
+                                                      .sportsUpdate(
+                                                          item.id.toString());
+
+                                                  print(mycontroller
+                                                      .sportid.value);
+                                                  cx.write(
+                                                      LKeys
+                                                          .paginationLeagueSportId,
+                                                      item.id.toString());
+                                                  setState(() {
+                                                    vollyIndex = index;
+                                                    mycontroller
+                                                        .currentCategoryId
+                                                        .value = item.id;
+                                                  });
+                                                },
+                                                child: Padding(
+                                                  padding: EdgeInsets.only(
+                                                    left:
+                                                        cx.responsive(6, 4, 2),
+                                                    right:
+                                                        cx.responsive(6, 4, 2),
+                                                  ),
+                                                  child: Container(
+                                                    height: cx.responsive(
+                                                        65, 53, 44),
+                                                    width: cx.width / 2.75,
+                                                    decoration: BoxDecoration(
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                              100),
+                                                    ),
+                                                    // height: cx.height/cx.height/66.7,
+                                                    child: Row(
+                                                      mainAxisAlignment:
+                                                          MainAxisAlignment
+                                                              .start,
+                                                      crossAxisAlignment:
+                                                          CrossAxisAlignment
+                                                              .center,
+                                                      children: [
+                                                        Padding(
+                                                          padding: EdgeInsets.only(
+                                                              left: cx.height /
+                                                                  83.375),
+                                                          child: CircleAvatar(
+                                                            radius:
+                                                                cx.responsive(
+                                                                    30, 22, 17),
+                                                            backgroundColor:
+                                                                Colors
+                                                                    .transparent,
+                                                            child:
+                                                                Image.network(
+                                                              item.image,
+                                                              color: index ==
+                                                                      vollyIndex
+                                                                  ? Colors.white
+                                                                  : AppColor
+                                                                      .darkGreen,
+                                                            ),
+                                                          ),
+                                                        ),
+                                                        Gap(5),
+                                                        Container(
+                                                          width: cx.width / 5.3,
+                                                          child: NunitoText(
+                                                            text: item.name,
+                                                            fontSize:
+                                                                cx.height > 800
+                                                                    ? 18
+                                                                    : 16,
+                                                            fontWeight:
+                                                                FontWeight.w700,
+                                                            color: index ==
+                                                                    vollyIndex
+                                                                ? Colors.white
+                                                                : Colors.black,
+                                                            textOverflow:
+                                                                TextOverflow
+                                                                    .ellipsis,
+                                                            maxLines: 1,
+                                                          ),
+                                                        ),
+                                                      ],
+                                                    ),
+                                                  ),
+                                                ),
+                                              ),
+                                              decoration: BoxDecoration(
+                                                  color: index == vollyIndex
+                                                      ? AppColor.darkGreen
+                                                      : Colors.white
+                                                          .withOpacity(0.15),
+                                                  borderRadius:
+                                                      BorderRadius.circular(
+                                                          100),
+                                                  border: Border.all(
+                                                      color:
+                                                          Color(0xFFD4D4D4))),
+                                            ),
+                                            SizedBox(
+                                              width: cx.width / 50,
+                                            )
+                                          ],
+                                        ),
+                                      );
+                                    },
                                   ),
-                                );
-                              },
-                            ),
                           ),
                         ),
                         // BottomScroll(),
@@ -498,44 +517,5 @@ class _HomePageState extends State<HomePage> {
         ),
       ),
     );
-  }
-
-  Future<Position> _getGeoLocationPosition() async {
-    bool serviceEnabled;
-    LocationPermission permission;
-    serviceEnabled = await Geolocator.isLocationServiceEnabled();
-    if (!serviceEnabled) {
-      permission = await Geolocator.requestPermission();
-      // await Geolocator.openLocationSettings();
-      return Future.error('Location services are disabled.');
-    }
-    permission = await Geolocator.checkPermission();
-    if (permission == LocationPermission.denied) {
-      permission = await Geolocator.requestPermission();
-      if (permission == LocationPermission.denied) {
-        return Future.error('Location permissions are denied');
-      }
-    }
-    if (permission == LocationPermission.deniedForever) {
-      await Geolocator.openLocationSettings();
-
-      return Future.error(
-          'Location permissions are permanently denied, we cannot request permissions.');
-    }
-    return await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.high);
-  }
-
-  Future<void> GetAddressFromLatLong(Position position) async {
-    List<Placemark> placemarks =
-        await placemarkFromCoordinates(position.latitude, position.longitude);
-    debugPrint("++++++" + placemarks.toString());
-    Placemark place = placemarks[0];
-    Address =
-        '${place.street}, ${place.subLocality}, ${place.locality}, ${place.postalCode}, ${place.country}';
-
-    cx.searchDome.value = place.locality! + "," + place.country.toString();
-
-    debugPrint(cx.searchDome.value.toString());
   }
 }

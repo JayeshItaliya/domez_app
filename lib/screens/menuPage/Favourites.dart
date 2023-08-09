@@ -12,6 +12,8 @@ import '../../controller/favListController.dart';
 import '../authPage/editProfile.dart';
 import '../bottomSheet/bottomSheetFav.dart';
 import 'package:gap/gap.dart';
+import '../../commonModule/utils.dart';
+
 import '../../commonModule/widget/common/textInter.dart';
 
 class Favourites extends StatefulWidget {
@@ -95,6 +97,7 @@ class _FavouritesState extends State<Favourites> {
                               ])),
                       child: ListView(
                         shrinkWrap: true,
+                        controller: mycontroller.scrollController,
                         physics: BouncingScrollPhysics(),
                         children: [
                           // IgnorePointer(child: Gap(WonderEvents.topHeight)),

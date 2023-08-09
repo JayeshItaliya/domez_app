@@ -1,9 +1,9 @@
 name: domez
 description: A new Flutter project.
 
-publish_to: 'none' # Remove this line if you wish to publish to pub.dev
+publish_to: 'none'
 
-version: 1.0.21+21
+version: 1.0.34+34
 
 environment:
   sdk: '>=2.18.0<3.0.0'
@@ -41,10 +41,8 @@ dependencies:
   rflutter_alert: ^2.0.4
   flutter_facebook_auth:
   cached_network_image:
-#  firebase_storage:
   firebase_auth:
   firebase_core: ^2.10.0
-#  sign_in_with_apple: ^4.2.0
   sign_in_with_apple:
   pin_code_text_field: ^1.8.0
   http:
@@ -67,9 +65,6 @@ dependencies:
   go_router:
   firebase_dynamic_links:
   flutter_html:
-
-#  flutter_image_compress: ^1.1.3
-
 dependency_overrides:
 firebase_dynamic_links_platform_interface:
 git:

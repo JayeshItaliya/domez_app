@@ -9,8 +9,6 @@ class SearchListController extends GetxController {
 
   var myList = List<FavouriteModel>.empty(growable: true).obs;
   var isDataProcessing = false.obs;
-
-  ScrollController scrollController = ScrollController();
   StreamSubscription? subscription;
   var isoffline = false.obs;
   var type =1.obs;
@@ -52,23 +50,16 @@ class SearchListController extends GetxController {
       isDataProcessing.value = true;
 
       if (isoffline.value == false) {
-        print("sriti");
 
         TaskProvider().getSearchList(type,searchName).then((resp) {
-          print("Heyyylooow");
           if(resp!=null) {
-            print("Heyyylooow");
-
             isDataProcessing.value = false;
             myList.clear();
             myList.addAll(resp);
-
           }
           else{
             isDataProcessing.value = false;
-
           }
-
         }, onError: (err) {
           isDataProcessing.value = false;
           showSnackbar("Error", err.toString(), Colors.red);

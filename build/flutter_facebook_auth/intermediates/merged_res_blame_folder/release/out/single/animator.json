@@ -1,0 +1,26 @@
+[
+    {
+        "merged": "/Users/SMIINFOTECH/Downloads/domez/build/flutter_facebook_auth/intermediates/merged_res/release/animator/fragment_fade_exit.xml",
+        "source": "/Users/SMIINFOTECH/.gradle/caches/transforms-3/18ce47181b13768bcefd981444c5c1fe/transformed/fragment-1.3.0/res/animator/fragment_fade_exit.xml"
+    },
+    {
+        "merged": "/Users/SMIINFOTECH/Downloads/domez/build/flutter_facebook_auth/intermediates/merged_res/release/animator/fragment_open_exit.xml",
+        "source": "/Users/SMIINFOTECH/.gradle/caches/transforms-3/18ce47181b13768bcefd981444c5c1fe/transformed/fragment-1.3.0/res/animator/fragment_open_exit.xml"
+    },
+    {
+        "merged": "/Users/SMIINFOTECH/Downloads/domez/build/flutter_facebook_auth/intermediates/merged_res/release/animator/fragment_close_exit.xml",
+        "source": "/Users/SMIINFOTECH/.gradle/caches/transforms-3/18ce47181b13768bcefd981444c5c1fe/transformed/fragment-1.3.0/res/animator/fragment_close_exit.xml"
+    },
+    {
+        "merged": "/Users/SMIINFOTECH/Downloads/domez/build/flutter_facebook_auth/intermediates/merged_res/release/animator/fragment_fade_enter.xml",
+        "source": "/Users/SMIINFOTECH/.gradle/caches/transforms-3/18ce47181b13768bcefd981444c5c1fe/transformed/fragment-1.3.0/res/animator/fragment_fade_enter.xml"
+    },
+    {
+        "merged": "/Users/SMIINFOTECH/Downloads/domez/build/flutter_facebook_auth/intermediates/merged_res/release/animator/fragment_open_enter.xml",
+        "source": "/Users/SMIINFOTECH/.gradle/caches/transforms-3/18ce47181b13768bcefd981444c5c1fe/transformed/fragment-1.3.0/res/animator/fragment_open_enter.xml"
+    },
+    {
+        "merged": "/Users/SMIINFOTECH/Downloads/domez/build/flutter_facebook_auth/intermediates/merged_res/release/animator/fragment_close_enter.xml",
+        "source": "/Users/SMIINFOTECH/.gradle/caches/transforms-3/18ce47181b13768bcefd981444c5c1fe/transformed/fragment-1.3.0/res/animator/fragment_close_enter.xml"
+    }
+]

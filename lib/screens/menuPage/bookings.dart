@@ -1,4 +1,5 @@
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:domez/commonModule/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:gap/gap.dart';
@@ -8,13 +9,14 @@ import '../../commonModule/Constant.dart';
 import '../../commonModule/Strings.dart';
 import '../../commonModule/widget/common/textInter.dart';
 import '../../commonModule/widget/common/textSentic.dart';
+import '../../controller/bookListController.dart';
 import '../../controller/commonController.dart';
 import '../../controller/domesDetailsController.dart';
 import '../authPage/editProfile.dart';
 import '../bottomSheet/bottomSheetBookings.dart';
 
 class Bookings extends StatefulWidget {
-  bool isBackButton;
+  final bool isBackButton;
 
   Bookings({Key? key, required this.isBackButton}) : super(key: key);
 
@@ -28,6 +30,7 @@ class _BookingsState extends State<Bookings> with WidgetsBindingObserver {
   bool search = false;
   CommonController cx = Get.put(CommonController());
   final dx = Get.put(DomesDetailsController());
+  final mycontroller = Get.put(BookListController());
 
   bool Previous = false;
 
@@ -39,8 +42,6 @@ class _BookingsState extends State<Bookings> with WidgetsBindingObserver {
     setState(() {
       search = false;
     });
-
-    // print("hell11");
   }
 
   @override
@@ -62,15 +63,12 @@ class _BookingsState extends State<Bookings> with WidgetsBindingObserver {
             }
             else{
               cx.curIndex.value=0;
-
             }
           }
-
           if(widget.isBackButton){
             Get.back();
           }
           return false;
-
         },
 
         child: SafeArea(
@@ -98,7 +96,7 @@ class _BookingsState extends State<Bookings> with WidgetsBindingObserver {
                 child: ListView(
                   shrinkWrap: true,
                   physics: BouncingScrollPhysics(),
-
+                  controller: mycontroller.scrollController,
                   children: [
                     // IgnorePointer(child: Gap(WonderEvents.topHeight)),
                     Container(
@@ -175,7 +173,7 @@ class _BookingsState extends State<Bookings> with WidgetsBindingObserver {
                                       children: [
                                         Gap(cx.height / 66.7),
                                         InterText(
-                                          text: "Here are Your",
+                                          text: "Here Are Your",
                                           fontWeight: FontWeight.w500,
                                           color: Color(0xFF70A792),
                                           fontSize: cx.responsive(30,24,20),

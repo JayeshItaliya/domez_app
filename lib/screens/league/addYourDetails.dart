@@ -15,6 +15,9 @@ import '../../controller/leagueDetailsController.dart';
 import '../../controller/leaguesListController.dart';
 import '../../model/LeagueDetailsModel.dart';
 import '../bottomSheet/bottomSheetAddYourDetails.dart';
+import '../../commonModule/utils.dart';
+
+
 class AddYourDetails extends StatefulWidget {
   bool isFav;
 
@@ -28,8 +31,7 @@ class AddYourDetails extends StatefulWidget {
 }
 
 class _AddYourDetailsState extends State<AddYourDetails> {
-  bool fav = false;
-  int selectedIndex = -1;
+
   CommonController cx = Get.put(CommonController());
   final mycontroller = Get.put(LeagueDetailsController());
   final LeagueList = Get.put(LeagueListController());
@@ -176,7 +178,7 @@ class _AddYourDetailsState extends State<AddYourDetails> {
                                         lid: item.id.toString());
                                   } else {
                                     // Get.to(SignIn());
-                                    onAlertSignIn(context: context);
+                                    onAlertSignIn(context: context,currentIndex: 2,noOfPopTimes: 1);
                                   }
                                 },
                                 child: CircleAvatar(

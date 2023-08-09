@@ -16,6 +16,8 @@ import '../../commonModule/widget/common/textInter.dart';
 import '../../commonModule/widget/common/textNunito.dart';
 import '../../commonModule/widget/search/simplecircularIcon.dart';
 import '../../commonModule/widget/common/textSentic.dart';
+import '../../commonModule/utils.dart';
+
 
 class BookingDetailsLeague extends StatefulWidget {
   bool? linkAccess;
@@ -72,9 +74,11 @@ class _BookingDetailsLeagueState extends State<BookingDetailsLeague> {
   String minutes1 = '';
   String seconds1 = '';
   DateTime bookingCreatedTime = DateTime.now();
+  DateTime torontoTimeZone = DateTime.now();
 
   bool isDefaultTime = true;
   late BookingDetailsModel item;
+  List<int> errorDomeImage = [];
 
   @override
   void initState() {
@@ -82,7 +86,8 @@ class _BookingDetailsLeagueState extends State<BookingDetailsLeague> {
     super.initState();
     item = mycontroller.myList[0];
     bookingCreatedTime = item.bookingCreatedAt;
-
+    torontoTimeZone=item.currentTime;
+    currentTime=torontoTimeZone;
     setState(() {
       print("Timing Details");
       print(item.startDate);
@@ -219,7 +224,7 @@ class _BookingDetailsLeagueState extends State<BookingDetailsLeague> {
     }
 
     //-----Before 2 hours of Booking Time-----
-    if (DateTime.now().millisecondsSinceEpoch >=
+    if (torontoTimeZone.millisecondsSinceEpoch >=
         bookingTime.subtract(Duration(hours: 2)).millisecondsSinceEpoch) {
       isCancelTimerAvailable = false;
     }
@@ -258,18 +263,45 @@ class _BookingDetailsLeagueState extends State<BookingDetailsLeague> {
                                   clipBehavior: Clip.none,
                                   children: [
                                     Container(
+                                      decoration: errorDomeImage
+                                          .contains(cx.read(Keys.domeId))
+                                          ? BoxDecoration(
+                                          borderRadius:
+                                          BorderRadius.circular(20),
+                                          gradient: backShadowContainer(),
+                                          image: DecorationImage(
+                                            image: AssetImage(
+                                              Image1.domesAround,
+                                            ),
+                                            fit: BoxFit.cover,
+                                          ))
+                                          : BoxDecoration(
+                                          borderRadius: BorderRadius.all(
+                                              Radius.circular(cx.height / 26.68)),
+                                          image: DecorationImage(
+                                            image: NetworkImage(
+                                              mycontroller
+                                                  .myList[0].image.isEmpty
+                                                  ? "https://thumbs.dreamstime.com/b/indoor-stadium-view-behind-wicket-cricket-160851985.jpg"
+                                                  : mycontroller
+                                                  .myList[0].image,
+                                              scale:
+                                              cx.height > 800 ? 1.8 : 2.4,
+                                            ),
+                                            fit: BoxFit.cover,
+                                            onError: (Object e,
+                                                StackTrace? stackTrace) {
+                                              setState(() {
+                                                errorDomeImage
+                                                    .add(cx.read(Keys.domeId));
+                                              });
+                                            },
+                                          )
+                                      ),
                                       margin: EdgeInsets.only(
                                           left: 8, right: 8, top: 8),
                                       width: MediaQuery.of(context).size.width,
                                       height: cx.height / 4.3,
-                                      decoration: BoxDecoration(
-                                        borderRadius: BorderRadius.all(
-                                            Radius.circular(cx.height / 26.68)),
-                                        image: DecorationImage(
-                                            image: AssetImage(
-                                                "assets/images/step.png"),
-                                            fit: BoxFit.cover),
-                                      ),
                                     ),
                                     Positioned(
                                       left: cx.responsive(50,38, 28),
@@ -465,14 +497,16 @@ class _BookingDetailsLeagueState extends State<BookingDetailsLeague> {
                                                                                 .toString())
                                                                         .then(
                                                                             (value) {
-                                                                      setState(
-                                                                          () {
-                                                                        item.bookingStatus =
-                                                                            "Cancelled";
-                                                                        isCancelTimerAvailable =
-                                                                            false;
-                                                                      });
-                                                                      // mycontroller.setBid();
+                                                                              if(value==1){
+                                                                                setState(
+                                                                                        () {
+                                                                                      item.bookingStatus =
+                                                                                      "Cancelled";
+                                                                                      isCancelTimerAvailable =
+                                                                                      false;
+                                                                                    });
+                                                                              }
+
                                                                     });
                                                                     stopTimer();
                                                                   });
@@ -703,15 +737,16 @@ class _BookingDetailsLeagueState extends State<BookingDetailsLeague> {
                                                                     .toString())
                                                                 .then(
                                                                     (value) {
-                                                                  setState(
-                                                                          () {
-                                                                        item.bookingStatus =
-                                                                        "Cancelled";
-                                                                        isCancelTimerAvailable =
-                                                                        false;
-                                                                      });
-                                                                  // mycontroller.setBid();
-                                                                });
+                                                                      if(value==1){
+                                                                        setState(
+                                                                                () {
+                                                                              item.bookingStatus =
+                                                                              "Cancelled";
+                                                                              isCancelTimerAvailable =
+                                                                              false;
+                                                                            });
+                                                                      }
+                                                                    });
                                                             stopTimer();
                                                           });
                                                     },

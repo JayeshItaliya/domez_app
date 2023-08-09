@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:domez/commonModule/Constant.dart';
+import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
 import '../../commonModule/AppColor.dart';
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
@@ -17,10 +18,14 @@ import '../../commonModule/widget/common/mySeperator.dart';
 import '../../commonModule/widget/common/textInter.dart';
 import '../../commonModule/widget/common/textNunito.dart';
 import '../../commonModule/widget/search/simplecircularIcon.dart';
+import '../../commonModule/utils.dart';
 
 class BookingDetailsDomesFull extends StatefulWidget {
-  bool? linkAccess;
-  BookingDetailsDomesFull({Key? key,required this.linkAccess}) : super(key: key);
+  final bool? linkAccess;
+  final bool? isActive;
+
+  BookingDetailsDomesFull({Key? key, required this.linkAccess, required this.isActive})
+      : super(key: key);
 
   @override
   State<BookingDetailsDomesFull> createState() =>
@@ -51,9 +56,8 @@ class _BookingDetailsDomesFullState extends State<BookingDetailsDomesFull> {
   Timer? countdownTimer;
   Duration myDuration = Duration(hours: 1, minutes: 59, seconds: 60);
 
-  DateTime todayTime = DateTime.now();
+  DateTime torontoCurTime = DateTime.now();
 
-  DateTime currentTime = DateTime.now();
   DateTime bookingTime = DateTime.now();
 
   String timeRemaining = '';
@@ -76,6 +80,11 @@ class _BookingDetailsDomesFullState extends State<BookingDetailsDomesFull> {
 
   bool isDefaultTime = true;
   late BookingDetailsModel item;
+  String site = "";
+  String? _linkMessage;
+  bool _isCreatingLink = false;
+  List<int> errorDomeImage = [];
+
 
   @override
   void initState() {
@@ -83,12 +92,12 @@ class _BookingDetailsDomesFullState extends State<BookingDetailsDomesFull> {
     super.initState();
     item = mycontroller.myList[0];
     bookingCreatedTime = item.bookingCreatedAt;
-
+    torontoCurTime = item.currentTime;
+    _createDynamicLink(true, "/domeBooking", item.id.toString());
     setState(() {
       print("Timing Details");
       print(item.startDate);
       print(item.time.substring(0, 2));
-
 
       startTime = item.time.substring(0, 2);
       print(startTime);
@@ -111,24 +120,25 @@ class _BookingDetailsDomesFullState extends State<BookingDetailsDomesFull> {
       print(startTime);
       print(item.startDate);
 
-      timeRemaining = item.startDate + ' ' + startTime + ":${item.time.substring(3,5)}:00";
+      timeRemaining =
+          item.startDate + ' ' + startTime + ":${item.time.substring(3, 5)}:00";
 
       print(timeRemaining);
       bookingTime = DateTime.parse(timeRemaining);
       print(bookingTime);
 
       print(bookingTime.subtract(Duration(hours: 4)));
-      print(bookingCreatedTime.toLocal());
+      print(bookingCreatedTime);
 
       print("Default Time?");
       print(bookingTime.subtract(Duration(hours: 4)).millisecondsSinceEpoch);
-      print(bookingCreatedTime.toLocal().millisecondsSinceEpoch);
+      print(bookingCreatedTime.millisecondsSinceEpoch);
 
-      if (currentTime.difference(bookingCreatedTime.toLocal()).inHours < 2) {
+      if (torontoCurTime.difference(bookingCreatedTime).inHours < 2) {
         isCancelTimerAvailable = true;
         if (bookingTime.subtract(Duration(hours: 4)).millisecondsSinceEpoch <=
-            bookingCreatedTime.toLocal().millisecondsSinceEpoch) {
-          dur = bookingTime.difference(currentTime);
+            bookingCreatedTime.millisecondsSinceEpoch) {
+          dur = bookingTime.difference(torontoCurTime);
           print(dur);
           if (dur.inHours >= 2) {
             print("Less than 4 hours");
@@ -149,12 +159,11 @@ class _BookingDetailsDomesFullState extends State<BookingDetailsDomesFull> {
           isDefaultTime = false;
         } else {
           print("Time is bigger");
-          print("currentTime=>" + currentTime.toString());
+          print("torontoCurTime=>" + torontoCurTime.toString());
           print("bookingCreatedTimeUTC=>" + bookingCreatedTime.toString());
-          print("bookingCreatedTimeLocal=>" +
-              bookingCreatedTime.toLocal().toString());
+          print("bookingCreatedTimeLocal=>" + bookingCreatedTime.toString());
 
-          myDuration = currentTime.difference(bookingCreatedTime.toLocal());
+          myDuration = torontoCurTime.difference(bookingCreatedTime);
           print("myDuration1");
           print(myDuration);
 
@@ -220,7 +229,7 @@ class _BookingDetailsDomesFullState extends State<BookingDetailsDomesFull> {
     }
 
     //-----Before 2 hours of Booking Time-----
-    if (DateTime.now().millisecondsSinceEpoch >=
+    if (torontoCurTime.millisecondsSinceEpoch >=
         bookingTime.subtract(Duration(hours: 2)).millisecondsSinceEpoch) {
       isCancelTimerAvailable = false;
     }
@@ -256,27 +265,58 @@ class _BookingDetailsDomesFullState extends State<BookingDetailsDomesFull> {
                                 width: MediaQuery.of(context).size.width * 0.9,
                                 height: isCancelTimerAvailable
                                     ? cx.height * 0.5
-                                    : cx.responsive(cx.height * 1.15, cx.height * 1.2, cx.height * 1.25),
+                                    : cx.responsive(cx.height * 1.15,
+                                        cx.height * 1.2, cx.height * 1.25),
                                 child: Stack(
                                   clipBehavior: Clip.none,
                                   children: [
                                     Container(
+                                      decoration: errorDomeImage
+                                          .contains(cx.read(Keys.domeId))
+                                          ? BoxDecoration(
+                                          borderRadius:
+                                          BorderRadius.circular(20),
+                                          gradient: backShadowContainer(),
+
+                                          image: DecorationImage(
+                                            image: AssetImage(
+                                              Image1.domesAround,
+                                            ),
+                                            fit: BoxFit.cover,
+                                          ))
+                                          : BoxDecoration(
+                                          borderRadius: BorderRadius.all(
+                                              Radius.circular(cx.height / 26.68)),
+                                          image: DecorationImage(
+                                            image: NetworkImage(
+                                              mycontroller
+                                                  .myList[0].image.isEmpty
+                                                  ? "https://thumbs.dreamstime.com/b/indoor-stadium-view-behind-wicket-cricket-160851985.jpg"
+                                                  : mycontroller
+                                                  .myList[0].image,
+                                              scale:
+                                              cx.height > 800 ? 1.8 : 2.4,
+                                            ),
+                                            fit: BoxFit.cover,
+                                            onError: (Object e,
+                                                StackTrace? stackTrace) {
+                                              setState(() {
+                                                errorDomeImage
+                                                    .add(cx.read(Keys.domeId));
+                                              });
+                                            },
+                                          )
+                                      ),
                                       margin: EdgeInsets.only(
                                           left: 8, right: 8, top: 8),
                                       width: MediaQuery.of(context).size.width,
                                       height: cx.height / 4.3,
-                                      decoration: BoxDecoration(
-                                        borderRadius: BorderRadius.all(
-                                            Radius.circular(cx.height / 26.68)),
-                                        image: DecorationImage(
-                                            image: AssetImage(
-                                                "assets/images/step.png"),
-                                            fit: BoxFit.cover),
-                                      ),
                                     ),
+
+
                                     Positioned(
-                                      left: cx.responsive(50,38, 28),
-                                      top: cx.responsive(33,25, 20),
+                                      left: cx.responsive(50, 38, 28),
+                                      top: cx.responsive(33, 25, 20),
                                       child: InkWell(
                                         onTap: () {
                                           Get.back();
@@ -287,7 +327,7 @@ class _BookingDetailsDomesFullState extends State<BookingDetailsDomesFull> {
                                           child: SimpleCircularIconButton(
                                             iconData: Icons.arrow_back_ios_new,
                                             iconColor: Colors.black,
-                                            radius: cx.responsive(50,42, 37),
+                                            radius: cx.responsive(50, 42, 37),
                                           ),
                                         ),
                                       ),
@@ -468,14 +508,16 @@ class _BookingDetailsDomesFullState extends State<BookingDetailsDomesFull> {
                                                                                 .toString())
                                                                         .then(
                                                                             (value) {
-                                                                      setState(
-                                                                          () {
-                                                                        item.bookingStatus =
-                                                                            "Cancelled";
-                                                                        isCancelTimerAvailable =
-                                                                            false;
-                                                                      });
-                                                                      // mycontroller.setBid();
+                                                                              if(value==1){
+                                                                                setState(
+                                                                                        () {
+                                                                                      item.bookingStatus =
+                                                                                      "Cancelled";
+                                                                                      isCancelTimerAvailable =
+                                                                                      false;
+                                                                                    });
+                                                                              }
+
                                                                     });
                                                                     stopTimer();
                                                                   });
@@ -493,7 +535,7 @@ class _BookingDetailsDomesFullState extends State<BookingDetailsDomesFull> {
                                                                           .w700,
                                                                   fontSize: cx
                                                                       .responsive(
-                                                                    25,
+                                                                          25,
                                                                           21,
                                                                           18),
                                                                 ),
@@ -545,8 +587,9 @@ class _BookingDetailsDomesFullState extends State<BookingDetailsDomesFull> {
                                   hours1: hours1,
                                   minutes1: minutes1,
                                   seconds1: seconds1,
-                                  timerMessage:"You can cancel this booking within the given time",
-                                  paymentLink:mycontroller.myList[0].paymentLink)
+                                  timerMessage:
+                                      "You can cancel this booking within the given time",
+                                  paymentLink: item.paymentLink.toString())
                               : Padding(
                                   padding: EdgeInsets.only(
                                       top: 0,
@@ -669,9 +712,13 @@ class _BookingDetailsDomesFullState extends State<BookingDetailsDomesFull> {
                                         ),
                                         fullReceipt(),
                                         Container(
-                                          height: isCancelTimerAvailable
+                                          height: isCancelTimerAvailable ||
+                                              (item.bookingStatus
+                                                  .isEmpty  &&
+                                                  item.isRattingExist == 0&&
+                                                  item.isActive==2)
                                               ? cx.height / 7
-                                              : cx.height / 15,
+                                              : cx.height / 12,
                                           decoration: BoxDecoration(
                                               color: Colors.white,
                                               borderRadius: BorderRadius.only(
@@ -713,15 +760,16 @@ class _BookingDetailsDomesFullState extends State<BookingDetailsDomesFull> {
                                                                               .toString())
                                                                       .then(
                                                                           (value) {
-                                                                    setState(
-                                                                        () {
-                                                                      item.bookingStatus =
-                                                                          "Cancelled";
-                                                                      isCancelTimerAvailable =
-                                                                          false;
-                                                                    });
-                                                                    // mycontroller.setBid();
-                                                                  });
+                                                                            if(value==1){
+                                                                              setState(
+                                                                                      () {
+                                                                                    item.bookingStatus =
+                                                                                    "Cancelled";
+                                                                                    isCancelTimerAvailable =
+                                                                                    false;
+                                                                                  });
+                                                                            }
+                                                                          });
                                                                   stopTimer();
                                                                 });
                                                           },
@@ -738,7 +786,9 @@ class _BookingDetailsDomesFullState extends State<BookingDetailsDomesFull> {
                                                                         .w700,
                                                                 fontSize: cx
                                                                     .responsive(
-                                                                        25,21, 18),
+                                                                        25,
+                                                                        21,
+                                                                        18),
                                                               ),
                                                               Gap(7),
                                                             ],
@@ -746,7 +796,81 @@ class _BookingDetailsDomesFullState extends State<BookingDetailsDomesFull> {
                                                         ),
                                                       ],
                                                     )
-                                                  : Container(),
+                                                  : item.bookingStatus
+                                                              .isEmpty  &&
+                                                          item.isRattingExist == 0&&
+                                                          item.isActive==2
+                                                      ? Column(
+                                                          children: [
+                                                            Container(
+                                                              height:
+                                                                  cx.height / 9,
+                                                              decoration:
+                                                                  BoxDecoration(
+                                                                color: Colors
+                                                                    .white,
+                                                              ),
+                                                              child: Column(
+                                                                children: [
+                                                                  Gap(6),
+                                                                  Padding(
+                                                                    padding: EdgeInsets
+                                                                        .fromLTRB(
+                                                                            20.0,
+                                                                            0,
+                                                                            20,
+                                                                            0),
+                                                                    child:
+                                                                        const Divider(
+                                                                      color: Color(
+                                                                          0xFFE7F4EF),
+                                                                      thickness:
+                                                                          2,
+                                                                    ),
+                                                                  ),
+                                                                  InkWell(
+                                                                    onTap: () {
+                                                                      print(
+                                                                          "Review Booking");
+                                                                      msgpasscontroller
+                                                                          .clear();
+                                                                      starsValue =
+                                                                          5;
+                                                                      onRatingsPopUp(
+                                                                          ratingContext:
+                                                                              context,
+                                                                          domeId:
+                                                                              item.domeId);
+                                                                      // showDialog(
+                                                                      //     context: context,
+                                                                      //     builder: (BuildContext context) =>
+                                                                      //         onRatingsPopUp(context: context,domeId: item.domeId));
+                                                                    },
+                                                                    child:
+                                                                        Column(
+                                                                      children: [
+                                                                        Gap(7),
+                                                                        InterText(
+                                                                          text:
+                                                                              "Rate & Review",
+                                                                          color:
+                                                                              AppColor.lightGreen,
+                                                                          fontWeight:
+                                                                              FontWeight.w700,
+                                                                          fontSize: cx.responsive(
+                                                                              25,
+                                                                              21,
+                                                                              18),
+                                                                        ),
+                                                                      ],
+                                                                    ),
+                                                                  ),
+                                                                ],
+                                                              ),
+                                                            ),
+                                                          ],
+                                                        )
+                                                      : Container(),
                                             ],
                                           ),
                                         ),
@@ -793,9 +917,7 @@ class _BookingDetailsDomesFullState extends State<BookingDetailsDomesFull> {
                             children: [
                               NunitoText(
                                   text: "Field",
-                                  fontSize: cx.height > 800
-                                      ? 18
-                                      : 16,
+                                  fontSize: cx.height > 800 ? 18 : 16,
                                   fontWeight: FontWeight.w600,
                                   color: AppColor.grey),
                               Container(
@@ -814,9 +936,7 @@ class _BookingDetailsDomesFullState extends State<BookingDetailsDomesFull> {
                               ),
                               NunitoText(
                                   text: "Players",
-                                  fontSize: cx.height > 800
-                                      ? 18
-                                      : 16,
+                                  fontSize: cx.height > 800 ? 18 : 16,
                                   fontWeight: FontWeight.w600,
                                   color: AppColor.grey),
                               NunitoText(
@@ -833,9 +953,7 @@ class _BookingDetailsDomesFullState extends State<BookingDetailsDomesFull> {
                             children: [
                               NunitoText(
                                   text: "Date",
-                                  fontSize: cx.height > 800
-                                      ? 18
-                                      : 16,
+                                  fontSize: cx.height > 800 ? 18 : 16,
                                   fontWeight: FontWeight.w600,
                                   color: AppColor.grey),
                               NunitoText(
@@ -848,9 +966,7 @@ class _BookingDetailsDomesFullState extends State<BookingDetailsDomesFull> {
                               ),
                               NunitoText(
                                   text: "Time",
-                                  fontSize: cx.height > 800
-                                      ? 18
-                                      : 16,
+                                  fontSize: cx.height > 800 ? 18 : 16,
                                   fontWeight: FontWeight.w600,
                                   color: AppColor.grey),
                               NunitoText(
@@ -865,16 +981,15 @@ class _BookingDetailsDomesFullState extends State<BookingDetailsDomesFull> {
                     ),
                   ),
                   Padding(
-                    padding: EdgeInsets.only(left: 20, top: cx.height / 44.47,right: 3),
+                    padding: EdgeInsets.only(
+                        left: 20, top: cx.height / 44.47, right: 3),
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.start,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         NunitoText(
                             text: "Address",
-                            fontSize: cx.height > 800
-                                ? 18
-                                : 16,
+                            fontSize: cx.height > 800 ? 18 : 16,
                             fontWeight: FontWeight.w600,
                             color: AppColor.grey),
                         NunitoText(
@@ -914,13 +1029,13 @@ class _BookingDetailsDomesFullState extends State<BookingDetailsDomesFull> {
                             children: [
                               NunitoText(
                                   text: "Sub Total",
-                                  fontSize: cx.responsive(28,22, 18),
+                                  fontSize: cx.responsive(28, 22, 18),
                                   fontWeight: FontWeight.w600,
                                   color: AppColor.grey),
                               Gap(6),
                               NunitoText(
                                   text: "Service Fee",
-                                  fontSize: cx.responsive(28,22, 18),
+                                  fontSize: cx.responsive(28, 22, 18),
                                   fontWeight: FontWeight.w600,
                                   color: AppColor.grey),
                               Gap(6),
@@ -928,10 +1043,9 @@ class _BookingDetailsDomesFullState extends State<BookingDetailsDomesFull> {
                                 children: [
                                   NunitoText(
                                       text: "HST  ",
-                                      fontSize: cx.responsive(28,22, 18),
+                                      fontSize: cx.responsive(28, 22, 18),
                                       fontWeight: FontWeight.w600,
                                       color: AppColor.grey),
-
                                 ],
                               ),
                             ],
@@ -939,8 +1053,8 @@ class _BookingDetailsDomesFullState extends State<BookingDetailsDomesFull> {
                         ),
                         Padding(
                           padding: EdgeInsets.only(
-                            left: cx.responsive(5,3, 2),
-                            top: cx.responsive(14,10, 7),
+                            left: cx.responsive(5, 3, 2),
+                            top: cx.responsive(14, 10, 7),
                           ),
                           child: Container(
                             child: Column(
@@ -951,7 +1065,7 @@ class _BookingDetailsDomesFullState extends State<BookingDetailsDomesFull> {
                                     textAlign: TextAlign.end,
                                     text:
                                         "\$" + item.subTotal.toStringAsFixed(2),
-                                    fontSize: cx.responsive(28,22, 18),
+                                    fontSize: cx.responsive(28, 22, 18),
                                     fontWeight: FontWeight.w700,
                                     color: Color(0xFF757575)),
                                 Gap(4),
@@ -959,14 +1073,14 @@ class _BookingDetailsDomesFullState extends State<BookingDetailsDomesFull> {
                                     textAlign: TextAlign.end,
                                     text: "+ \$" +
                                         item.serviceFee.toStringAsFixed(2),
-                                    fontSize: cx.responsive(28,22, 18),
+                                    fontSize: cx.responsive(28, 22, 18),
                                     fontWeight: FontWeight.w700,
                                     color: Color(0xFF757575)),
                                 Gap(4),
                                 NunitoText(
                                     textAlign: TextAlign.end,
                                     text: "+ \$" + item.hst.toStringAsFixed(2),
-                                    fontSize: cx.responsive(28,22, 18),
+                                    fontSize: cx.responsive(28, 22, 18),
                                     fontWeight: FontWeight.w700,
                                     color: Color(0xFF757575)),
                               ],
@@ -995,18 +1109,14 @@ class _BookingDetailsDomesFullState extends State<BookingDetailsDomesFull> {
                         Container(
                           child: NunitoText(
                               text: "  Total",
-                              fontSize:
-                              cx.responsive(
-                                  27,22, 19),
+                              fontSize: cx.responsive(27, 22, 19),
                               fontWeight: FontWeight.w700,
                               color: Color(0xFF757575)),
                         ),
                         SenticText(
                             textAlign: TextAlign.start,
                             text: " \$" + item.totalAmount.toStringAsFixed(2),
-                            fontSize:
-                            cx.responsive(
-                                29,24, 21),
+                            fontSize: cx.responsive(29, 24, 21),
                             fontWeight: FontWeight.w600,
                             color: Color(0xFF07261A)),
                       ],
@@ -1029,14 +1139,14 @@ class _BookingDetailsDomesFullState extends State<BookingDetailsDomesFull> {
                           crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
                             CircleAvatar(
-                              radius: cx.responsive(25,22.5, 20),
+                              radius: cx.responsive(25, 22.5, 20),
                               backgroundColor: Colors.white,
                               child: CachedNetworkImage(
                                 imageUrl: cx.read("image"),
                                 imageBuilder: (context, imageProvider) =>
                                     CircleAvatar(
                                   backgroundColor: Colors.transparent,
-                                  radius: cx.responsive(25,20, 17),
+                                  radius: cx.responsive(25, 20, 17),
                                   backgroundImage: NetworkImage(
                                     cx.read("image"),
                                   ),
@@ -1044,7 +1154,7 @@ class _BookingDetailsDomesFullState extends State<BookingDetailsDomesFull> {
                                 fit: BoxFit.cover,
                                 placeholder: (context, url) => CircleAvatar(
                                   backgroundColor: Colors.transparent,
-                                  radius: cx.responsive(25,20, 17),
+                                  radius: cx.responsive(25, 20, 17),
                                   backgroundImage: AssetImage(
                                     Image1.anime,
                                   ),
@@ -1052,7 +1162,7 @@ class _BookingDetailsDomesFullState extends State<BookingDetailsDomesFull> {
                                 errorWidget: (context, url, error) =>
                                     CircleAvatar(
                                   backgroundColor: Colors.transparent,
-                                  radius: cx.responsive(25,20, 17),
+                                  radius: cx.responsive(25, 20, 17),
                                   backgroundImage: AssetImage(
                                     Image1.anime,
                                   ),
@@ -1065,7 +1175,7 @@ class _BookingDetailsDomesFullState extends State<BookingDetailsDomesFull> {
                               child: NunitoText(
                                 text: item.userInfo.email,
                                 fontWeight: FontWeight.w500,
-                                fontSize: cx.responsive(22,18, 16),
+                                fontSize: cx.responsive(22, 18, 16),
                                 color: Color(0xFF628477),
                                 textOverflow: TextOverflow.ellipsis,
                                 maxLines: 1,
@@ -1119,5 +1229,41 @@ class _BookingDetailsDomesFullState extends State<BookingDetailsDomesFull> {
 
   void stopTimer() {
     setState(() => countdownTimer!.cancel());
+  }
+
+  Future<void> _createDynamicLink(
+      bool short, String link, String bookingId) async {
+    setState(() {
+      _isCreatingLink = true;
+    });
+    final DynamicLinkParameters parameters = DynamicLinkParameters(
+      uriPrefix: Constant.kUriPrefix,
+      // link: Uri.parse(Constant.kUriPrefix + link+'?bookingId=45'),
+      link: Uri.parse(
+          "https://www.domez.io/domeBooking?bookingId=${bookingId.toString()}"),
+      // link: Uri.parse(Constant.kUriPrefix + link),
+      // longDynamicLink: Uri.parse(
+      //   'https://flutterfiretests.page.link?efr=0&ibi=io.flutter.plugins.firebase.dynamiclinksexample&apn=io.flutter.plugins.firebase.dynamiclinksexample&imv=0&amv=0&link=https%3A%2F%2Fexample%2Fhelloworld&ofl=https://ofl-example.com',
+      // ),
+      androidParameters: const AndroidParameters(
+        packageName: 'domez.io',
+        minimumVersion: 0,
+      ),
+    );
+
+    Uri url;
+    if (short) {
+      final ShortDynamicLink shortLink =
+          await dynamicLinks.buildShortLink(parameters);
+      url = shortLink.shortUrl;
+    } else {
+      url = await dynamicLinks.buildLink(parameters);
+    }
+
+    setState(() {
+      _linkMessage = url.toString();
+      _isCreatingLink = false;
+    });
+    print("Hey NORA" + _linkMessage.toString());
   }
 }

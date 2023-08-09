@@ -17,6 +17,8 @@ import 'Favourites.dart';
 import 'bookings.dart';
 import 'helpcenter.dart';
 import 'package:gap/gap.dart';
+import '../../commonModule/utils.dart';
+
 import '../../commonModule/widget/common/textNunito.dart';
 
 class ManageAccounts extends StatefulWidget {
@@ -28,16 +30,11 @@ class ManageAccounts extends StatefulWidget {
 
 class _ManageAccountsState extends State<ManageAccounts> {
   CommonController cx = Get.put(CommonController());
-  String? _linkMessage;
-  bool _isCreatingLink = false;
-  FirebaseDynamicLinks dynamicLinks = FirebaseDynamicLinks.instance;
 
 @override
   void initState() {
     // TODO: implement initState
     super.initState();
-    _createDynamicLink(true,"/domeBooking");
-
 
     print(cx.image.value);
     print(cx.read("image"));
@@ -158,7 +155,6 @@ class _ManageAccountsState extends State<ManageAccounts> {
                                 SignIn(curIndex: 4),
                                 transition: Transition.rightToLeft
                             );
-                            // onAlertSignIn(context:context);
                           },
                           child: SenticText(
                             text: "Sign In",
@@ -202,7 +198,11 @@ class _ManageAccountsState extends State<ManageAccounts> {
 
                     cx.read("islogin")?
                     Get.to(Favourites()):
-                    onAlertSignIn(context:context);
+                    onAlertSignIn(
+                        context:context,
+                        currentIndex: 4,
+                        noOfPopTimes: -1
+                    );
                   },
                   child: ListTile(
                     // dense: true,
@@ -227,7 +227,7 @@ class _ManageAccountsState extends State<ManageAccounts> {
                     cx.read("islogin")?
                     Get.to(
                       Bookings(isBackButton: true),):
-                      onAlertSignIn(context:context);
+                      onAlertSignIn(context:context,currentIndex: 4,noOfPopTimes: -1);
 
                   },
                   child: ListTile(
@@ -281,7 +281,7 @@ class _ManageAccountsState extends State<ManageAccounts> {
                     cx.read("islogin")?
                     Get.to(
                       RequestDomez(),):
-                    onAlertSignIn(context:context);
+                    onAlertSignIn(context:context,currentIndex: 4,noOfPopTimes: -1);
 
                   },
                   child: ListTile(
@@ -292,7 +292,7 @@ class _ManageAccountsState extends State<ManageAccounts> {
                       scale: cx.height > 800 ? 2 : 2.5,
                     ),
                     title: NunitoText(
-                      text: "Request Domez App",
+                      text: "Request Domez",
                       fontSize: cx.height > 800 ? 22 : 18,
                       fontWeight: FontWeight.w700,
                       color: Color(0xFF6A6A6A),
@@ -308,7 +308,7 @@ class _ManageAccountsState extends State<ManageAccounts> {
                     Get.to(
                       HelpCenter(),
                     ):
-                    onAlertSignIn(context:context);
+                    onAlertSignIn(context:context,currentIndex: 4,noOfPopTimes: -1);
 
                   },
                   child: ListTile(
@@ -340,7 +340,6 @@ class _ManageAccountsState extends State<ManageAccounts> {
                 Padding(
                   padding:  EdgeInsets.only(left: cx.width /18),
                   child: Column(
-                    // crossAxisAlignment: CrossAxisAlignment.center,
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
                       InkWell(
@@ -357,14 +356,14 @@ class _ManageAccountsState extends State<ManageAccounts> {
                         onTap: () async {
                           cx.read("islogin")?
                           Get.to(Settings()):
-                          onAlertSignIn(context:context);
+                          onAlertSignIn(context:context,currentIndex: 4,noOfPopTimes: -1);
                         },
                       ),
 
                       InkWell(
                         onTap: (){
                           Get.to(WebViewClass(
-                            "Terms And Conditions",
+                            "Terms & Conditions",
                               Constant.termsUrl
                           ));
                         },
@@ -372,7 +371,7 @@ class _ManageAccountsState extends State<ManageAccounts> {
                           height: 40,
                           width: cx.width,
                           child: NunitoText(
-                            text: "Terms And Conditions",
+                            text: "Terms & Conditions",
                             fontSize: cx.height > 800 ? 22 : 18,
                             fontWeight: FontWeight.w500,
                             color: Color(0xFF6A6A6A),
@@ -442,39 +441,5 @@ class _ManageAccountsState extends State<ManageAccounts> {
           ),
         ),
     );
-  }
-  Future<void> _createDynamicLink(bool short, String link) async {
-    setState(() {
-      _isCreatingLink = true;
-    });
-    final DynamicLinkParameters parameters = DynamicLinkParameters(
-      uriPrefix: Constant.kUriPrefix,
-      // link: Uri.parse(Constant.kUriPrefix + link+'?bookingId=45'),
-      link: Uri.parse("https://www.domez.io/domeBooking?bookingId=1"),
-      // link: Uri.parse(Constant.kUriPrefix + link),
-      // longDynamicLink: Uri.parse(
-      //   'https://flutterfiretests.page.link?efr=0&ibi=io.flutter.plugins.firebase.dynamiclinksexample&apn=io.flutter.plugins.firebase.dynamiclinksexample&imv=0&amv=0&link=https%3A%2F%2Fexample%2Fhelloworld&ofl=https://ofl-example.com',
-      // ),
-      androidParameters: const AndroidParameters(
-        packageName: 'domez.io',
-        minimumVersion: 0,
-      ),
-    );
-
-    Uri url;
-    if (short) {
-      final ShortDynamicLink shortLink =
-      await dynamicLinks.buildShortLink(parameters);
-      url = shortLink.shortUrl;
-    } else {
-      url = await dynamicLinks.buildLink(parameters);
-    }
-
-    setState(() {
-      _linkMessage = url.toString();
-      _isCreatingLink = false;
-    });
-    print("Hey NORA"+_linkMessage.toString());
-
   }
 }

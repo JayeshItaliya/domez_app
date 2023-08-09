@@ -11,7 +11,17 @@ import '../bottomSheet/bottomSheetSignUp.dart';
 
 
 class SignUp extends StatefulWidget {
-  const SignUp({Key? key}) : super(key: key);
+  final bool isBackButton;
+  final int curIndex;
+  final int noOfPopTime;
+
+  SignUp({
+    Key? key,
+    this.isBackButton =true,
+    this.curIndex=4,
+    this.noOfPopTime=-1
+
+  }) : super(key: key);
 
   @override
   State<SignUp> createState() => _SignUpState();
@@ -90,7 +100,7 @@ class _SignUpState extends State<SignUp> {
                           ),
                         ),
 
-                        BottomSheetSignUp(),
+                        BottomSheetSignUp(curIndex: widget.curIndex,noOfPopTime: widget.noOfPopTime),
 
 
                       ],

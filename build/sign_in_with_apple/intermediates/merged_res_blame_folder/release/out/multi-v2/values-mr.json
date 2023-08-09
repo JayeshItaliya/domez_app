@@ -1,0 +1,68 @@
+{
+    "logs": [
+        {
+            "outputFile": "/Users/SMIINFOTECH/Downloads/domez/build/sign_in_with_apple/intermediates/merged_res/release/values-mr/values-mr.xml",
+            "map": [
+                {
+                    "source": "/Users/SMIINFOTECH/.gradle/caches/transforms-3/347c304377591f46544dcf24cebb2078/transformed/core-1.6.0/res/values-mr/values-mr.xml",
+                    "from": {
+                        "startLines": "2",
+                        "startColumns": "4",
+                        "startOffsets": "55",
+                        "endColumns": "100",
+                        "endOffsets": "151"
+                    },
+                    "to": {
+                        "startLines": "6",
+                        "startColumns": "4",
+                        "startOffsets": "469",
+                        "endColumns": "100",
+                        "endOffsets": "565"
+                    }
+                },
+                {
+                    "source": "/Users/SMIINFOTECH/.gradle/caches/transforms-3/4adffd44c3a2c2d404872239221966df/transformed/browser-1.2.0/res/values-mr/values-mr.xml",
+                    "from": {
+                        "startLines": "2,3,4,5",
+                        "startColumns": "4,4,4,4",
+                        "startOffsets": "55,156,257,368",
+                        "endColumns": "100,100,110,100",
+                        "endOffsets": "151,252,363,464"
+                    }
+                }
+            ]
+        },
+        {
+            "outputFile": "/Users/SMIINFOTECH/Downloads/domez/build/sign_in_with_apple/intermediates/incremental/mergeReleaseResources/merged.dir/values-mr/values-mr.xml",
+            "map": [
+                {
+                    "source": "/Users/SMIINFOTECH/.gradle/caches/transforms-3/347c304377591f46544dcf24cebb2078/transformed/core-1.6.0/res/values-mr/values-mr.xml",
+                    "from": {
+                        "startLines": "2",
+                        "startColumns": "4",
+                        "startOffsets": "55",
+                        "endColumns": "100",
+                        "endOffsets": "151"
+                    },
+                    "to": {
+                        "startLines": "6",
+                        "startColumns": "4",
+                        "startOffsets": "469",
+                        "endColumns": "100",
+                        "endOffsets": "565"
+                    }
+                },
+                {
+                    "source": "/Users/SMIINFOTECH/.gradle/caches/transforms-3/4adffd44c3a2c2d404872239221966df/transformed/browser-1.2.0/res/values-mr/values-mr.xml",
+                    "from": {
+                        "startLines": "2,3,4,5",
+                        "startColumns": "4,4,4,4",
+                        "startOffsets": "55,156,257,368",
+                        "endColumns": "100,100,110,100",
+                        "endOffsets": "151,252,363,464"
+                    }
+                }
+            ]
+        }
+    ]
+}

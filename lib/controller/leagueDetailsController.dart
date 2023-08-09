@@ -10,8 +10,6 @@ class LeagueDetailsController extends GetxController {
 
   var myList = List<LeagueDetailsModel>.empty(growable: true).obs;
   var isDataProcessing = false.obs;
-
-  ScrollController scrollController = ScrollController();
   StreamSubscription? subscription;
   var isoffline = false.obs;
   // var did=''.obs;
@@ -38,7 +36,6 @@ class LeagueDetailsController extends GetxController {
 
   @override
   void onInit() {
-    print("SOHAM");
     print(leagueId.value);
 
     // TODO: implement onInit
@@ -47,7 +44,6 @@ class LeagueDetailsController extends GetxController {
   }
   Future<void> setLid(String leagueId,bool isFav) async {
     this.leagueId.value=leagueId;
-    print("DIWAKAR");
     print(this.leagueId.value);
     await getTask(isFav);
 

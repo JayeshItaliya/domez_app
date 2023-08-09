@@ -4,8 +4,10 @@ import 'package:auto_size_text/auto_size_text.dart';
 import 'package:avatar_stack/avatar_stack.dart';
 
 import 'package:domez/commonModule/Strings.dart';
+import 'package:flutter/gestures.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 import '../../../commonModule/AppColor.dart';
@@ -18,6 +20,7 @@ import '../../controller/commonController.dart';
 import '../../controller/domesDetailsController.dart';
 import '../../model/domesDetailsModel.dart';
 import '../homePage/ratings.dart';
+import '../../commonModule/utils.dart';
 
 class BottomSheetDomesPage extends StatefulWidget {
   const BottomSheetDomesPage({Key? key}) : super(key: key);
@@ -37,11 +40,13 @@ class _BottomSheetDomesPageState extends State<BottomSheetDomesPage> {
   late StreamSubscription<Position> positionStream;
   Completer<GoogleMapController> _controller = Completer();
   late CameraPosition _kGooglePlex;
+  // String formattedString='';
 
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
+
     // marker = Marker(
     //     markerId: MarkerId(mycontroller.myList[0].lat + mycontroller.myList[0].lng),
     //     infoWindow: InfoWindow(title: "Google Plex"),
@@ -53,6 +58,7 @@ class _BottomSheetDomesPageState extends State<BottomSheetDomesPage> {
     //   zoom: 14.4746,
     // );
   }
+
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
@@ -246,11 +252,14 @@ class _BottomSheetDomesPageState extends State<BottomSheetDomesPage> {
                                               ),
                                               NunitoText(
                                                 textAlign: TextAlign.start,
-                                                text: item.rattingData.images.length != 0?item
-                                                        .rattingData.totalReview
-                                                        .toString() +
-                                                    " Reviews":
-                                                    "0 Review",
+                                                text: item.rattingData.images
+                                                            .length !=
+                                                        0
+                                                    ? item.rattingData
+                                                            .totalReview
+                                                            .toString() +
+                                                        " Reviews"
+                                                    : "0 Review",
                                                 fontWeight: FontWeight.w600,
                                                 fontSize:
                                                     cx.height > 800 ? 17 : 15,
@@ -296,15 +305,24 @@ class _BottomSheetDomesPageState extends State<BottomSheetDomesPage> {
                                                       CrossAxisAlignment.start,
                                                   children: [
                                                     Container(
-                                                      width: item.rattingData.images.length<=1?
-                                                      cx.width / 9:
-                                                      item.rattingData.images.length<=3?
-                                                      cx.width / 6:
-                                                      cx.width / 4.5,
+                                                      width: item
+                                                                  .rattingData
+                                                                  .images
+                                                                  .length <=
+                                                              1
+                                                          ? cx.width / 9
+                                                          : item
+                                                                      .rattingData
+                                                                      .images
+                                                                      .length <=
+                                                                  3
+                                                              ? cx.width / 6
+                                                              : cx.width / 4.5,
                                                       alignment:
                                                           Alignment.centerLeft,
                                                       child: AvatarStack(
-                                                          height: cx.width /10.5,
+                                                          height:
+                                                              cx.width / 10.5,
                                                           borderColor:
                                                               Colors.white,
                                                           width: cx.width / 2,
@@ -329,13 +347,8 @@ class _BottomSheetDomesPageState extends State<BottomSheetDomesPage> {
                               ),
                             ),
                             Gap(cx.height / 37.06),
-                            NunitoText(
-                              textAlign: TextAlign.start,
-                              text: item.description,
-                              fontWeight: FontWeight.w400,
-                              fontSize: cx.height > 800 ? 18 : 16,
-                              color: Color(0xFF444444),
-                            ),
+
+                            handleDescription("Dome Description",item.description),
                             Gap(cx.height / 37.06),
                             Gap(10),
                             Container(
@@ -351,7 +364,6 @@ class _BottomSheetDomesPageState extends State<BottomSheetDomesPage> {
                                     height: 1.2,
                                     text: 'Location',
                                     fontSize: cx.height > 800 ? 20 : 18,
-
                                     fontWeight: FontWeight.w500,
                                   ),
                                   Gap(cx.height / 44.47),
@@ -395,13 +407,7 @@ class _BottomSheetDomesPageState extends State<BottomSheetDomesPage> {
                               fontWeight: FontWeight.w500,
                             ),
                             Gap(8),
-                            NunitoText(
-                              textAlign: TextAlign.start,
-                              text: item.benefitsDescription,
-                              fontWeight: FontWeight.w400,
-                              fontSize: cx.height > 800 ? 17 : 14,
-                              color: Color(0xFF444444),
-                            ),
+                            handleDescription("Amenities Description",item.benefitsDescription),
                             Gap(cx.height / 33.5),
                             Wrap(
                               spacing: 10,
@@ -484,8 +490,6 @@ class _BottomSheetDomesPageState extends State<BottomSheetDomesPage> {
     );
   }
 
-
-
   openMap(String lat, String Lng) async {
     String googleURL =
         "https://www.google.com/maps/search/?api=1&query=$lat,$Lng";
@@ -494,4 +498,112 @@ class _BottomSheetDomesPageState extends State<BottomSheetDomesPage> {
         ? await launchUrlString(googleURL)
         : throw 'Could not launch $googleURL';
   }
+
+  Widget handleDescription(String title,String desc) {
+
+    return RichText(
+      maxLines: 10,
+      overflow: TextOverflow.clip,
+      text: TextSpan(
+        text: '',
+
+        style: GoogleFonts.nunito(
+          color: Color(0xFF444444),
+          fontWeight: FontWeight.w500,
+          fontSize: cx.height > 800 ? 18 : 16,
+        ),
+        children: <TextSpan>[
+          desc.length > 150?TextSpan(
+            text: desc.substring(0,150),
+          ):TextSpan(
+            text: desc.toString(),
+          ),
+          desc.length > 150
+              ? TextSpan(
+                  text: '...Show More',
+                  style: GoogleFonts.nunito(
+                    fontWeight: FontWeight.bold,
+                    color: AppColor.darkGreen,
+                    fontSize: cx.height > 800 ? 18 : 16,
+                    // decoration: TextDecoration.underline,
+                  ),
+                  recognizer: TapGestureRecognizer()
+                    ..onTap = () {
+                      showDialog(
+                          barrierDismissible: false,
+                          context: context,
+                          builder: (BuildContext context) {
+                            return moreDialog(title,desc);
+                          });
+                    },
+                )
+              : TextSpan(text: ''),
+        ],
+      ),
+    );
+  }
+
+  Widget moreDialog(String title,String desc) =>
+      StatefulBuilder(builder: (BuildContext context,
+          StateSetter setState /*You can rename this!*/) {
+        return Dialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)),
+          insetPadding: EdgeInsets.zero,
+
+          child: Container(
+            width: cx.width / 1.15,
+            height: cx.height / 1.1,
+            child: Column(
+
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    IconButton(
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                      },
+                      icon: Icon(
+                        Icons.cancel,
+                        color: Colors.red,
+                        size: 30,
+                      ),
+                    ),
+                  ],
+                ),
+                SenticText(
+                    height: 1.2,
+                    text: title,
+                    fontSize: cx.height > 800 ? 23 : 20,
+                    fontWeight: FontWeight.w600,
+                    maxLines: 1,
+                    textAlign: TextAlign.center,
+                    textOverflow: TextOverflow.ellipsis,
+                    color: Colors.black),
+                Gap(cx.height / 50),
+                Expanded(
+                  child: ListView(
+                    shrinkWrap: true,
+                    children: <Widget>[
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(12.0,8,10,8),
+                        child: NunitoText(
+                          color: Color(0xFF444444),
+                          fontWeight: FontWeight.w500,
+                          fontSize: cx.height > 800 ? 18 : 16,
+                          textAlign: TextAlign.start,
+                          text: desc,
+                          maxLines: 100000,
+                        ),
+                      ),
+                      Gap(cx.height / 25),
+
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      });
 }

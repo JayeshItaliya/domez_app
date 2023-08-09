@@ -1,11 +1,10 @@
 import 'dart:ui';
+import 'package:domez/controller/bookListController.dart';
+import 'package:domez/controller/categoryController.dart';
 
-import 'package:geocoding/geocoding.dart';
-import 'package:geolocator/geolocator.dart';
 import '../../../commonModule/AppColor.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../../commonModule/Constant.dart';
 import '../../commonModule/Strings.dart';
 import 'package:gap/gap.dart';
 import '../../commonModule/widget/common/textInter.dart';
@@ -21,7 +20,7 @@ import '../homePage/domesAround.dart';
 import '../homePage/mostPopular.dart';
 import '../menuPage/bookings.dart';
 import '../menuPage/requestDomez.dart';
-
+import '../../commonModule/utils.dart';
 
 class BottomScroll extends StatefulWidget {
   const BottomScroll({Key? key}) : super(key: key);
@@ -41,76 +40,71 @@ class _BottomScrollState extends State<BottomScroll> {
     );
   }
 
-  var sController = DraggableScrollableController();
-  ScrollController scrollController1 = ScrollController();
   CommonController cx = Get.put(CommonController());
   final mycontroller = Get.put(DomesListController());
+  final booklistController = Get.put(BookListController());
   final dx = Get.put(DomesDetailsController());
   BookingDetailsController bx = Get.put(BookingDetailsController());
-  String location = '';
-  String Address = '';
+  CategoryController categoryController = Get.put(CategoryController());
+
   List<bool> mostPopular = [false, false, false];
   List<bool> domesAround = [false, false, false];
   List<int> errorRecentBooking = [];
   List<int> errorImagesMostPopular = [];
   List<int> errorImagesDomeAround = [];
   double scrollValue = 0.0;
-  var dragScrollKey = UniqueKey();
-  double mostPopularWidth= 0.0;
-
-  // DraggableScrollableController draggableScrollableController =
-  //     DraggableScrollableController();
+  double mostPopularWidth = 0.0;
 
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((timeStamp)=>addPostFrameBack);
+    WidgetsBinding.instance
+        .addPostFrameCallback((timeStamp) => addPostFrameBack);
 
-    mostPopularWidth=cx.responsive(300, 220, 200);
-
+    mostPopularWidth = cx.responsive(300, 220, 200);
+    print("cx.lat.value");
+    print("cx.lng.value");
+    print(cx.read(Keys.lat));
+    print(cx.read(Keys.lng));
     print(cx.lat.value);
     print(cx.lng.value);
-    cx.write(Keys.lat, cx.lat.value);
-    cx.write(Keys.lng, cx.lng.value);
-    print(cx.read("id"));
+
+
+    if(cx.read(Keys.lat)!=null&&cx.read(Keys.lng)!=null){
+      cx.lat.value=cx.read(Keys.lat);
+      cx.lat.value=cx.read(Keys.lng);
+    }
+
     cx.isReset.value = false;
-    print("Internet");
     print(mycontroller.isoffline.value);
     print(mycontroller.isDataProcessing1.value);
     print(mycontroller.isDataProcessing2.value);
     print(mycontroller.isDataProcessing3.value);
+
+    // mycontroller.getTask1(categoryController.sportid.value);
+    // mycontroller.getTask2(categoryController.sportid.value);
+    // mycontroller.getTask3(categoryController.sportid.value);
   }
 
   @override
   Widget build(BuildContext context) {
-    print("Hey shivakar");
     print(mycontroller.isoffline.value);
-    return WillPopScope(
-      onWillPop: () async {
-        if (!cx.isReset.value) {
-          cx.isReset.value = true;
-          print("Reset HomePaqe");
-          return false;
-        }
-        // sController.animateTo(0.0, duration: Duration(seconds: 1), curve: Curves.ease);
-        // scrollController1.animateTo(0, duration: Duration(seconds: 1), curve: Curves.ease);
-
-        return false;
-      },
-      child: Obx(() => mycontroller.isoffline.value
-          ? noInternetLottie()
-          : mycontroller.isDataProcessing1.value||
-          mycontroller.isDataProcessing2.value||
-          mycontroller.isDataProcessing3.value
-              ? Container(
-                  child: Center(
-                    child: CircularProgressIndicator(
-                      color: AppColor.darkGreen,
-                    ),
+    return Obx(() => mycontroller.isoffline.value
+        ? noInternetLottie()
+        : mycontroller.isDataProcessing1.value ||
+                mycontroller.isDataProcessing2.value ||
+                mycontroller.isDataProcessing3.value ||
+                categoryController.isDataProcessing.value
+            ? Container(
+                color: AppColor.bg,
+                child: Center(
+                  child: CircularProgressIndicator(
+                    color: AppColor.darkGreen,
                   ),
-                )
-              : DraggableScrollableSheet(
+                ),
+              )
+            : DraggableScrollableSheet(
                 // controller: sController,
                 // key: UniqueKey(),
                 // snap: true,
@@ -119,7 +113,6 @@ class _BottomScrollState extends State<BottomScroll> {
                 minChildSize: cx.height > 800 ? 0.58 : 0.54,
                 builder: (BuildContext draggableSheetContext,
                     ScrollController scrollController) {
-
                   return Obx(
                     () => ListView(
                       controller: scrollController,
@@ -130,56 +123,54 @@ class _BottomScrollState extends State<BottomScroll> {
                                 mycontroller.myList2.length == 0 &&
                                 mycontroller.myList3.length == 0
                             ? Container(
-                              height: cx.height,
-                              decoration: BoxDecoration(
-                                color: Colors.white,
-                                borderRadius: BorderRadius.circular(
-                                    cx.height / 22),
-                              ),
-                              child: Column(
-                                children: [
-                                  Gap(cx.height / 44.47),
-                                  Center(child: buildHandle()),
-                                  Gap(cx.height / 33.5),
-                                  Image.asset(
-                                      "assets/images/noData.png"),
-                                  Gap(cx.height / 7.5),
-                                  InkWell(
-                                    onTap: () {
-                                      cx.read("islogin")
-                                          ? Get.to(
-                                              RequestDomez(),
-                                            )
-                                          : onAlertSignIn(
-                                              context: context);
-                                    },
-                                    child: Padding(
-                                      padding:
-                                          const EdgeInsets.all(18.0),
-                                      child: Container(
-                                        height:
-                                            cx.responsive(110, 80, 60),
-                                        decoration: BoxDecoration(
-                                            color: Colors.black,
-                                            borderRadius:
-                                                BorderRadius.circular(
-                                                    50)),
-                                        // padding: EdgeInsets.all(cx.responsive(33,25, 20),),
-                                        child: Center(
-                                          child: NunitoText(
-                                            text: "Request Domez App",
-                                            fontWeight: FontWeight.w700,
-                                            fontSize: cx.responsive(
-                                                33, 25, 20),
-                                            color: Colors.white,
+                                height: cx.height,
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius:
+                                      BorderRadius.circular(cx.height / 22),
+                                ),
+                                child: Column(
+                                  children: [
+                                    Gap(cx.height / 44.47),
+                                    Center(child: buildHandle()),
+                                    Gap(cx.height / 33.5),
+                                    Image.asset("assets/images/noData.png"),
+                                    Gap(cx.height / 7.5),
+                                    InkWell(
+                                      onTap: () {
+                                        cx.read("islogin")
+                                            ? Get.to(
+                                                RequestDomez(),
+                                              )
+                                            : onAlertSignIn(
+                                                context: context,
+                                                currentIndex: 0,
+                                                noOfPopTimes: 1);
+                                      },
+                                      child: Padding(
+                                        padding: const EdgeInsets.all(18.0),
+                                        child: Container(
+                                          height: cx.responsive(110, 80, 60),
+                                          decoration: BoxDecoration(
+                                              color: Colors.black,
+                                              borderRadius:
+                                                  BorderRadius.circular(50)),
+                                          // padding: EdgeInsets.all(cx.responsive(33,25, 20),),
+                                          child: Center(
+                                            child: NunitoText(
+                                              text: "Request Domez",
+                                              fontWeight: FontWeight.w700,
+                                              fontSize:
+                                                  cx.responsive(33, 25, 20),
+                                              color: Colors.white,
+                                            ),
                                           ),
                                         ),
                                       ),
-                                    ),
-                                  )
-                                ],
-                              ),
-                            )
+                                    )
+                                  ],
+                                ),
+                              )
                             : Container(
                                 decoration: BoxDecoration(
                                   color: Colors.white,
@@ -189,8 +180,7 @@ class _BottomScrollState extends State<BottomScroll> {
                                 child: Column(
                                   crossAxisAlignment:
                                       CrossAxisAlignment.start,
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.start,
+                                  mainAxisAlignment: MainAxisAlignment.start,
                                   children: [
                                     Gap(cx.height / 44.47),
                                     Center(child: buildHandle()),
@@ -200,8 +190,7 @@ class _BottomScrollState extends State<BottomScroll> {
                                             ? Container()
                                             : Column(
                                                 crossAxisAlignment:
-                                                    CrossAxisAlignment
-                                                        .start,
+                                                    CrossAxisAlignment.start,
                                                 children: [
                                                   Row(
                                                     crossAxisAlignment:
@@ -212,28 +201,27 @@ class _BottomScrollState extends State<BottomScroll> {
                                                             .spaceBetween,
                                                     children: [
                                                       Padding(
-                                                        padding: EdgeInsets.only(
-                                                            left:
-                                                                cx.height /
-                                                                    23.82),
+                                                        padding:
+                                                            EdgeInsets.only(
+                                                                left:
+                                                                    cx.height /
+                                                                        23.82),
                                                         child: SenticText(
                                                           text:
                                                               'Recent Bookings',
                                                           fontSize:
                                                               cx.responsive(
-                                                                  26,
-                                                                  20,
-                                                                  16),
+                                                                  26, 20, 16),
                                                           fontWeight:
-                                                              FontWeight
-                                                                  .w500,
+                                                              FontWeight.w500,
                                                           textAlign:
-                                                              TextAlign
-                                                                  .left,
+                                                              TextAlign.left,
                                                         ),
                                                       ),
                                                       InkWell(
                                                         onTap: () {
+                                                          booklistController.page = 1;
+                                                          booklistController.getTask("1");
                                                           Get.to(Bookings(
                                                             isBackButton:
                                                                 true,
@@ -266,11 +254,9 @@ class _BottomScrollState extends State<BottomScroll> {
                                                   ),
                                                   Gap(cx.height / 66.7),
                                                   Container(
-                                                    height:
-                                                        cx.height / 6.069,
+                                                    height: cx.height / 6.069,
                                                     child: Obx(
-                                                      () =>
-                                                          ListView.builder(
+                                                      () => ListView.builder(
                                                         shrinkWrap: true,
                                                         physics:
                                                             BouncingScrollPhysics(),
@@ -282,8 +268,7 @@ class _BottomScrollState extends State<BottomScroll> {
                                                                 .length,
                                                         // reverse: true,
                                                         itemBuilder:
-                                                            (context,
-                                                                index) {
+                                                            (context, index) {
                                                           DomesListModel
                                                               item =
                                                               mycontroller
@@ -324,22 +309,24 @@ class _BottomScrollState extends State<BottomScroll> {
                                                                             cx.height / 26.68)
                                                                     : Container(),
                                                                 Container(
-                                                                  height: cx
-                                                                          .height /
-                                                                      6.06,
-                                                                  width: cx
-                                                                          .width /
-                                                                      1.84,
+                                                                  height:
+                                                                      cx.height /
+                                                                          6.06,
+                                                                  width:
+                                                                      cx.width /
+                                                                          1.84,
                                                                   // color: Colors.white,
                                                                   decoration: BoxDecoration(
                                                                       color: Colors
                                                                           .white,
                                                                       border: Border.all(
-                                                                          color: AppColor.bg,
-                                                                          width: 1.2),
-                                                                      borderRadius: BorderRadius.circular(12)),
-                                                                  child:
-                                                                      Row(
+                                                                          color: AppColor
+                                                                              .bg,
+                                                                          width:
+                                                                              1.2),
+                                                                      borderRadius:
+                                                                          BorderRadius.circular(12)),
+                                                                  child: Row(
                                                                     children: [
                                                                       Padding(
                                                                         padding:
@@ -369,8 +356,10 @@ class _BottomScrollState extends State<BottomScroll> {
                                                                                       });
                                                                                     },
                                                                                   )),
-                                                                          width: cx.width * 0.18,
-                                                                          height: cx.height / 6.06,
+                                                                          width:
+                                                                              cx.width * 0.18,
+                                                                          height:
+                                                                              cx.height / 6.06,
                                                                         ),
                                                                       ),
                                                                       Column(
@@ -421,9 +410,9 @@ class _BottomScrollState extends State<BottomScroll> {
                                                                   ),
                                                                 ),
                                                                 SizedBox(
-                                                                  width: cx
-                                                                          .height /
-                                                                      55.58,
+                                                                  width:
+                                                                      cx.height /
+                                                                          55.58,
                                                                 )
                                                               ],
                                                             ),
@@ -450,10 +439,9 @@ class _BottomScrollState extends State<BottomScroll> {
                                                 },
                                                 child: Padding(
                                                   padding: EdgeInsets.only(
-                                                      left:
-                                                          cx.height / 26.68,
-                                                      right: cx.height /
-                                                          19.057),
+                                                      left: cx.height / 26.68,
+                                                      right:
+                                                          cx.height / 19.057),
                                                   child: Row(
                                                     mainAxisAlignment:
                                                         MainAxisAlignment
@@ -466,58 +454,60 @@ class _BottomScrollState extends State<BottomScroll> {
                                                                     83.375),
                                                         child: SenticText(
                                                           height: 1.2,
-                                                          text: cx.width >
-                                                                  550
+                                                          text: cx.width > 550
                                                               ? 'Most Popular'
                                                               : 'Most\nPopular',
                                                           fontSize:
-                                                              cx.height >
-                                                                      800
+                                                              cx.height > 800
                                                                   ? 30
                                                                   : 26,
                                                           fontWeight:
-                                                              FontWeight
-                                                                  .w500,
+                                                              FontWeight.w500,
                                                         ),
                                                       ),
-                                                      Container(
-                                                        height: cx.width >
-                                                                550
-                                                            ? cx.height / 35
-                                                            : cx.height /
-                                                                20.21,
-                                                        width: cx.width >
-                                                                550
-                                                            ? cx.height / 35
-                                                            : cx.height /
-                                                                20.21,
-                                                        decoration: BoxDecoration(
-                                                            border: Border.all(
+                                                      mycontroller.myList2
+                                                                  .length ==
+                                                              0
+                                                          ? Container()
+                                                          : Container(
+                                                              height: cx.width >
+                                                                      550
+                                                                  ? cx.height /
+                                                                      35
+                                                                  : cx.height /
+                                                                      20.21,
+                                                              width: cx.width >
+                                                                      550
+                                                                  ? cx.height /
+                                                                      35
+                                                                  : cx.height /
+                                                                      20.21,
+                                                              decoration: BoxDecoration(
+                                                                  border: Border.all(
+                                                                      color: AppColor
+                                                                          .darkGreen),
+                                                                  borderRadius:
+                                                                      BorderRadius.circular(cx.height /
+                                                                          13.34)),
+                                                              child: Icon(
+                                                                Icons
+                                                                    .arrow_forward_ios_rounded,
+                                                                size: cx.width >
+                                                                        550
+                                                                    ? cx.height /
+                                                                        60
+                                                                    : cx.height /
+                                                                        44.47,
                                                                 color: AppColor
-                                                                    .darkGreen),
-                                                            borderRadius: BorderRadius
-                                                                .circular(cx
-                                                                        .height /
-                                                                    13.34)),
-                                                        child: Icon(
-                                                          Icons
-                                                              .arrow_forward_ios_rounded,
-                                                          size: cx.width > 550
-                                                              ? cx.height /
-                                                                  60
-                                                              : cx.height /
-                                                                  44.47,
-                                                          color: AppColor
-                                                              .darkGreen,
-                                                        ),
-                                                      )
+                                                                    .darkGreen,
+                                                              ),
+                                                            )
                                                     ],
                                                   ),
                                                 ),
                                               ),
                                               Gap(cx.height / 33.5),
-                                              mycontroller.myList2.length ==
-                                                      0
+                                              mycontroller.myList2.length == 0
                                                   ? Column(
                                                       mainAxisAlignment:
                                                           MainAxisAlignment
@@ -526,18 +516,14 @@ class _BottomScrollState extends State<BottomScroll> {
                                                           CrossAxisAlignment
                                                               .center,
                                                       children: [
-                                                        Gap(cx.height *
-                                                            0.1),
+                                                        Gap(cx.height * 0.1),
                                                         Container(
                                                           height:
-                                                              cx.height *
-                                                                  0.2,
+                                                              cx.height * 0.2,
                                                           // height: 200,
-                                                          color:
-                                                              Colors.white,
-                                                          alignment:
-                                                              Alignment
-                                                                  .topCenter,
+                                                          color: Colors.white,
+                                                          alignment: Alignment
+                                                              .topCenter,
                                                           child: NunitoText(
                                                               text:
                                                                   'No Data Found',
@@ -556,7 +542,8 @@ class _BottomScrollState extends State<BottomScroll> {
                                                       ],
                                                     )
                                                   : Container(
-                                                      height:cx.responsive(350, 300, 265),
+                                                      height: cx.responsive(
+                                                          350, 300, 265),
                                                       decoration:
                                                           BoxDecoration(
                                                         color: Colors
@@ -570,8 +557,8 @@ class _BottomScrollState extends State<BottomScroll> {
                                                           .centerLeft,
                                                       // width: 250,
                                                       child: Obx(
-                                                        () => ListView
-                                                            .builder(
+                                                        () =>
+                                                            ListView.builder(
                                                           shrinkWrap: true,
                                                           physics:
                                                               BouncingScrollPhysics(),
@@ -592,31 +579,43 @@ class _BottomScrollState extends State<BottomScroll> {
 
                                                             return InkWell(
                                                               onTap: () {
+                                                                cx.write(
+                                                                    Keys.image,
+                                                                    item.image);
                                                                 Get.to(
-                                                                    DomePage(
-                                                                      isFav: item.isFav,
-                                                                      domeId: item.id.toString(),
-                                                                    ),);
+                                                                  DomePage(
+                                                                    isFav: item
+                                                                        .isFav,
+                                                                    domeId: item
+                                                                        .id
+                                                                        .toString(),
+                                                                  ),
+                                                                );
                                                                 // dx.setDid(
                                                                 //     item.id
                                                                 //         .toString(),
                                                                 //     item.isFav);
                                                               },
-                                                              child:
-                                                                  Padding(
+                                                              child: Padding(
                                                                 padding: EdgeInsets.only(
                                                                     left: index ==
                                                                             0
                                                                         ? cx.height /
                                                                             26.68
                                                                         : 0,
-                                                                    right: cx.height /
+                                                                    right: cx
+                                                                            .height /
                                                                         51.31),
                                                                 child: Card(
                                                                   shape:
                                                                       RoundedRectangleBorder(
-                                                                    borderRadius:
-                                                                        BorderRadius.circular(cx.responsive(cx.width /22,cx.width /15,cx.width /9)),
+                                                                    borderRadius: BorderRadius.circular(cx.responsive(
+                                                                        cx.width /
+                                                                            22,
+                                                                        cx.width /
+                                                                            15,
+                                                                        cx.width /
+                                                                            9)),
                                                                   ),
                                                                   color: Colors
                                                                       .transparent,
@@ -626,10 +625,14 @@ class _BottomScrollState extends State<BottomScroll> {
                                                                       Clip.antiAliasWithSaveLayer,
                                                                   child:
                                                                       Container(
-                                                                        height:cx.height / 2.78,
-                                                                        width:mostPopularWidth,
+                                                                    height: cx
+                                                                            .height /
+                                                                        2.78,
+                                                                    width:
+                                                                        mostPopularWidth,
                                                                     // color: Colors.white,
-                                                                    decoration: errorImagesMostPopular.contains(item.id)
+                                                                    decoration: errorImagesMostPopular
+                                                                            .contains(item.id)
                                                                         ? BoxDecoration(
                                                                             image: DecorationImage(
                                                                               image: AssetImage(Image1.domesAround),
@@ -650,14 +653,14 @@ class _BottomScrollState extends State<BottomScroll> {
                                                                           ),
                                                                     child:
                                                                         Container(
-                                                                      height:
-                                                                          cx.height / 2.78,
-                                                                      width:cx.width / 2,
-                                                                      decoration: BoxDecoration(
-                                                                          gradient: LinearGradient(begin: Alignment.topCenter, end: Alignment.bottomCenter, colors: [
-                                                                        Colors.black.withOpacity(.0),
-                                                                        Colors.black.withOpacity(.7),
-                                                                      ])),
+                                                                      height: cx.height /
+                                                                          2.78,
+                                                                      width:
+                                                                          cx.width /
+                                                                              2,
+                                                                      decoration:
+                                                                          BoxDecoration(
+                                                                              gradient:backShadowContainer()),
                                                                       child:
                                                                           Column(
                                                                         mainAxisAlignment:
@@ -667,7 +670,7 @@ class _BottomScrollState extends State<BottomScroll> {
                                                                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                                                             children: [
                                                                               Container(
-                                                                                width: mostPopularWidth* 0.55,
+                                                                                width: mostPopularWidth * 0.55,
                                                                                 height: cx.responsive(50, 42, 38),
                                                                                 child: ListView.builder(
                                                                                     shrinkWrap: true,
@@ -695,7 +698,7 @@ class _BottomScrollState extends State<BottomScroll> {
                                                                                   height: cx.responsive(70, 62, 55),
                                                                                   alignment: Alignment(0, 0),
                                                                                   width: cx.responsive(68, 60, 53),
-                                                                                  decoration: BoxDecoration(color: Color(0xFFFFE68A), borderRadius: BorderRadius.circular(cx.responsive(20,14,12))),
+                                                                                  decoration: BoxDecoration(color: Color(0xFFFFE68A), borderRadius: BorderRadius.circular(cx.responsive(20, 14, 12))),
                                                                                   child: Column(
                                                                                     mainAxisAlignment: MainAxisAlignment.center,
                                                                                     crossAxisAlignment: CrossAxisAlignment.center,
@@ -783,7 +786,7 @@ class _BottomScrollState extends State<BottomScroll> {
                                                                                           color: Colors.white,
                                                                                         ),
                                                                                         Container(
-                                                                                          width: mostPopularWidth* 0.55,
+                                                                                          width: mostPopularWidth * 0.55,
                                                                                           child: NunitoText(
                                                                                             shadow: <Shadow>[
                                                                                               Shadow(
@@ -810,7 +813,6 @@ class _BottomScrollState extends State<BottomScroll> {
                                                                                       ],
                                                                                     ),
                                                                                     Gap(5),
-
                                                                                   ],
                                                                                 ),
                                                                                 Container(
@@ -824,7 +826,7 @@ class _BottomScrollState extends State<BottomScroll> {
                                                                                         child: Icon(
                                                                                           item.isFav ? Icons.favorite : Icons.favorite_border_rounded,
                                                                                           color: Colors.white,
-                                                                                          size:  28,
+                                                                                          size: 28,
                                                                                         ),
                                                                                         onTap: () {
                                                                                           if (cx.read("islogin")) {
@@ -836,8 +838,8 @@ class _BottomScrollState extends State<BottomScroll> {
                                                                                             });
                                                                                             cx.favourite(uid: cx.read("id").toString(), type: "1", did: item.id.toString());
                                                                                           } else {
-                                                                                            // Get.to(SignIn());
-                                                                                            onAlertSignIn(context: context);
+                                                                                            // Get.to(SignIn())
+                                                                                            onAlertSignIn(context: context, currentIndex: 0, noOfPopTimes: 1);
                                                                                           }
                                                                                         },
                                                                                       ),
@@ -850,7 +852,6 @@ class _BottomScrollState extends State<BottomScroll> {
                                                                                     ],
                                                                                   ),
                                                                                 ),
-
                                                                               ],
                                                                             ),
                                                                           ),
@@ -872,8 +873,7 @@ class _BottomScrollState extends State<BottomScroll> {
                                       children: [
                                         InkWell(
                                           onTap: () {
-                                            if (mycontroller
-                                                    .myList3.length !=
+                                            if (mycontroller.myList3.length !=
                                                 0) {
                                               Get.to(DomesAroundYou());
                                             }
@@ -895,68 +895,68 @@ class _BottomScrollState extends State<BottomScroll> {
                                                   fontSize: cx.height > 800
                                                       ? 30
                                                       : 26,
-                                                  fontWeight:
-                                                      FontWeight.w500,
+                                                  fontWeight: FontWeight.w500,
                                                 ),
-                                                Container(
-                                                  height: cx.width > 550
-                                                      ? cx.height / 35
-                                                      : cx.height / 20.21,
-                                                  width: cx.width > 550
-                                                      ? cx.height / 35
-                                                      : cx.height / 20.21,
-                                                  decoration: BoxDecoration(
-                                                      border: Border.all(
+                                                mycontroller.myList3.length ==
+                                                        0
+                                                    ? Container()
+                                                    : Container(
+                                                        height: cx.width > 550
+                                                            ? cx.height / 35
+                                                            : cx.height /
+                                                                20.21,
+                                                        width: cx.width > 550
+                                                            ? cx.height / 35
+                                                            : cx.height /
+                                                                20.21,
+                                                        decoration: BoxDecoration(
+                                                            border: Border.all(
+                                                                color: AppColor
+                                                                    .darkGreen),
+                                                            borderRadius:
+                                                                BorderRadius.circular(
+                                                                    cx.height /
+                                                                        13.34)),
+                                                        child: Icon(
+                                                          Icons
+                                                              .arrow_forward_ios_rounded,
+                                                          size: cx.width > 550
+                                                              ? cx.height / 60
+                                                              : cx.height /
+                                                                  44.47,
                                                           color: AppColor
-                                                              .darkGreen),
-                                                      borderRadius:
-                                                          BorderRadius
-                                                              .circular(
-                                                                  cx.height /
-                                                                      13.34)),
-                                                  child: Icon(
-                                                    Icons
-                                                        .arrow_forward_ios_rounded,
-                                                    size: cx.width > 550
-                                                        ? cx.height / 60
-                                                        : cx.height / 44.47,
-                                                    color:
-                                                        AppColor.darkGreen,
-                                                  ),
-                                                )
+                                                              .darkGreen,
+                                                        ),
+                                                      )
                                               ],
                                             ),
                                           ),
                                         ),
-                                        cx.read(Keys.lat) == '' &&
-                                                cx.read(Keys.lng) == '' &&
-                                                cx.lat.value == '' &&
-                                                cx.lng.value == ''
+                                        cx.read(Keys.lat) == '' ||
+                                                cx.read(Keys.lng) == ''||
+                                            cx.read(Keys.lat) == null ||
+                                            cx.read(Keys.lng) == null
                                             ? Row(
                                                 mainAxisAlignment:
-                                                    MainAxisAlignment
-                                                        .center,
+                                                    MainAxisAlignment.center,
                                                 crossAxisAlignment:
-                                                    CrossAxisAlignment
-                                                        .center,
+                                                    CrossAxisAlignment.center,
                                                 children: [
                                                   // Gap(cx.height/33.5),
                                                   Column(
                                                     children: [
-                                                      Gap(cx.height / 80),
+                                                      Gap(cx.height / 60),
                                                       InkWell(
                                                         onTap: () {
                                                           getCurrentLocation();
                                                         },
                                                         child: Container(
                                                           height:
-                                                              cx.height /
-                                                                  12,
-                                                          width: cx.width *
-                                                              0.55,
-                                                          alignment:
-                                                              Alignment
-                                                                  .center,
+                                                              cx.height / 12,
+                                                          width:
+                                                              cx.width * 0.55,
+                                                          alignment: Alignment
+                                                              .center,
                                                           decoration:
                                                               BoxDecoration(
                                                             borderRadius:
@@ -980,8 +980,8 @@ class _BottomScrollState extends State<BottomScroll> {
                                                                         800
                                                                     ? 20
                                                                     : 18,
-                                                            color: Colors
-                                                                .white,
+                                                            color:
+                                                                Colors.white,
                                                             // height: 2.3,
                                                             textOverflow:
                                                                 TextOverflow
@@ -990,6 +990,7 @@ class _BottomScrollState extends State<BottomScroll> {
                                                           ),
                                                         ),
                                                       ),
+                                                      Gap(cx.height / 30),
                                                     ],
                                                   ),
                                                 ],
@@ -1025,10 +1026,11 @@ class _BottomScrollState extends State<BottomScroll> {
                                                                     textAlign:
                                                                         TextAlign
                                                                             .center,
-                                                                    fontSize: cx.responsive(
-                                                                        33,
-                                                                        27,
-                                                                        23),
+                                                                    fontSize:
+                                                                        cx.responsive(
+                                                                            33,
+                                                                            27,
+                                                                            23),
                                                                     color: Colors
                                                                         .grey
                                                                         .shade600),
@@ -1036,13 +1038,14 @@ class _BottomScrollState extends State<BottomScroll> {
                                                             ],
                                                           )
                                                         : ListView.builder(
-                                                            shrinkWrap:
-                                                                true,
+                                                            shrinkWrap: true,
                                                             physics:
                                                                 BouncingScrollPhysics(),
                                                             // scrollDirection: Axis.horizontal,
                                                             itemCount:
-                                                                mycontroller.myList3.length,
+                                                                mycontroller
+                                                                    .myList3
+                                                                    .length,
                                                             itemBuilder:
                                                                 (context,
                                                                     index) {
@@ -1054,17 +1057,24 @@ class _BottomScrollState extends State<BottomScroll> {
 
                                                               return Column(
                                                                 children: [
-                                                                  Gap(cx.height /33.5),
+                                                                  Gap(cx.height /
+                                                                      33.5),
                                                                   InkWell(
                                                                     onTap:
                                                                         () {
-                                                                          Get.to(
-                                                                              DomePage(
-                                                                                isFav: item.isFav,
-                                                                                domeId: item.id.toString(),
-                                                                              ),
-                                                                          );
-                                                                              // arguments: false,);
+                                                                      cx.write(
+                                                                          Keys.image,
+                                                                          item.image);
+
+                                                                      Get.to(
+                                                                        DomePage(
+                                                                          isFav:
+                                                                              item.isFav,
+                                                                          domeId:
+                                                                              item.id.toString(),
+                                                                        ),
+                                                                      );
+                                                                      // arguments: false,);
                                                                       // dx.setDid(
                                                                       //     item.id.toString(),
                                                                       //     item.isFav);
@@ -1073,8 +1083,8 @@ class _BottomScrollState extends State<BottomScroll> {
                                                                         Padding(
                                                                       padding:
                                                                           EdgeInsets.only(
-                                                                        left:
-                                                                            cx.height / 26.68,
+                                                                        left: cx.height /
+                                                                            26.68,
                                                                       ),
                                                                       child:
                                                                           Row(
@@ -1155,8 +1165,7 @@ class _BottomScrollState extends State<BottomScroll> {
                                                                                                 cx.favourite(uid: cx.read("id").toString(), type: "1", did: item.id.toString());
                                                                                               } else {
                                                                                                 print(index);
-                                                                                                // Get.to(SignIn());
-                                                                                                onAlertSignIn(context: context);
+                                                                                                onAlertSignIn(context: context, currentIndex: 0, noOfPopTimes: 1);
                                                                                               }
                                                                                             },
                                                                                           ),
@@ -1189,7 +1198,6 @@ class _BottomScrollState extends State<BottomScroll> {
                                                                                                   color: Color(0xFF07261A),
                                                                                                   fontSize: cx.responsive(22, 18, 16),
                                                                                                   textAlign: TextAlign.center,
-
                                                                                                 ),
                                                                                               ),
                                                                                               InterText(
@@ -1201,8 +1209,7 @@ class _BottomScrollState extends State<BottomScroll> {
                                                                                               ),
                                                                                             ],
                                                                                           ),
-                                                                                        )
-                                                                                    ),
+                                                                                        )),
                                                                                     Positioned(
                                                                                         left: cx.height / 44.47,
                                                                                         bottom: cx.height / 44.47,
@@ -1308,80 +1315,8 @@ class _BottomScrollState extends State<BottomScroll> {
                     ),
                   );
                 },
-              )),
-    );
+              ));
   }
 
-  Future<void> getCurrentLocation() async {
-    Position position = await _getGeoLocationPosition();
-    location = 'Lat: ${position.latitude} , Long: ${position.longitude}';
-    GetAddressFromLatLong(position);
-
-    cx.lat.value = position.latitude.toString();
-    cx.lng.value = position.longitude.toString();
-
-    print(cx.lat.value);
-    print(cx.lng.value);
-    cx.write(Keys.lat, cx.lat.value);
-    cx.write(Keys.lng, cx.lng.value);
-    debugPrint(location);
-    debugPrint(Address);
-  }
-
-  Future<Position> _getGeoLocationPosition() async {
-    bool serviceEnabled;
-    LocationPermission permission;
-    serviceEnabled = await Geolocator.isLocationServiceEnabled();
-
-    if (!serviceEnabled) {
-        permission = await Geolocator.requestPermission();
-
-      await Geolocator.openLocationSettings();
-      // return Future.error('Location services are disabled.');
-    }
-    permission = await Geolocator.checkPermission();
-    print("permission");
-    print(permission);
-
-
-    if (permission == LocationPermission.denied) {
-      permission = await Geolocator.requestPermission();
-      // await Geolocator.openLocationSettings();
-
-      if (permission == LocationPermission.denied) {
-        return Future.error('Location permissions are denied');
-      }
-    }
-
-
-
-    if (permission == LocationPermission.deniedForever) {
-      await Geolocator.openLocationSettings();
-
-      return Future.error(
-          'Location permissions are permanently denied, we cannot request permissions.');
-    }
-
-    return await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.high);
-  }
-
-
-  Future<void> GetAddressFromLatLong(Position position) async {
-    List<Placemark> placemarks =
-        await placemarkFromCoordinates(position.latitude, position.longitude);
-    debugPrint("++++++" + placemarks.toString());
-    Placemark place = placemarks[0];
-    Address =
-        '${place.street}, ${place.subLocality}, ${place.locality}, ${place.postalCode}, ${place.country}';
-
-    cx.searchDome.value = place.locality! + "," + place.country.toString();
-
-    debugPrint(cx.searchDome.value.toString());
-  }
-  void addPostFrameBack(
-      FrameCallback callback){
-
-  }
-
+  void addPostFrameBack(FrameCallback callback) {}
 }

@@ -8,27 +8,32 @@ import 'package:flutter/material.dart';
 import 'package:ticket_widget/ticket_widget.dart';
 import '../../../../controller/commonController.dart';
 import '../../../../main_page.dart';
-import '../../../commonModule/Constant.dart';
 import '../../../commonModule/Strings.dart';
 import 'package:gap/gap.dart';
+import '../../../commonModule/utils.dart';
 import '../../../commonModule/widget/common/mySeperator.dart';
 import '../../../commonModule/widget/common/textInter.dart';
 import '../../../commonModule/widget/common/textNunito.dart';
+
 import '../../../commonModule/widget/common/textSentic.dart';
 
 class BookingReceipt extends StatefulWidget {
-  String email;
-  String image;
-  String bookingId;
-  String paymentLink;
+  final String email;
+  final String image;
+  final String bookingId;
+  final String paymentLink;
+  final DateTime? bookingTime;
+  final DateTime? currentTime;
 
-  BookingReceipt(
-      {Key? key,
-      required this.email,
-      required this.image,
-      required this.bookingId,
-      required this.paymentLink})
-      : super(key: key);
+  BookingReceipt({
+    Key? key,
+    required this.email,
+    required this.image,
+    required this.bookingId,
+    required this.paymentLink,
+    required this.bookingTime,
+    required this.currentTime,
+  }) : super(key: key);
 
   @override
   State<BookingReceipt> createState() => _BookingReceiptState();
@@ -43,8 +48,6 @@ class _BookingReceiptState extends State<BookingReceipt> {
 
   Timer? countdownTimer;
   Duration myDuration = Duration(hours: 1, minutes: 59, seconds: 60);
-
-  DateTime todayTime = DateTime.now();
 
   DateTime currentTime = DateTime.now();
   DateTime bookingTime = DateTime.now();
@@ -67,16 +70,16 @@ class _BookingReceiptState extends State<BookingReceipt> {
   String seconds1 = '';
 
   bool isDefaultTime = true;
-  String? _linkMessage;
-  bool _isCreatingLink = false;
+
   FirebaseDynamicLinks dynamicLinks = FirebaseDynamicLinks.instance;
+  List<int> errorDomeImage = [];
 
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
     initDynamicLinks();
-    _createDynamicLink(false,"/domeBooking");
+    currentTime = widget.currentTime ?? DateTime.now();
 
     setState(() {
       print("Timing Details");
@@ -109,15 +112,13 @@ class _BookingReceiptState extends State<BookingReceipt> {
       bookingTime = DateTime.parse(timeRemaining);
       print(bookingTime);
 
-      print(todayTime.add(Duration(hours: 2)));
-
       print("Default Time?");
       print(bookingTime.subtract(Duration(hours: 4)));
-      print(DateTime.now());
       print(bookingTime.millisecondsSinceEpoch);
-      print(DateTime.now().millisecondsSinceEpoch);
+      print(widget.currentTime ?? DateTime.now());
+
       if (bookingTime.subtract(Duration(hours: 4)).millisecondsSinceEpoch <=
-          DateTime.now().millisecondsSinceEpoch) {
+          (widget.currentTime ?? DateTime.now()).millisecondsSinceEpoch) {
         dur = bookingTime.difference(currentTime);
         print(dur);
         if (dur.inHours >= 2) {
@@ -161,7 +162,6 @@ class _BookingReceiptState extends State<BookingReceipt> {
     seconds1 = strDigits(myDuration.inSeconds.remainder(60));
 
     //---Testing----
-    // dur=Duration(seconds:10);
     print(hours);
     print(minutes);
     print(seconds);
@@ -187,7 +187,7 @@ class _BookingReceiptState extends State<BookingReceipt> {
     }
 
     //-----Before 2 hours of Booking Time-----
-    if (DateTime.now().millisecondsSinceEpoch >=
+    if ((widget.currentTime ?? DateTime.now()).millisecondsSinceEpoch >=
         bookingTime.subtract(Duration(hours: 2)).millisecondsSinceEpoch) {
       isCancelTimerAvailable = false;
     }
@@ -223,23 +223,54 @@ class _BookingReceiptState extends State<BookingReceipt> {
                             clipBehavior: Clip.none,
                             children: [
                               Container(
-                                margin:
-                                    EdgeInsets.only(left: 8, right: 8, top: 8),
+                                decoration: errorDomeImage
+                                    .contains(cx.read(Keys.domeId))
+                                    ? BoxDecoration(
+                                    borderRadius:
+                                    BorderRadius.circular(20),
+                                    gradient: backShadowContainer(),
+
+                                    image: DecorationImage(
+                                      image: AssetImage(
+                                        Image1.domesAround,
+                                      ),
+                                      fit: BoxFit.cover,
+                                    ))
+                                    : BoxDecoration(
+                                    borderRadius: BorderRadius.all(
+                                        Radius.circular(cx.height / 26.68)),
+                                    image: DecorationImage(
+                                      image: NetworkImage(
+                                        (cx.read(
+                                          Keys.image,
+                                        )).isEmpty
+                                            ? "https://thumbs.dreamstime.com/b/indoor-stadium-view-behind-wicket-cricket-160851985.jpg"
+                                            : cx.read(
+                                          Keys.image,
+                                        ),
+                                        scale:
+                                        cx.height > 800 ? 1.8 : 2.4,
+                                      ),
+                                      fit: BoxFit.cover,
+                                      onError: (Object e,
+                                          StackTrace? stackTrace) {
+                                        setState(() {
+                                          errorDomeImage
+                                              .add(cx.read(Keys.domeId));
+                                        });
+                                      },
+                                    )
+                                ),
+                                margin: EdgeInsets.only(
+                                    left: 8, right: 8, top: 8),
                                 width: MediaQuery.of(context).size.width,
                                 height: cx.height / 4.3,
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.all(
-                                      Radius.circular(cx.height / 26.68)),
-                                  image: DecorationImage(
-                                      image:
-                                          AssetImage("assets/images/step.png"),
-                                      fit: BoxFit.cover),
-                                ),
                               ),
                             ],
                           ),
                         ),
                       ),
+
                       isCancelTimerAvailable
                           ? Padding(
                               padding: EdgeInsets.only(
@@ -379,11 +410,13 @@ class _BookingReceiptState extends State<BookingReceipt> {
                                                                           Get.back();
                                                                           cancelAccount(context: context, bookingId: widget.bookingId.toString())
                                                                               .then((value) {
-                                                                            setState(() {
-                                                                              paymentStatus = "Cancelled";
-                                                                              isCancelTimerAvailable = false;
-                                                                            });
-                                                                            // mycontroller.setBid();
+                                                                            if (value ==
+                                                                                1) {
+                                                                              setState(() {
+                                                                                paymentStatus = "Cancelled";
+                                                                                isCancelTimerAvailable = false;
+                                                                              });
+                                                                            }
                                                                           });
                                                                         });
                                                                   },
@@ -398,7 +431,9 @@ class _BookingReceiptState extends State<BookingReceipt> {
                                                                         fontWeight:
                                                                             FontWeight.w700,
                                                                         fontSize: cx.responsive(
-                                                                            25,21,18),
+                                                                            25,
+                                                                            21,
+                                                                            18),
                                                                       ),
                                                                     ],
                                                                   ),
@@ -429,7 +464,7 @@ class _BookingReceiptState extends State<BookingReceipt> {
                                         alignment: Alignment.center,
                                         child: NunitoText(
                                           text: "Home",
-                                          fontSize: cx.responsive(28,22, 18),
+                                          fontSize: cx.responsive(28, 22, 18),
                                           textAlign: TextAlign.center,
                                           color: Colors.white,
                                           fontWeight: FontWeight.w700,
@@ -579,13 +614,14 @@ class _BookingReceiptState extends State<BookingReceipt> {
                                                                   .bookingId
                                                                   .toString())
                                                           .then((value) {
-                                                        setState(() {
-                                                          paymentStatus =
-                                                              "Cancelled";
-                                                          isCancelTimerAvailable =
-                                                              false;
-                                                        });
-                                                        // mycontroller.setBid();
+                                                        if (value == 1) {
+                                                          setState(() {
+                                                            paymentStatus =
+                                                                "Cancelled";
+                                                            isCancelTimerAvailable =
+                                                                false;
+                                                          });
+                                                        }
                                                       });
                                                     });
                                               },
@@ -596,8 +632,8 @@ class _BookingReceiptState extends State<BookingReceipt> {
                                                     text: "Cancel Booking",
                                                     color: Color(0xFFB01717),
                                                     fontWeight: FontWeight.w700,
-                                                    fontSize:
-                                                        cx.responsive(25,21, 18),
+                                                    fontSize: cx.responsive(
+                                                        25, 21, 18),
                                                   ),
                                                 ],
                                               ),
@@ -623,7 +659,7 @@ class _BookingReceiptState extends State<BookingReceipt> {
                                     alignment: Alignment.center,
                                     child: NunitoText(
                                       text: "Home",
-                                      fontSize: cx.responsive(28,22, 18),
+                                      fontSize: cx.responsive(28, 22, 18),
                                       textAlign: TextAlign.center,
                                       color: Colors.white,
                                       fontWeight: FontWeight.w700,
@@ -673,9 +709,7 @@ class _BookingReceiptState extends State<BookingReceipt> {
                             children: [
                               NunitoText(
                                   text: "Field",
-                                  fontSize: cx.height > 800
-                                      ? 18
-                                      : 16,
+                                  fontSize: cx.height > 800 ? 18 : 16,
                                   fontWeight: FontWeight.w600,
                                   color: AppColor.grey),
                               Container(
@@ -694,9 +728,7 @@ class _BookingReceiptState extends State<BookingReceipt> {
                               ),
                               NunitoText(
                                   text: "Players",
-                                  fontSize: cx.height > 800
-                                      ? 18
-                                      : 16,
+                                  fontSize: cx.height > 800 ? 18 : 16,
                                   fontWeight: FontWeight.w600,
                                   color: AppColor.grey),
                               NunitoText(
@@ -713,9 +745,7 @@ class _BookingReceiptState extends State<BookingReceipt> {
                             children: [
                               NunitoText(
                                   text: "Date",
-                                  fontSize: cx.height > 800
-                                      ? 18
-                                      : 16,
+                                  fontSize: cx.height > 800 ? 18 : 16,
                                   fontWeight: FontWeight.w600,
                                   color: AppColor.grey),
                               NunitoText(
@@ -732,9 +762,7 @@ class _BookingReceiptState extends State<BookingReceipt> {
                               ),
                               NunitoText(
                                   text: "Time",
-                                  fontSize: cx.height > 800
-                                      ? 18
-                                      : 16,
+                                  fontSize: cx.height > 800 ? 18 : 16,
                                   fontWeight: FontWeight.w600,
                                   color: AppColor.grey),
                               NunitoText(
@@ -772,9 +800,7 @@ class _BookingReceiptState extends State<BookingReceipt> {
                       children: [
                         NunitoText(
                             text: "Address",
-                            fontSize: cx.height > 800
-                                ? 18
-                                : 16,
+                            fontSize: cx.height > 800 ? 18 : 16,
                             fontWeight: FontWeight.w600,
                             color: AppColor.grey),
                         Container(
@@ -782,7 +808,7 @@ class _BookingReceiptState extends State<BookingReceipt> {
                           child: NunitoText(
                               text: cx.read(Keys.address),
                               fontSize: cx.height > 800 ? 17 : 15,
-                              maxLines: cx.height>800?3:2,
+                              maxLines: cx.height > 800 ? 3 : 2,
                               textOverflow: TextOverflow.ellipsis,
                               fontWeight: FontWeight.w700,
                               color: Color(0xFF414141)),
@@ -817,13 +843,13 @@ class _BookingReceiptState extends State<BookingReceipt> {
                             children: [
                               NunitoText(
                                   text: "Sub Total",
-                                  fontSize: cx.responsive(25,20, 17),
+                                  fontSize: cx.responsive(25, 20, 17),
                                   fontWeight: FontWeight.w600,
                                   color: AppColor.grey),
                               Gap(6),
                               NunitoText(
                                   text: "Service Fee",
-                                  fontSize: cx.responsive(25,20, 17),
+                                  fontSize: cx.responsive(25, 20, 17),
                                   fontWeight: FontWeight.w600,
                                   color: AppColor.grey),
                               Gap(6),
@@ -831,7 +857,7 @@ class _BookingReceiptState extends State<BookingReceipt> {
                                 children: [
                                   NunitoText(
                                       text: "HST  ",
-                                      fontSize: cx.responsive(25,20, 17),
+                                      fontSize: cx.responsive(25, 20, 17),
                                       fontWeight: FontWeight.w600,
                                       color: AppColor.grey),
                                 ],
@@ -841,8 +867,8 @@ class _BookingReceiptState extends State<BookingReceipt> {
                         ),
                         Padding(
                           padding: EdgeInsets.only(
-                            left: cx.responsive(4,3, 2),
-                            top: cx.responsive(14,10, 7),
+                            left: cx.responsive(4, 3, 2),
+                            top: cx.responsive(14, 10, 7),
                           ),
                           child: Container(
                             child: Column(
@@ -853,7 +879,7 @@ class _BookingReceiptState extends State<BookingReceipt> {
                                     textAlign: TextAlign.end,
                                     text: "\$" +
                                         cx.read(Keys.price).toStringAsFixed(2),
-                                    fontSize: cx.responsive(28,22, 18),
+                                    fontSize: cx.responsive(28, 22, 18),
                                     fontWeight: FontWeight.w700,
                                     color: Color(0xFF757575)),
                                 Gap(4),
@@ -863,7 +889,7 @@ class _BookingReceiptState extends State<BookingReceipt> {
                                         cx
                                             .read(Keys.serviceFee)
                                             .toStringAsFixed(2),
-                                    fontSize: cx.responsive(28,22, 18),
+                                    fontSize: cx.responsive(28, 22, 18),
                                     fontWeight: FontWeight.w700,
                                     color: Color(0xFF757575)),
                                 Gap(4),
@@ -873,7 +899,7 @@ class _BookingReceiptState extends State<BookingReceipt> {
                                         cx
                                             .read(Keys.totalHST)
                                             .toStringAsFixed(2),
-                                    fontSize: cx.responsive(28,22, 18),
+                                    fontSize: cx.responsive(28, 22, 18),
                                     fontWeight: FontWeight.w700,
                                     color: Color(0xFF757575)),
                               ],
@@ -902,9 +928,7 @@ class _BookingReceiptState extends State<BookingReceipt> {
                         Container(
                           child: NunitoText(
                               text: "  Total",
-                              fontSize:
-                              cx.responsive(
-                                  27,22, 19),
+                              fontSize: cx.responsive(27, 22, 19),
                               fontWeight: FontWeight.w700,
                               color: Color(0xFF757575)),
                         ),
@@ -912,9 +936,7 @@ class _BookingReceiptState extends State<BookingReceipt> {
                             textAlign: TextAlign.start,
                             text:
                                 " \$" + cx.read(Keys.total).toStringAsFixed(2),
-                            fontSize:
-                            cx.responsive(
-                                29,24, 21),
+                            fontSize: cx.responsive(29, 24, 21),
                             fontWeight: FontWeight.w600,
                             color: Color(0xFF07261A)),
                       ],
@@ -937,14 +959,14 @@ class _BookingReceiptState extends State<BookingReceipt> {
                           crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
                             CircleAvatar(
-                              radius: cx.responsive(25,22.5, 20),
+                              radius: cx.responsive(25, 22.5, 20),
                               backgroundColor: Colors.white,
                               child: CachedNetworkImage(
                                 imageUrl: widget.image,
                                 imageBuilder: (context, imageProvider) =>
                                     CircleAvatar(
                                   backgroundColor: Colors.transparent,
-                                  radius: cx.responsive(25,20, 17),
+                                  radius: cx.responsive(25, 20, 17),
                                   backgroundImage: NetworkImage(
                                     widget.image,
                                   ),
@@ -952,7 +974,7 @@ class _BookingReceiptState extends State<BookingReceipt> {
                                 fit: BoxFit.cover,
                                 placeholder: (context, url) => CircleAvatar(
                                   backgroundColor: Colors.transparent,
-                                  radius: cx.responsive(25,20, 17),
+                                  radius: cx.responsive(25, 20, 17),
                                   backgroundImage: AssetImage(
                                     Image1.anime,
                                   ),
@@ -960,7 +982,7 @@ class _BookingReceiptState extends State<BookingReceipt> {
                                 errorWidget: (context, url, error) =>
                                     CircleAvatar(
                                   backgroundColor: Colors.transparent,
-                                  radius: cx.responsive(25,20, 17),
+                                  radius: cx.responsive(25, 20, 17),
                                   backgroundImage: AssetImage(
                                     Image1.anime,
                                   ),
@@ -973,8 +995,8 @@ class _BookingReceiptState extends State<BookingReceipt> {
                               child: NunitoText(
                                 text: widget.email.toString(),
                                 fontWeight: FontWeight.w500,
-                                fontSize: cx.responsive(22,18, 16),
-                                color: Color(0xFF846262),
+                                fontSize: cx.responsive(22, 18, 16),
+                                color: AppColor.darkGreen,
                                 textOverflow: TextOverflow.ellipsis,
                                 maxLines: 1,
                               ),
@@ -1023,58 +1045,5 @@ class _BookingReceiptState extends State<BookingReceipt> {
         myDuration = Duration(seconds: seconds);
       }
     });
-  }
-  Future<void> initDynamicLinks() async {
-    dynamicLinks.onLink.listen((dynamicLinkData) {
-      final Uri uri = dynamicLinkData.link;
-      final queryParams = uri.queryParameters;
-      if (queryParams.isNotEmpty) {
-        String? productId = queryParams["id"];
-        Navigator.pushNamed(context, dynamicLinkData.link.path,
-            arguments: {"productId": int.parse(productId!)});
-      } else {
-        Navigator.pushNamed(
-          context,
-          dynamicLinkData.link.path,
-        );
-      }
-    }).onError((error) {
-      print('onLink error');
-      print(error.message);
-    });
-  }
-  Future<void> _createDynamicLink(bool short, String link) async {
-    setState(() {
-      _isCreatingLink = true;
-    });
-    final DynamicLinkParameters parameters = DynamicLinkParameters(
-      uriPrefix: Constant.kUriPrefix,
-      link: Uri.parse(Constant.kUriPrefix + link+'?bookingId=${widget.bookingId}'),
-      androidParameters: const AndroidParameters(
-        packageName: 'domez.io',
-        minimumVersion: 0,
-      ),
-      iosParameters: IOSParameters(
-        bundleId: 'domez.io',
-        minimumVersion: '1',
-        appStoreId: '',
-      ),
-    );
-
-    Uri url;
-    if (short) {
-      final ShortDynamicLink shortLink =
-      await dynamicLinks.buildShortLink(parameters);
-      url = shortLink.shortUrl;
-    } else {
-      url = await dynamicLinks.buildLink(parameters);
-    }
-
-    setState(() {
-      _linkMessage = url.toString();
-      _isCreatingLink = false;
-    });
-    print("Hey NORA"+_linkMessage.toString());
-
   }
 }

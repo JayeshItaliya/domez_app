@@ -1,0 +1,42 @@
+[
+    {
+        "merged": "/Users/SMIINFOTECH/Downloads/domez/build/stripe_android/intermediates/merged_res/release/interpolator-v21/m3_sys_motion_easing_standard_decelerate.xml",
+        "source": "/Users/SMIINFOTECH/.gradle/caches/transforms-3/fe3f0f464b810136ae8bbd131690639c/transformed/material-1.8.0/res/interpolator-v21/m3_sys_motion_easing_standard_decelerate.xml"
+    },
+    {
+        "merged": "/Users/SMIINFOTECH/Downloads/domez/build/stripe_android/intermediates/merged_res/release/interpolator-v21/mtrl_fast_out_linear_in.xml",
+        "source": "/Users/SMIINFOTECH/.gradle/caches/transforms-3/fe3f0f464b810136ae8bbd131690639c/transformed/material-1.8.0/res/interpolator-v21/mtrl_fast_out_linear_in.xml"
+    },
+    {
+        "merged": "/Users/SMIINFOTECH/Downloads/domez/build/stripe_android/intermediates/merged_res/release/interpolator-v21/m3_sys_motion_easing_emphasized_accelerate.xml",
+        "source": "/Users/SMIINFOTECH/.gradle/caches/transforms-3/fe3f0f464b810136ae8bbd131690639c/transformed/material-1.8.0/res/interpolator-v21/m3_sys_motion_easing_emphasized_accelerate.xml"
+    },
+    {
+        "merged": "/Users/SMIINFOTECH/Downloads/domez/build/stripe_android/intermediates/merged_res/release/interpolator-v21/m3_sys_motion_easing_emphasized_decelerate.xml",
+        "source": "/Users/SMIINFOTECH/.gradle/caches/transforms-3/fe3f0f464b810136ae8bbd131690639c/transformed/material-1.8.0/res/interpolator-v21/m3_sys_motion_easing_emphasized_decelerate.xml"
+    },
+    {
+        "merged": "/Users/SMIINFOTECH/Downloads/domez/build/stripe_android/intermediates/merged_res/release/interpolator-v21/m3_sys_motion_easing_standard_accelerate.xml",
+        "source": "/Users/SMIINFOTECH/.gradle/caches/transforms-3/fe3f0f464b810136ae8bbd131690639c/transformed/material-1.8.0/res/interpolator-v21/m3_sys_motion_easing_standard_accelerate.xml"
+    },
+    {
+        "merged": "/Users/SMIINFOTECH/Downloads/domez/build/stripe_android/intermediates/merged_res/release/interpolator-v21/m3_sys_motion_easing_standard.xml",
+        "source": "/Users/SMIINFOTECH/.gradle/caches/transforms-3/fe3f0f464b810136ae8bbd131690639c/transformed/material-1.8.0/res/interpolator-v21/m3_sys_motion_easing_standard.xml"
+    },
+    {
+        "merged": "/Users/SMIINFOTECH/Downloads/domez/build/stripe_android/intermediates/merged_res/release/interpolator-v21/m3_sys_motion_easing_emphasized.xml",
+        "source": "/Users/SMIINFOTECH/.gradle/caches/transforms-3/fe3f0f464b810136ae8bbd131690639c/transformed/material-1.8.0/res/interpolator-v21/m3_sys_motion_easing_emphasized.xml"
+    },
+    {
+        "merged": "/Users/SMIINFOTECH/Downloads/domez/build/stripe_android/intermediates/merged_res/release/interpolator-v21/mtrl_fast_out_slow_in.xml",
+        "source": "/Users/SMIINFOTECH/.gradle/caches/transforms-3/fe3f0f464b810136ae8bbd131690639c/transformed/material-1.8.0/res/interpolator-v21/mtrl_fast_out_slow_in.xml"
+    },
+    {
+        "merged": "/Users/SMIINFOTECH/Downloads/domez/build/stripe_android/intermediates/merged_res/release/interpolator-v21/m3_sys_motion_easing_linear.xml",
+        "source": "/Users/SMIINFOTECH/.gradle/caches/transforms-3/fe3f0f464b810136ae8bbd131690639c/transformed/material-1.8.0/res/interpolator-v21/m3_sys_motion_easing_linear.xml"
+    },
+    {
+        "merged": "/Users/SMIINFOTECH/Downloads/domez/build/stripe_android/intermediates/merged_res/release/interpolator-v21/mtrl_linear_out_slow_in.xml",
+        "source": "/Users/SMIINFOTECH/.gradle/caches/transforms-3/fe3f0f464b810136ae8bbd131690639c/transformed/material-1.8.0/res/interpolator-v21/mtrl_linear_out_slow_in.xml"
+    }
+]

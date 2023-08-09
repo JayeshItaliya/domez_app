@@ -24,6 +24,7 @@ class BookingDetailsModel {
     required this.paymentStatus,
     required this.bookingStatus,
     required this.bookingCreatedAt,
+    required this.currentTime,
     required this.userInfo,
     required this.paymentLink,
     required this.otherContributors,
@@ -31,6 +32,7 @@ class BookingDetailsModel {
     required this.endDate,
     required this.domeId,
     required this.isRattingExist,
+    required this.isActive,
   });
 
   int id;
@@ -56,6 +58,7 @@ class BookingDetailsModel {
   String paymentStatus;
   String bookingStatus;
   DateTime bookingCreatedAt;
+  DateTime currentTime;
   UserInfo userInfo;
   String paymentLink;
   List<OtherContributor> otherContributors;
@@ -63,6 +66,7 @@ class BookingDetailsModel {
   String endDate;
   int domeId;
   int isRattingExist;
+  int isActive;
   factory BookingDetailsModel.fromJson(Map<String, dynamic> json) => BookingDetailsModel(
     id: json["id"],
     type: json["type"],
@@ -87,6 +91,7 @@ class BookingDetailsModel {
     paymentStatus: json["payment_status"],
     bookingStatus: json["booking_status"],
     bookingCreatedAt: DateTime.parse(json["booking_created_at"]),
+    currentTime: DateTime.parse(json["current_time"]),
     userInfo: UserInfo.fromJson(json["user_info"]),
     paymentLink: json["payment_link"],
     otherContributors: List<OtherContributor>.from(json["other_contributors"].map((x) => OtherContributor.fromJson(x))),
@@ -94,6 +99,7 @@ class BookingDetailsModel {
     endDate: json["end_date"],
     domeId: json["dome_id"],
     isRattingExist: json["is_ratting_exist"],
+    isActive: json["is_active"],
   );
 
   Map<String, dynamic> toJson() => {
@@ -120,6 +126,7 @@ class BookingDetailsModel {
     "payment_status": paymentStatus,
     "booking_status": bookingStatus,
     "booking_created_at": bookingCreatedAt.toIso8601String(),
+    "current_time": currentTime.toIso8601String(),
     "user_info": userInfo.toJson(),
     "payment_link": paymentLink,
     "other_contributors": List<dynamic>.from(otherContributors.map((x) => x.toJson())),
@@ -127,6 +134,7 @@ class BookingDetailsModel {
     "end_date": endDate,
     "dome_id": domeId,
     "is_ratting_exist": isRattingExist,
+    "is_active": isActive,
   };
 }
 
@@ -178,11 +186,11 @@ class UserInfo {
   String userImage;
 
   factory UserInfo.fromJson(Map<String, dynamic> json) => UserInfo(
-    id: json["id"],
-    name: json["name"],
-    phone: json["phone"],
-    email: json["email"],
-    userImage: json["user_image"],
+    id: json["id"]??0,
+    name: json["name"]??"",
+    phone: json["phone"]??"",
+    email: json["email"]??"",
+    userImage: json["user_image"]??"",
   );
 
   Map<String, dynamic> toJson() => {

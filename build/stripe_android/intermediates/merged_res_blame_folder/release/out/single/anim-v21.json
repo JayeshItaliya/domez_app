@@ -1,0 +1,38 @@
+[
+    {
+        "merged": "/Users/SMIINFOTECH/Downloads/domez/build/stripe_android/intermediates/merged_res/release/anim-v21/fragment_fast_out_extra_slow_in.xml",
+        "source": "/Users/SMIINFOTECH/.gradle/caches/transforms-3/71f712b24a4f37bfeac382770cbfed91/transformed/fragment-1.5.5/res/anim-v21/fragment_fast_out_extra_slow_in.xml"
+    },
+    {
+        "merged": "/Users/SMIINFOTECH/Downloads/domez/build/stripe_android/intermediates/merged_res/release/anim-v21/mtrl_bottom_sheet_slide_in.xml",
+        "source": "/Users/SMIINFOTECH/.gradle/caches/transforms-3/fe3f0f464b810136ae8bbd131690639c/transformed/material-1.8.0/res/anim-v21/mtrl_bottom_sheet_slide_in.xml"
+    },
+    {
+        "merged": "/Users/SMIINFOTECH/Downloads/domez/build/stripe_android/intermediates/merged_res/release/anim-v21/mtrl_bottom_sheet_slide_out.xml",
+        "source": "/Users/SMIINFOTECH/.gradle/caches/transforms-3/fe3f0f464b810136ae8bbd131690639c/transformed/material-1.8.0/res/anim-v21/mtrl_bottom_sheet_slide_out.xml"
+    },
+    {
+        "merged": "/Users/SMIINFOTECH/Downloads/domez/build/stripe_android/intermediates/merged_res/release/anim-v21/m3_side_sheet_slide_out.xml",
+        "source": "/Users/SMIINFOTECH/.gradle/caches/transforms-3/fe3f0f464b810136ae8bbd131690639c/transformed/material-1.8.0/res/anim-v21/m3_side_sheet_slide_out.xml"
+    },
+    {
+        "merged": "/Users/SMIINFOTECH/Downloads/domez/build/stripe_android/intermediates/merged_res/release/anim-v21/design_bottom_sheet_slide_in.xml",
+        "source": "/Users/SMIINFOTECH/.gradle/caches/transforms-3/fe3f0f464b810136ae8bbd131690639c/transformed/material-1.8.0/res/anim-v21/design_bottom_sheet_slide_in.xml"
+    },
+    {
+        "merged": "/Users/SMIINFOTECH/Downloads/domez/build/stripe_android/intermediates/merged_res/release/anim-v21/m3_side_sheet_slide_in.xml",
+        "source": "/Users/SMIINFOTECH/.gradle/caches/transforms-3/fe3f0f464b810136ae8bbd131690639c/transformed/material-1.8.0/res/anim-v21/m3_side_sheet_slide_in.xml"
+    },
+    {
+        "merged": "/Users/SMIINFOTECH/Downloads/domez/build/stripe_android/intermediates/merged_res/release/anim-v21/m3_bottom_sheet_slide_in.xml",
+        "source": "/Users/SMIINFOTECH/.gradle/caches/transforms-3/fe3f0f464b810136ae8bbd131690639c/transformed/material-1.8.0/res/anim-v21/m3_bottom_sheet_slide_in.xml"
+    },
+    {
+        "merged": "/Users/SMIINFOTECH/Downloads/domez/build/stripe_android/intermediates/merged_res/release/anim-v21/design_bottom_sheet_slide_out.xml",
+        "source": "/Users/SMIINFOTECH/.gradle/caches/transforms-3/fe3f0f464b810136ae8bbd131690639c/transformed/material-1.8.0/res/anim-v21/design_bottom_sheet_slide_out.xml"
+    },
+    {
+        "merged": "/Users/SMIINFOTECH/Downloads/domez/build/stripe_android/intermediates/merged_res/release/anim-v21/m3_bottom_sheet_slide_out.xml",
+        "source": "/Users/SMIINFOTECH/.gradle/caches/transforms-3/fe3f0f464b810136ae8bbd131690639c/transformed/material-1.8.0/res/anim-v21/m3_bottom_sheet_slide_out.xml"
+    }
+]

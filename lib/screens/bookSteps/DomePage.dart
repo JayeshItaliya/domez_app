@@ -1,4 +1,5 @@
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:domez/controller/categoryController.dart';
 import 'package:domez/controller/domesListController.dart';
 import 'package:intl/intl.dart';
 import '../../../commonModule/AppColor.dart';
@@ -11,6 +12,7 @@ import 'package:get/get.dart';
 import 'package:page_indicator/page_indicator.dart';
 import '../../commonModule/Constant.dart';
 import 'package:gap/gap.dart';
+import '../../commonModule/utils.dart';
 import '../../commonModule/widget/common/textInter.dart';
 import '../../commonModule/widget/common/textNunito.dart';
 import '../../commonModule/widget/search/customButton.dart';
@@ -26,7 +28,7 @@ class DomePage extends StatefulWidget {
   bool isFav;
   String domeId;
 
-  DomePage({Key? key, required this.isFav,required this.domeId})
+  DomePage({Key? key, required this.isFav, required this.domeId})
       : super(key: key);
 
   @override
@@ -40,10 +42,11 @@ class _DomePageState extends State<DomePage> {
 
   CommonController cx = Get.put(CommonController());
   final mycontroller = Get.put(DomesDetailsController());
+  final categoryController = Get.put(CategoryController());
   final domesListController = Get.put(DomesListController());
   FavListController favListController = Get.put(FavListController());
   late final DomesDetailsModel item;
-
+  List<int> closedDays=[];
 
   @override
   void initState() {
@@ -52,6 +55,13 @@ class _DomePageState extends State<DomePage> {
     getData().then((value) {
       item = mycontroller.myList[0];
 
+      item.closedDays?.asMap().forEach((index,int element) {
+        print(element);
+        if(element==1){
+          closedDays.add(index+1);
+        }
+      });
+      print("closed days==="+closedDays.toString());
     });
     setState(() {
       initfav = widget.isFav;
@@ -59,11 +69,8 @@ class _DomePageState extends State<DomePage> {
   }
 
   Future<void> getData() async {
-    await mycontroller.setDid(
-        widget.domeId,
-        widget.isFav);
+    await mycontroller.setDid(widget.domeId, widget.isFav);
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -77,12 +84,12 @@ class _DomePageState extends State<DomePage> {
     return WillPopScope(
       onWillPop: () async {
         if (initfav != widget.isFav) {
-          if (cx.curIndex.value!=-1) {
+          if (cx.curIndex.value != -1) {
             domesListController
-                .getTask1(domesListController.sportid.value)
+                .getTask1(categoryController.sportid.value)
                 .then((value) {
-              domesListController.getTask2(domesListController.sportid.value);
-              domesListController.getTask3(domesListController.sportid.value);
+              domesListController.getTask2(categoryController.sportid.value);
+              domesListController.getTask3(categoryController.sportid.value);
               Get.back();
             });
             return true;
@@ -192,7 +199,6 @@ class _DomePageState extends State<DomePage> {
                                                         fit: BoxFit.cover,
                                                         Image1.domesAround,
                                                       ),
-
                                                       errorWidget: (context,
                                                               url, error) =>
                                                           Image.asset(
@@ -211,35 +217,31 @@ class _DomePageState extends State<DomePage> {
                                         child: InkWell(
                                           onTap: () {
                                             if (initfav != widget.isFav) {
-                                              print("Hey update1");
-                                              if (cx.curIndex.value!=4) {
+                                              if (cx.curIndex.value != 4) {
                                                 domesListController
-                                                    .getTask1(
-                                                    domesListController
+                                                    .getTask1(categoryController
                                                         .sportid.value)
                                                     .then((value) {
                                                   domesListController.getTask2(
-                                                      domesListController
+                                                      categoryController
                                                           .sportid.value);
                                                   domesListController.getTask3(
-                                                      domesListController
+                                                      categoryController
                                                           .sportid.value);
                                                   Get.back();
                                                 });
                                               }
 
-
-                                              if (cx.curIndex.value==4) {
+                                              if (cx.curIndex.value == 4) {
                                                 domesListController
-                                                    .getTask1(
-                                                        domesListController
-                                                            .sportid.value)
+                                                    .getTask1(categoryController
+                                                        .sportid.value)
                                                     .then((value) {
                                                   domesListController.getTask2(
-                                                      domesListController
+                                                      categoryController
                                                           .sportid.value);
                                                   domesListController.getTask3(
-                                                      domesListController
+                                                      categoryController
                                                           .sportid.value);
                                                   Get.back();
                                                 });
@@ -288,7 +290,7 @@ class _DomePageState extends State<DomePage> {
                                                   type: "1");
                                             } else {
                                               // Get.to(SignIn());
-                                              onAlertSignIn(context: context);
+                                              onAlertSignIn(context: context,currentIndex: 0,noOfPopTimes: 1);
                                             }
                                           },
                                           child: CircleAvatar(
@@ -392,6 +394,12 @@ class _DomePageState extends State<DomePage> {
                                               children: List.generate(
                                                 item.sportsList.length,
                                                 (index) {
+                                                  if(item.sportsList.length==1){
+                                                    selectedIndex=0;
+                                                    sportId = item
+                                                        .sportsList[index]
+                                                        .sportId;
+                                                  }
                                                   return InkWell(
                                                     onTap: () {
                                                       setState(() {
@@ -543,9 +551,13 @@ class _DomePageState extends State<DomePage> {
                                                     cx.globalSelectedIndex = [];
                                                     cx.globalPrice.value = 0.0;
 
+
+
                                                     Get.back();
                                                     Get.to(BookSlot(
                                                       isEditing: false,
+                                                      closedDays: closedDays,
+                                                      torontoTimeStamp: item.currentTime??DateTime.now(),
                                                     ));
                                                   });
                                                 },

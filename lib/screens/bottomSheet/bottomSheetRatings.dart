@@ -291,19 +291,7 @@ class _BottomSheetRatingsState extends State<BottomSheetRatings> {
                                                   child: Column(
                                                     children: [
                                                       Gap(15),
-                                                      // ListTile(
-                                                      //   dense:true,
-                                                      //
-                                                      //   leading:InterText(
-                                                      //       text: "Soham Shah",
-                                                      //       fontSize: cx.height > 800 ? 20 : 18,
-                                                      //       fontWeight: FontWeight.w500),
-                                                      //   trailing: NunitoText(
-                                                      //     text: '11 Nov, 2022',
-                                                      //     color: Color(0xFFA8A8A8),
-                                                      //     fontWeight: FontWeight.w600,
-                                                      //   ),
-                                                      // ),
+
                                                       Padding(
                                                         padding:
                                                             EdgeInsets.fromLTRB(

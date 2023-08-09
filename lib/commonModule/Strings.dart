@@ -21,7 +21,8 @@ class Svg1{
 class Keys{
   static const String domeName = 'domeName';
   static const String city = 'city';
-  static const String state = 'State';
+  static const String state = 'state';
+  static const String image = 'domeImage';
   static const String address = 'address';
   static const String domeId = 'domeId';
   static const String hstPercent = 'hst';
@@ -47,11 +48,11 @@ class Keys{
   static const String splitPaidAmount = 'splitPaidAmount';
   static const String splitRemainingAmount = 'splitRemainingAmount';
 
+  static const String paginationDomeSportId = 'paginationDomeSportId';
   static const String sportId = 'sportId';
   static const String tempEmail = 'tempEmail';
   static const String publishableStripeKey = 'publishableStripeKey';
   static const String secretStripeKey = 'secretStripeKey';
-
 
 
   static const String lat = 'lat';
@@ -89,6 +90,7 @@ class LKeys{
   static const String total = 'total';
   static const String splitPaidAmount = 'splitPaidAmount';
   static const String splitRemainingAmount = 'splitRemainingAmount';
-  static const String sportId = 'sportId';
+  static const String paginationLeagueSportId = 'paginationLeagueSportId';
+
 // static const String sportName = 'sportName';
 }

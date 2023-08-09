@@ -10,6 +10,7 @@ import 'package:google_place/google_place.dart';
 import '../../commonModule/Constant.dart';
 import '../../commonModule/Strings.dart';
 import 'package:gap/gap.dart';
+import '../../commonModule/utils.dart';
 import '../../commonModule/widget/common/textInter.dart';
 import '../../commonModule/widget/common/textSentic.dart';
 import '../../commonModule/widget/search/searchlocationPicker.dart';
@@ -17,6 +18,7 @@ import '../../controller/commonController.dart';
 import '../../controller/domesDetailsController.dart';
 import '../../controller/domesListController.dart';
 import '../authPage/editProfile.dart';
+
 
 class FilterDataList extends StatefulWidget {
   const FilterDataList({Key? key}) : super(key: key);

@@ -14,6 +14,8 @@ import '../../commonModule/widget/common/textNunito.dart';
 import '../../controller/commonController.dart';
 import '../../main_page.dart';
 import '../../commonModule/widget/common/textSentic.dart';
+import '../../commonModule/utils.dart';
+
 
 class FinalLeagueReceipt extends StatefulWidget {
   String email;
@@ -73,6 +75,7 @@ class _FinalLeagueReceiptState extends State<FinalLeagueReceipt> {
   String seconds1 = '';
 
   bool isDefaultTime = true;
+  List<int> errorDomeImage = [];
 
   @override
   void initState() {
@@ -221,22 +224,52 @@ class _FinalLeagueReceiptState extends State<FinalLeagueReceipt> {
                             child: SizedBox(
                               width: MediaQuery.of(context).size.width * 0.9,
                               height: isCancelTimerAvailable?cx.height *0.5:cx.height * 1.3,
+
                               child: Stack(
                                 clipBehavior: Clip.none,
                                 children: [
                                   Container(
+                                    decoration: errorDomeImage
+                                        .contains(cx.read(Keys.domeId))
+                                        ? BoxDecoration(
+                                        borderRadius:
+                                        BorderRadius.circular(20),
+                                        gradient: backShadowContainer(),
+                                        image: DecorationImage(
+                                          image: AssetImage(
+                                            Image1.domesAround,
+                                          ),
+                                          fit: BoxFit.cover,
+                                        ))
+                                        : BoxDecoration(
+                                        borderRadius: BorderRadius.all(
+                                            Radius.circular(cx.height / 26.68)),
+                                        image: DecorationImage(
+                                          image: NetworkImage(
+                                            (cx.read(
+                                              Keys.image,
+                                            )).isEmpty
+                                                ? "https://thumbs.dreamstime.com/b/indoor-stadium-view-behind-wicket-cricket-160851985.jpg"
+                                                : cx.read(
+                                              Keys.image,
+                                            ),
+                                            scale:
+                                            cx.height > 800 ? 1.8 : 2.4,
+                                          ),
+                                          fit: BoxFit.cover,
+                                          onError: (Object e,
+                                              StackTrace? stackTrace) {
+                                            setState(() {
+                                              errorDomeImage
+                                                  .add(cx.read(Keys.domeId));
+                                            });
+                                          },
+                                        )
+                                    ),
                                     margin: EdgeInsets.only(
                                         left: 8, right: 8, top: 8),
                                     width: MediaQuery.of(context).size.width,
                                     height: cx.height / 4.3,
-                                    decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.all(
-                                          Radius.circular(cx.height / 26.68)),
-                                      image: DecorationImage(
-                                          image: AssetImage(
-                                              "assets/images/step.png"),
-                                          fit: BoxFit.cover),
-                                    ),
                                   ),
                                 ],
                               ),
@@ -391,11 +424,13 @@ class _FinalLeagueReceiptState extends State<FinalLeagueReceipt> {
                                                                             onCancel: () {
                                                                               Get.back();
                                                                               cancelAccount(context: context, bookingId: widget.bookingId.toString()).then((value) {
-                                                                                setState(() {
-                                                                                  paymentStatus = "Cancelled";
-                                                                                  isCancelTimerAvailable = false;
-                                                                                });
-                                                                                // mycontroller.setBid();
+                                                                                if(value==1){
+                                                                                  setState(() {
+                                                                                    paymentStatus = "Cancelled";
+                                                                                    isCancelTimerAvailable = false;
+                                                                                  });
+                                                                                }
+
                                                                               });
                                                                             });
                                                                       },
@@ -600,13 +635,15 @@ class _FinalLeagueReceiptState extends State<FinalLeagueReceipt> {
                                                                       .toString())
                                                               .then(
                                                                   (value) {
-                                                            setState(() {
-                                                              paymentStatus =
-                                                                  "Cancelled";
-                                                              isCancelAvailable =
-                                                                  false;
-                                                            });
-                                                            // mycontroller.setBid();
+                                                                    if(value==1){
+                                                                      setState(() {
+                                                                        paymentStatus =
+                                                                        "Cancelled";
+                                                                        isCancelAvailable =
+                                                                        false;
+                                                                      });
+                                                                    }
+
                                                           });
                                                         });
                                                   },

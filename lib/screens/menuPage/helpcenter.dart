@@ -13,6 +13,8 @@ import 'package:http/http.dart'as http;
 import 'package:gap/gap.dart';
 import '../../commonModule/widget/common/textInter.dart';
 import '../../commonModule/widget/common/textNunito.dart';
+import '../../commonModule/utils.dart';
+
 
 class HelpCenter extends StatefulWidget {
   const HelpCenter({Key? key}) : super(key: key);

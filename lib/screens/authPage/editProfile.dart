@@ -7,6 +7,7 @@ import 'package:domez/commonModule/AppColor.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import '../../commonModule/utils.dart';
 
 import 'package:get/get.dart';
 import 'package:image_compression_flutter/flutter_image_compress.dart';

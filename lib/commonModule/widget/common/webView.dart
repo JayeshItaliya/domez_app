@@ -19,13 +19,6 @@ class _WebViewClassState extends State<WebViewClass> {
   bool isLoading = true;
 
   @override
-  void initState() {
-    super.initState();
-
-    print(widget.url);
-  }
-
-  @override
   Widget build(BuildContext context) {
     SystemChrome.setSystemUIOverlayStyle(
         SystemUiOverlayStyle(
@@ -76,13 +69,11 @@ class _WebViewClassState extends State<WebViewClass> {
 
             },
             onPageFinished: (finish) {
-              print(finish.toString());
               setState(() {
                 isLoading = false;
               });
             },
             onPageStarted: (url){
-              print(url.toString());
               setState(() {
                 isLoading = false;
               });

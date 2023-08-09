@@ -27,6 +27,7 @@ class LeagueDetailsModel {
     required this.amenities,
     required this.bookingDeadline,
     required this.isFav,
+    required this.currentTime,
 
 
   });
@@ -57,6 +58,7 @@ class LeagueDetailsModel {
   List<Amenity> amenities;
   DateTime bookingDeadline;
   bool isFav;
+  DateTime currentTime;
 
   factory LeagueDetailsModel.fromJson(Map<String, dynamic> json) => LeagueDetailsModel(
     id: json["id"],
@@ -85,6 +87,7 @@ class LeagueDetailsModel {
     amenities: List<Amenity>.from(json["amenities"].map((x) => Amenity.fromJson(x))),
     bookingDeadline: DateTime.parse(json["booking_deadline"]),
     isFav: json["is_fav"],
+    currentTime: DateTime.parse(json["current_time"]),
 
   );
 
@@ -115,6 +118,7 @@ class LeagueDetailsModel {
     "amenities": List<dynamic>.from(amenities.map((x) => x.toJson())),
     "booking_deadline": "${bookingDeadline.year.toString().padLeft(4, '0')}-${bookingDeadline.month.toString().padLeft(2, '0')}-${bookingDeadline.day.toString().padLeft(2, '0')}",
     "is_fav": isFav,
+    "current_time": currentTime.toIso8601String(),
   };
 }
 

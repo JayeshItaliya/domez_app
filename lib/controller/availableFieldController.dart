@@ -9,8 +9,6 @@ class AvailableFieldController extends GetxController {
 
   var myList = List<AvailableFieldsModel>.empty(growable: true).obs;
   var isDataProcessing = false.obs;
-
-  ScrollController scrollController = ScrollController();
   StreamSubscription? subscription;
   var isoffline = false.obs;
 
@@ -51,7 +49,7 @@ class AvailableFieldController extends GetxController {
           if(resp!=null){
             isDataProcessing.value = false;
             myList.clear();
-            myList.addAll(resp!);
+            myList.addAll(resp);
           }
           else{
             isDataProcessing.value = false;

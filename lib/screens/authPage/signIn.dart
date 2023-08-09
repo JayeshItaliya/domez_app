@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_statusbarcolor_ns/flutter_statusbarcolor_ns.dart';
 import 'package:get/get.dart';
 import 'package:page_indicator/page_indicator.dart';
@@ -9,15 +8,18 @@ import '../../commonModule/Strings.dart';
 import '../../commonModule/widget/search/simplecircularIcon.dart';
 import '../../controller/commonController.dart';
 import '../bottomSheet/bottomSheetSignIn.dart';
+import '../../commonModule/utils.dart';
 
 class SignIn extends StatefulWidget {
   final bool isBackButton;
   final int curIndex;
+  final int noOfPopTime;
 
    SignIn({
     Key? key,
     this.isBackButton =true,
-    required this.curIndex
+    required this.curIndex,
+    this.noOfPopTime=-1
 
   }) : super(key: key);
 
@@ -41,78 +43,89 @@ class _SignInState extends State<SignIn> {
     FlutterStatusbarcolor.setStatusBarColor(Colors.transparent);
 
     final size = MediaQuery.of(context).size;
-    return Container(
-      color:Colors.transparent,
-      child: Scaffold(
-        backgroundColor: Colors.white,
-        extendBody: true,
-        // resizeToAvoidBottomInset: true,
-        // key: _scaffoldkey,
-        body:
-        SafeArea(
-          top:false,
-          child: Stack(
-            fit: StackFit.expand,
-            children: [
-              Container(
-                height: size.height,
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  gradient: LinearGradient(
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
-                      stops: [
-                        0.5,
-                        0.6
-                      ],
-                      colors: [
-                        Colors.white,
-                        Colors.white,
-                      ]),
-                  borderRadius: BorderRadius.only(
-                      bottomLeft: Radius.elliptical(cx.height/16.7, cx.height/23.82),
-                      bottomRight: Radius.elliptical(cx.height/16.7, cx.height/23.82)),
-                ),
-                child: ListView(
-                  shrinkWrap: true,
-                  physics: ClampingScrollPhysics(),
-                  padding: EdgeInsets.zero,
+    return WillPopScope(
+      onWillPop: ()async{
+        if(widget.curIndex==1){
+          cx.curIndex.value=0;
+          return false;
+        }
+        else{
+          return true;
+        }
+      },
+      child: Container(
+        color:Colors.transparent,
+        child: Scaffold(
+          backgroundColor: Colors.white,
+          extendBody: true,
+          // resizeToAvoidBottomInset: true,
+          // key: _scaffoldkey,
+          body:
+          SafeArea(
+            top:false,
+            child: Stack(
+              fit: StackFit.expand,
+              children: [
+                Container(
+                  height: size.height,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        stops: [
+                          0.5,
+                          0.6
+                        ],
+                        colors: [
+                          Colors.white,
+                          Colors.white,
+                        ]),
+                    borderRadius: BorderRadius.only(
+                        bottomLeft: Radius.elliptical(cx.height/16.7, cx.height/23.82),
+                        bottomRight: Radius.elliptical(cx.height/16.7, cx.height/23.82)),
+                  ),
+                  child: ListView(
+                    shrinkWrap: true,
+                    physics: ClampingScrollPhysics(),
+                    padding: EdgeInsets.zero,
 
-                  children: [
-                    Stack(
-                      children: [
-                        Container(
-                          height: size.height / 2 ,
-                          child: buildImage(
-                              size
-                          ),
-                        ),
-                        widget.isBackButton?Positioned(
-                          left:cx.height>800?25: 20,
-                          top: 38,
-                          child: InkWell(
-                            onTap: (){
-                              Get.back();
-                            },
-                            child: CircleAvatar(
-                              backgroundColor: Colors.white,
-                              radius: cx.responsive(32,24,17),
-                              child: SimpleCircularIconButton(
-                                iconData: Icons.arrow_back_ios_new,
-                                fillColor: Colors.red,
-                                radius: cx.responsive(60,45,35),
-
-                              ),
+                    children: [
+                      Stack(
+                        children: [
+                          Container(
+                            height: size.height / 2 ,
+                            child: buildImage(
+                                size
                             ),
                           ),
-                        ):Container(),
-                        BottomSheetSignIn(curIndex: widget.curIndex),
-                      ],
-                    ),
-                  ],
+                          widget.isBackButton?Positioned(
+                            left:cx.height>800?25: 20,
+                            top: 38,
+                            child: InkWell(
+                              onTap: (){
+                                Get.back();
+                              },
+                              child: CircleAvatar(
+                                backgroundColor: Colors.white,
+                                radius: cx.responsive(32,24,17),
+                                child: SimpleCircularIconButton(
+                                  iconData: Icons.arrow_back_ios_new,
+                                  fillColor: Colors.red,
+                                  radius: cx.responsive(60,45,35),
+
+                                ),
+                              ),
+                            ),
+                          ):Container(),
+                          BottomSheetSignIn(curIndex: widget.curIndex,noOfPopTime: widget.noOfPopTime),
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

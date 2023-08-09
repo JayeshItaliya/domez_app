@@ -9,6 +9,4 @@ class AppColor
   static final Green=Color(0xFF9BD9C1);
   static final grey=Color(0xFFA8A8A8);
   static final ticketWidget=Colors.white;
-  // static final ticketWidget=Color(0xFFFCFEFD);
-
 }
