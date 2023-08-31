@@ -26,6 +26,7 @@ import '../model/leagueListModel.dart';
 class TaskProvider extends GetConnect {
   Future<String?> getStripeKey() async {
     try {
+      print(Constant.getStripeKey);
       var request =
           http.MultipartRequest('GET', Uri.parse(Constant.getStripeKey));
       print(request.fields.toString());
@@ -33,14 +34,14 @@ class TaskProvider extends GetConnect {
       final response = await request.send();
       final respStr = await response.stream.bytesToString();
       final jsonBody = await jsonDecode(respStr);
-
+      print("stripe key");
       if (jsonBody['status'] == 1) {
         print(jsonBody.toString());
 
         String jsonBody1 = jsonBody['data']['public_key'];
         String jsonBody2 = jsonBody['data']['secret_key'];
 
-        // Constant.stripeSecretKey=jsonBody['data']['secret_key'];
+        Constant.stripeSecretKey=jsonBody['data']['secret_key'];
         print("Stripe Publishable Key");
         print(jsonBody1);
         print(jsonBody2);
@@ -754,7 +755,7 @@ class TaskProvider extends GetConnect {
           } else {
             Navigator.of(context).pushAndRemoveUntil(
               MaterialPageRoute(
-                  builder: (context) => WonderEvents(
+                  builder: (context) => MainPageScreen(
                         curIndex: curIndex,
                       )),
               (Route<dynamic> route) => false,
@@ -835,7 +836,7 @@ class TaskProvider extends GetConnect {
           } else {
             Navigator.of(context).pushAndRemoveUntil(
               MaterialPageRoute(
-                  builder: (context) => WonderEvents(
+                  builder: (context) => MainPageScreen(
                         curIndex: curIndex,
                       )),
               (Route<dynamic> route) => false,
@@ -921,7 +922,7 @@ class TaskProvider extends GetConnect {
           } else {
             Navigator.of(context).pushAndRemoveUntil(
               MaterialPageRoute(
-                  builder: (context) => WonderEvents(
+                  builder: (context) => MainPageScreen(
                         curIndex: curIndex,
                       )),
               (Route<dynamic> route) => false,

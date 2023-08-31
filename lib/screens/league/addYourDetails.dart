@@ -17,7 +17,6 @@ import '../../model/LeagueDetailsModel.dart';
 import '../bottomSheet/bottomSheetAddYourDetails.dart';
 import '../../commonModule/utils.dart';
 
-
 class AddYourDetails extends StatefulWidget {
   bool isFav;
 
@@ -31,7 +30,6 @@ class AddYourDetails extends StatefulWidget {
 }
 
 class _AddYourDetailsState extends State<AddYourDetails> {
-
   CommonController cx = Get.put(CommonController());
   final mycontroller = Get.put(LeagueDetailsController());
   final LeagueList = Get.put(LeagueListController());
@@ -46,14 +44,12 @@ class _AddYourDetailsState extends State<AddYourDetails> {
 
   @override
   Widget build(BuildContext context) {
-
     final size = MediaQuery.of(context).size;
     LeagueDetailsModel item = mycontroller.myList[0];
     return WillPopScope(
-      onWillPop: ()async{
-        if(true){
+      onWillPop: () async {
+        if (true) {
           Get.back(result: widget.isFav);
-
         }
         return true;
       },
@@ -62,7 +58,6 @@ class _AddYourDetailsState extends State<AddYourDetails> {
         child: Scaffold(
             backgroundColor: AppColor.darkGreen,
             extendBody: true,
-
             body: SafeArea(
               top: false,
               child: Stack(
@@ -101,68 +96,97 @@ class _AddYourDetailsState extends State<AddYourDetails> {
                               child: Container(
                                 height: size.height + cx.height / 13.34,
                                 // color: AppColor.bg,
-                                child: PageIndicatorContainer(
-                                    padding: EdgeInsets.only(
-                                      bottom: cx.responsive(
-                                          cx.height / 6.5,cx.height / 6.5, cx.height / 7),
-                                    ),
-                                    align: IndicatorAlign.bottom,
-                                    length: item.leagueImages.length,
-                                    indicatorColor: AppColor.bg,
-                                    indicatorSelectorColor: AppColor.darkGreen,
-                                    // size: 10.0,
-                                    indicatorSpace: 8.0,
-                                    child: PageView.builder(
-                                        itemCount: item.leagueImages.length,
-                                        itemBuilder:
-                                            (BuildContext context, int i) {
-                                          return CachedNetworkImage(
-                                            imageUrl: item.leagueImages[i].image
-                                                .toString(),
-                                            imageBuilder:
-                                                (context, imageProvider) =>
-                                                    Image.network(
-                                              item.leagueImages[i].image
-                                                  .toString(),
-                                              fit: BoxFit.cover,
-                                            ),
-                                            placeholder: (context, url) =>
-                                                Image.asset(
-                                              scale: cx.responsive(0.8,0.8, 0.5),
-                                              fit: BoxFit.cover,
-                                              Image1.domesAround,
-                                            ),
-                                            errorWidget: (context, url, error) =>
-                                                Image.asset(
-                                              scale: cx.responsive(0.8,0.8, 0.5),
-                                              fit: BoxFit.cover,
-                                              Image1.domesAround,
-                                            ),
-                                          );
-                                        })),
+                                child: item.leagueImages.length == 0 ||
+                                        item.leagueImages.length == 1
+                                    ? CachedNetworkImage(
+                                        imageUrl: item.leagueImages[0].image
+                                            .toString(),
+                                        imageBuilder:
+                                            (context, imageProvider) =>
+                                                Image.network(
+                                          item.leagueImages[0].image.toString(),
+                                          fit: BoxFit.cover,
+                                        ),
+                                        placeholder: (context, url) =>
+                                            Image.asset(
+                                          scale: cx.responsive(0.8, 0.8, 0.5),
+                                          fit: BoxFit.cover,
+                                          Image1.domesAround,
+                                        ),
+                                        errorWidget: (context, url, error) =>
+                                            Image.asset(
+                                          scale: cx.responsive(0.8, 0.8, 0.5),
+                                          fit: BoxFit.cover,
+                                          Image1.domesAround,
+                                        ),
+                                      )
+                                    : PageIndicatorContainer(
+                                        padding: EdgeInsets.only(
+                                          bottom: cx.responsive(cx.height / 6.5,
+                                              cx.height / 6.5, cx.height / 7),
+                                        ),
+                                        align: IndicatorAlign.bottom,
+                                        length: item.leagueImages.length,
+                                        indicatorColor: AppColor.bg,
+                                        indicatorSelectorColor:
+                                            AppColor.darkGreen,
+                                        // size: 10.0,
+                                        indicatorSpace: 8.0,
+                                        child: PageView.builder(
+                                            itemCount: item.leagueImages.length,
+                                            itemBuilder:
+                                                (BuildContext context, int i) {
+                                              return CachedNetworkImage(
+                                                imageUrl: item
+                                                    .leagueImages[i].image
+                                                    .toString(),
+                                                imageBuilder:
+                                                    (context, imageProvider) =>
+                                                        Image.network(
+                                                  item.leagueImages[i].image
+                                                      .toString(),
+                                                  fit: BoxFit.cover,
+                                                ),
+                                                placeholder: (context, url) =>
+                                                    Image.asset(
+                                                  scale: cx.responsive(
+                                                      0.8, 0.8, 0.5),
+                                                  fit: BoxFit.cover,
+                                                  Image1.domesAround,
+                                                ),
+                                                errorWidget:
+                                                    (context, url, error) =>
+                                                        Image.asset(
+                                                  scale: cx.responsive(
+                                                      0.8, 0.8, 0.5),
+                                                  fit: BoxFit.cover,
+                                                  Image1.domesAround,
+                                                ),
+                                              );
+                                            })),
                               ),
                             ),
                             Positioned(
                               left: cx.height > 800 ? 25 : 20,
-                              top: cx.responsive(80,55, 38),
+                              top: cx.responsive(80, 55, 38),
                               child: InkWell(
                                 onTap: () {
-                                    Get.back(result: widget.isFav);
-                                  },
+                                  Get.back(result: widget.isFav);
+                                },
                                 child: CircleAvatar(
                                   backgroundColor: Colors.white,
-                                  radius: cx.responsive(30,24, 17),
+                                  radius: cx.responsive(30, 24, 17),
                                   child: SimpleCircularIconButton(
                                     iconData: Icons.arrow_back_ios_new,
                                     fillColor: Colors.red,
-                                    radius: cx.responsive(60,45, 35),
+                                    radius: cx.responsive(60, 45, 35),
                                   ),
                                 ),
                               ),
                             ),
                             Positioned(
                               right: cx.height > 800 ? 25 : 20,
-                              top: cx.responsive(80,55, 38),
+                              top: cx.responsive(80, 55, 38),
                               child: InkWell(
                                 onTap: () {
                                   if (cx.read("islogin")) {
@@ -178,12 +202,15 @@ class _AddYourDetailsState extends State<AddYourDetails> {
                                         lid: item.id.toString());
                                   } else {
                                     // Get.to(SignIn());
-                                    onAlertSignIn(context: context,currentIndex: 2,noOfPopTimes: 1);
+                                    onAlertSignIn(
+                                        context: context,
+                                        currentIndex: 2,
+                                        noOfPopTimes: 1);
                                   }
                                 },
                                 child: CircleAvatar(
                                   backgroundColor: Colors.white,
-                                  radius: cx.responsive(33,24, 17),
+                                  radius: cx.responsive(33, 24, 17),
                                   child: SimpleCircularIconButton(
                                     iconData: widget.isFav
                                         ? Icons.favorite_rounded
@@ -191,12 +218,16 @@ class _AddYourDetailsState extends State<AddYourDetails> {
                                     iconColor: widget.isFav
                                         ? AppColor.darkGreen
                                         : Colors.black,
-                                    radius: cx.responsive(65,50, 35),
+                                    radius: cx.responsive(65, 50, 35),
                                   ),
                                 ),
                               ),
                             ),
-                            BottomSheetAddYourDetails(maxPlayers: int.parse(item.maxPlayer.replaceAll(" Players", "")),minPlayers: int.parse(item.minPlayer.replaceAll(" Players", ""))),
+                            BottomSheetAddYourDetails(
+                                maxPlayers: int.parse(
+                                    item.maxPlayer.replaceAll(" Players", "")),
+                                minPlayers: int.parse(
+                                    item.minPlayer.replaceAll(" Players", ""))),
                           ],
                         ),
                       ],
@@ -226,7 +257,8 @@ class _AddYourDetailsState extends State<AddYourDetails> {
               height: cx.height / 8.9,
               color: AppColor.darkGreen,
               child: Padding(
-                padding: EdgeInsets.fromLTRB(cx.responsive(40,25, 15), cx.height*0.025, 20, 0),
+                padding: EdgeInsets.fromLTRB(
+                    cx.responsive(40, 25, 15), cx.height * 0.025, 20, 0),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -235,7 +267,7 @@ class _AddYourDetailsState extends State<AddYourDetails> {
                       alignment: Alignment.centerLeft,
                       child: Padding(
                         padding: EdgeInsets.only(
-                          bottom: cx.responsive(35,25, 13),
+                          bottom: cx.responsive(35, 25, 13),
                         ),
                         child: Row(
                           children: [
@@ -259,7 +291,9 @@ class _AddYourDetailsState extends State<AddYourDetails> {
                       ),
                     ),
                     Padding(
-                      padding: EdgeInsets.only(bottom:  cx.responsive(cx.height / 25, cx.height / 35, cx.height / 50)),
+                      padding: EdgeInsets.only(
+                          bottom: cx.responsive(
+                              cx.height / 25, cx.height / 35, cx.height / 50)),
                       child: Container(
                         child: CustomButton(
                           text: "Continue",
@@ -271,8 +305,8 @@ class _AddYourDetailsState extends State<AddYourDetails> {
                             }
                           },
                           radius: cx.height / 13.34,
-                          width: cx.width *0.32,
-                          size: cx.responsive(25,20, 18),
+                          width: cx.width * 0.32,
+                          size: cx.responsive(25, 20, 18),
                           color: Colors.white,
                         ),
                       ),

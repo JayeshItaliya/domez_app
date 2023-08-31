@@ -260,7 +260,7 @@ class _SettingsState extends State<Settings> {
         Duration du = const Duration(seconds: 2);
         onAlert(context: context,type: 2,msg: "User Deleted Successfully");
         Timer(du, () {
-          Get.offAll(WonderEvents());
+          Get.offAll(MainPageScreen());
           cx.curIndex.value=0;
         });
       } else {
@@ -454,7 +454,7 @@ class _SettingsState extends State<Settings> {
               Duration du = const Duration(seconds: 2);
               onAlert(context: context,type: 2,msg: "User Logged Out Successfully");
               Timer(du, () {
-                Get.offAll(WonderEvents());
+                Get.offAll(MainPageScreen());
                 cx.curIndex.value=0;
               });
               },

@@ -199,7 +199,7 @@ class _FinalLeagueReceiptState extends State<FinalLeagueReceipt> {
     }
     return WillPopScope(
       onWillPop: () async {
-        Get.offAll(WonderEvents());
+        Get.offAll(MainPageScreen());
         return false;
       },
       child: Scaffold(
@@ -462,7 +462,7 @@ class _FinalLeagueReceiptState extends State<FinalLeagueReceipt> {
                                         Gap(cx.height / 15),
                                         InkWell(
                                           onTap: () {
-                                            Get.offAll(WonderEvents());
+                                            Get.offAll(MainPageScreen());
                                             setState(() {
                                               cx.curIndex.value = 0;
                                             });
@@ -670,7 +670,7 @@ class _FinalLeagueReceiptState extends State<FinalLeagueReceipt> {
                                     Gap(cx.height / 15),
                                     InkWell(
                                       onTap: () {
-                                        Get.offAll(WonderEvents());
+                                        Get.offAll(MainPageScreen());
                                         setState(() {
                                           cx.curIndex.value = 2;
                                         });

@@ -94,19 +94,15 @@ class _LocationPickerState extends State<LocationPicker> {
         ),
       ),
       backgroundColor: AppColor.bg,
-      body: Container(
-        // height: cx.height,
-        child: ListView(
-          shrinkWrap: true,
-          physics: ClampingScrollPhysics(),
-          children: [
-            Container(
-              height: cx.height * 0.12,
-              child: Column(
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.only(left: 14.0, right: 14),
-                    child: TextFormField(
+      body: Column(
+        children: [
+          Container(
+            height: cx.height * 0.12,
+            child: Column(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.only(left: 14.0, right: 14),
+                  child: TextFormField(
                       onFieldSubmitted: (value) {
                         if (searchController.text.isNotEmpty) {
                           autoCompleteSearch(searchController.text);
@@ -202,301 +198,310 @@ class _LocationPickerState extends State<LocationPicker> {
                         contentPadding: EdgeInsets.all(20),
                       ),
                       onChanged: onSearchTextChanged
-                    ),
                   ),
-                  SizedBox(
-                    height: 10,
-                  ),
-                ],
-              ),
+                ),
+                SizedBox(
+                  height: 10,
+                ),
+              ],
             ),
-            Container(
-              height: cx.height * 0.75,
-              child: Obx(
-                () => mycontroller.isDataProcessing.value
-                    ? Container(
-                        child: Center(
-                          child: CircularProgressIndicator(
-                            color: AppColor.darkGreen,
-                          ),
-                        ),
-                      )
-                    : predictions.length == 0 &&
-                            mycontroller.myList.length == 0 &&
-                            searchController.text.isNotEmpty
-                        ? Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              Container(
-                                height: cx.height * 0.45,
-                                // height: 200,
-                                color: AppColor.bg,
-                                alignment: Alignment.center,
-                                child: NunitoText(
-                                    text: 'Oops! No Result Found',
-                                    textAlign: TextAlign.center,
-                                    fontSize: cx.responsive(35, 27, 23),
-                                    color: Colors.grey.shade600),
-                              ),
-                            ],
+          ),
+
+          Expanded(
+            // height: cx.height,
+            child: ListView(
+              shrinkWrap: true,
+              physics: ClampingScrollPhysics(),
+              children: [
+                Container(
+                  height: cx.height * 0.75,
+                  child: Obx(
+                    () => mycontroller.isDataProcessing.value
+                        ? Container(
+                            height: cx.height*0.15,
+                            alignment: Alignment.topCenter,
+                            child: CircularProgressIndicator(
+                              color: AppColor.darkGreen,
+                            ),
                           )
-                        : SingleChildScrollView(
-                            physics: BouncingScrollPhysics(),
-                            child: Column(
-                              // shrinkWrap: true,
-                              // physics: ClampingScrollPhysics(),
-                              children: <Widget>[
-                                Obx(
-                                  () => mycontroller.isoffline.value
-                                      ? noInternetLottie()
-                                      : mycontroller.isDataProcessing.value
-                                          ? Center(
-                                              child: CircularProgressIndicator(
-                                                color: AppColor.darkGreen,
-                                              ),
-                                            )
-                                          : ListView.builder(
-                                              shrinkWrap: true,
-                                              itemCount: predictions.length,
-                                              physics:
-                                                  NeverScrollableScrollPhysics(),
-                                              itemBuilder: (context, index) {
+                        : predictions.length == 0 &&
+                                mycontroller.myList.length == 0 &&
+                                searchController.text.isNotEmpty
+                            ? Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: [
+                                  Container(
+                                    height: cx.height*0.15,
+                                    // height: 200,
+                                    color: AppColor.bg,
+                                    alignment: Alignment.topCenter,
+                                    child: NunitoText(
+                                        text: 'Oops! No Result Found',
+                                        textAlign: TextAlign.center,
+                                        fontSize: cx.responsive(35, 27, 23),
+                                        color: Colors.grey.shade600),
+                                  ),
+                                ],
+                              )
+                            : SingleChildScrollView(
+                                physics: BouncingScrollPhysics(),
+                                child: Column(
+                                  // shrinkWrap: true,
+                                  // physics: ClampingScrollPhysics(),
+                                  children: <Widget>[
+                                    Obx(
+                                      () => mycontroller.isoffline.value
+                                          ? noInternetLottie()
+                                          : mycontroller.isDataProcessing.value
+                                              ? Center(
+                                                  child: CircularProgressIndicator(
+                                                    color: AppColor.darkGreen,
+                                                  ),
+                                                )
+                                              : ListView.builder(
+                                                  shrinkWrap: true,
+                                                  itemCount: predictions.length,
+                                                  physics:
+                                                      NeverScrollableScrollPhysics(),
+                                                  itemBuilder: (context, index) {
 
-                                                return index == 2 ||
-                                                        index == 3 ||
-                                                        index == 4
-                                                    ? Container()
-                                                    : InkWell(
-                                                        onTap: () {
-                                                          getDetils(
-                                                              predictions[index]
-                                                                  .placeId
-                                                                  .toString());
+                                                    return index == 2 ||
+                                                            index == 3 ||
+                                                            index == 4
+                                                        ? Container()
+                                                        : InkWell(
+                                                            onTap: () {
+                                                              getDetils(
+                                                                  predictions[index]
+                                                                      .placeId
+                                                                      .toString());
 
-                                                          setState(() {
-                                                            cx.searchDome
-                                                                    .value =
-                                                                predictions[
-                                                                        index]
-                                                                    .description
-                                                                    .toString();
-                                                            debugPrint(cx
-                                                                .searchDome
-                                                                .value);
-                                                          });
-                                                        },
-                                                        child: Padding(
-                                                          padding:
-                                                              EdgeInsets.only(
-                                                                  left:
-                                                                      cx.width *
-                                                                          0.047,
-                                                                  bottom: 8),
-                                                          child: Row(
-                                                            mainAxisAlignment:
-                                                                MainAxisAlignment
-                                                                    .start,
-                                                            children: [
-                                                              Container(
-                                                                width:
-                                                                    cx.width *
-                                                                        0.10,
-                                                                child:
+                                                              setState(() {
+                                                                cx.searchDome
+                                                                        .value =
+                                                                    predictions[
+                                                                            index]
+                                                                        .description
+                                                                        .toString();
+                                                                debugPrint(cx
+                                                                    .searchDome
+                                                                    .value);
+                                                              });
+                                                            },
+                                                            child: Padding(
+                                                              padding:
+                                                                  EdgeInsets.only(
+                                                                      left:
+                                                                          cx.width *
+                                                                              0.047,
+                                                                      bottom: 8),
+                                                              child: Row(
+                                                                mainAxisAlignment:
+                                                                    MainAxisAlignment
+                                                                        .start,
+                                                                children: [
+                                                                  Container(
+                                                                    width:
+                                                                        cx.width *
+                                                                            0.10,
+                                                                    child:
+                                                                        CircleAvatar(
+                                                                      backgroundColor:
+                                                                          AppColor
+                                                                              .darkGreen,
+                                                                      child: Icon(
+                                                                        Icons
+                                                                            .pin_drop,
+                                                                        color: Colors
+                                                                            .white,
+                                                                      ),
+                                                                    ),
+                                                                  ),
+                                                                  Padding(
+                                                                    padding: EdgeInsets.only(
+                                                                        left: cx.width *
+                                                                            0.045),
+                                                                    child:
+                                                                        Container(
+                                                                      width:
+                                                                          cx.width *
+                                                                              0.75,
+                                                                      child: Text(
+                                                                        predictions[
+                                                                                index]
+                                                                            .description
+                                                                            .toString(),
+                                                                        overflow:
+                                                                            TextOverflow
+                                                                                .clip,
+                                                                        maxLines: 3,
+                                                                        style: TextStyle(
+                                                                            fontSize: cx.responsive(
+                                                                                22,
+                                                                                17,
+                                                                                15)),
+                                                                      ),
+                                                                    ),
+                                                                  )
+                                                                ],
+                                                              ),
+                                                            ),
+                                                          );
+                                                  },
+                                                ),
+                                    ),
+                                    Obx(
+                                      () => mycontroller.isoffline.value
+                                          ? Container()
+                                          : mycontroller.isDataProcessing.value
+                                              ? Container()
+                                              : ListView.builder(
+                                                  shrinkWrap: true,
+                                                  itemCount:
+                                                      mycontroller.myList.length,
+                                                  physics:
+                                                      NeverScrollableScrollPhysics(),
+                                                  itemBuilder: (context, index) {
+                                                    FavouriteModel item =
+                                                        mycontroller.myList[index];
+                                                    return InkWell(
+                                                      onTap: () {
+                                                        if (widget.homePage) {
+
+                                                          cx.curIndex.value = 0;
+                                                          Get.to(
+                                                            DomePage(
+                                                              isFav: item.isFav,
+                                                              domeId: item.id.toString(),
+                                                            ),);
+                                                        } else {
+                                                          Get.to(
+                                                              LeaguePageDetails(
+                                                                isFav: item.isFav,
+                                                                leagueId: item.id.toString(),));
+                                                        }
+
+                                                        // getDetils(predictions[index].placeId.toString());
+                                                        // setState((){
+                                                        //   cx.searchDome.value=predictions[index].description.toString();
+                                                        //   debugPrint(cx.searchDome.value);
+                                                        // });
+                                                      },
+                                                      child: Padding(
+                                                        padding: EdgeInsets.only(
+                                                            left: cx.width * 0.047,
+                                                            bottom: 8),
+                                                        child: Row(
+                                                          mainAxisAlignment:
+                                                              MainAxisAlignment
+                                                                  .start,
+                                                          children: [
+                                                            Container(
+                                                              width:
+                                                                  cx.width * 0.10,
+                                                              child:
+                                                                  CachedNetworkImage(
+                                                                imageUrl:
+                                                                    item.image,
+                                                                imageBuilder: (context,
+                                                                        imageProvider) =>
                                                                     CircleAvatar(
                                                                   backgroundColor:
                                                                       AppColor
                                                                           .darkGreen,
-                                                                  child: Icon(
-                                                                    Icons
-                                                                        .pin_drop,
-                                                                    color: Colors
-                                                                        .white,
+                                                                  radius:
+                                                                      cx.responsive(
+                                                                          40,
+                                                                          28,
+                                                                          20),
+                                                                  backgroundImage:
+                                                                      NetworkImage(
+                                                                          item.image),
+                                                                ),
+                                                                fit: BoxFit.cover,
+                                                                placeholder:
+                                                                    (context,
+                                                                            url) =>
+                                                                        CircleAvatar(
+                                                                  backgroundColor:
+                                                                      Colors
+                                                                          .transparent,
+                                                                  radius:
+                                                                      cx.responsive(
+                                                                          40,
+                                                                          28,
+                                                                          20),
+                                                                  backgroundImage:
+                                                                      AssetImage(
+                                                                    Image1.anime,
                                                                   ),
                                                                 ),
-                                                              ),
-                                                              Padding(
-                                                                padding: EdgeInsets.only(
-                                                                    left: cx.width *
-                                                                        0.045),
-                                                                child:
-                                                                    Container(
-                                                                  width:
-                                                                      cx.width *
-                                                                          0.75,
-                                                                  child: Text(
-                                                                    predictions[
-                                                                            index]
-                                                                        .description
-                                                                        .toString(),
-                                                                    overflow:
-                                                                        TextOverflow
-                                                                            .clip,
-                                                                    maxLines: 3,
-                                                                    style: TextStyle(
-                                                                        fontSize: cx.responsive(
-                                                                            22,
-                                                                            17,
-                                                                            15)),
-                                                                  ),
-                                                                ),
-                                                              )
-                                                            ],
-                                                          ),
-                                                        ),
-                                                      );
-                                              },
-                                            ),
-                                ),
-                                Obx(
-                                  () => mycontroller.isoffline.value
-                                      ? Container()
-                                      : mycontroller.isDataProcessing.value
-                                          ? Container()
-                                          : ListView.builder(
-                                              shrinkWrap: true,
-                                              itemCount:
-                                                  mycontroller.myList.length,
-                                              physics:
-                                                  NeverScrollableScrollPhysics(),
-                                              itemBuilder: (context, index) {
-                                                FavouriteModel item =
-                                                    mycontroller.myList[index];
-                                                return InkWell(
-                                                  onTap: () {
-                                                    if (widget.homePage) {
-
-                                                      cx.curIndex.value = 0;
-                                                      Get.to(
-                                                        DomePage(
-                                                          isFav: item.isFav,
-                                                          domeId: item.id.toString(),
-                                                        ),);
-                                                    } else {
-                                                      Get.to(
-                                                          LeaguePageDetails(
-                                                            isFav: item.isFav,
-                                                            leagueId: item.id.toString(),));
-                                                    }
-
-                                                    // getDetils(predictions[index].placeId.toString());
-                                                    // setState((){
-                                                    //   cx.searchDome.value=predictions[index].description.toString();
-                                                    //   debugPrint(cx.searchDome.value);
-                                                    // });
-                                                  },
-                                                  child: Padding(
-                                                    padding: EdgeInsets.only(
-                                                        left: cx.width * 0.047,
-                                                        bottom: 8),
-                                                    child: Row(
-                                                      mainAxisAlignment:
-                                                          MainAxisAlignment
-                                                              .start,
-                                                      children: [
-                                                        Container(
-                                                          width:
-                                                              cx.width * 0.10,
-                                                          child:
-                                                              CachedNetworkImage(
-                                                            imageUrl:
-                                                                item.image,
-                                                            imageBuilder: (context,
-                                                                    imageProvider) =>
-                                                                CircleAvatar(
-                                                              backgroundColor:
-                                                                  AppColor
-                                                                      .darkGreen,
-                                                              radius:
-                                                                  cx.responsive(
-                                                                      40,
-                                                                      28,
-                                                                      20),
-                                                              backgroundImage:
-                                                                  NetworkImage(
-                                                                      item.image),
-                                                            ),
-                                                            fit: BoxFit.cover,
-                                                            placeholder:
-                                                                (context,
-                                                                        url) =>
+                                                                errorWidget: (context,
+                                                                        url,
+                                                                        error) =>
                                                                     CircleAvatar(
-                                                              backgroundColor:
-                                                                  Colors
-                                                                      .transparent,
-                                                              radius:
-                                                                  cx.responsive(
-                                                                      40,
-                                                                      28,
-                                                                      20),
-                                                              backgroundImage:
-                                                                  AssetImage(
-                                                                Image1.anime,
+                                                                  backgroundColor:
+                                                                      Colors
+                                                                          .transparent,
+                                                                  radius:
+                                                                      cx.responsive(
+                                                                          40,
+                                                                          28,
+                                                                          20),
+                                                                  backgroundImage:
+                                                                      AssetImage(
+                                                                    Image1.anime,
+                                                                  ),
+                                                                ),
                                                               ),
                                                             ),
-                                                            errorWidget: (context,
-                                                                    url,
-                                                                    error) =>
-                                                                CircleAvatar(
-                                                              backgroundColor:
-                                                                  Colors
-                                                                      .transparent,
-                                                              radius:
-                                                                  cx.responsive(
-                                                                      40,
-                                                                      28,
-                                                                      20),
-                                                              backgroundImage:
-                                                                  AssetImage(
-                                                                Image1.anime,
+                                                            Container(
+                                                              width:
+                                                                  cx.width * 0.75,
+                                                              child: Padding(
+                                                                padding:
+                                                                    EdgeInsets.only(
+                                                                        left: cx.width *
+                                                                            0.045),
+                                                                child: Text(
+                                                                  widget.homePage
+                                                                      ? item
+                                                                          .domeName
+                                                                      : item
+                                                                          .leagueName,
+                                                                  overflow:
+                                                                      TextOverflow
+                                                                          .clip,
+                                                                  maxLines: 3,
+                                                                  style: TextStyle(
+                                                                      fontSize: cx
+                                                                          .responsive(
+                                                                              22,
+                                                                              17,
+                                                                              15)),
+                                                                ),
                                                               ),
-                                                            ),
-                                                          ),
+                                                            )
+                                                          ],
                                                         ),
-                                                        Container(
-                                                          width:
-                                                              cx.width * 0.75,
-                                                          child: Padding(
-                                                            padding:
-                                                                EdgeInsets.only(
-                                                                    left: cx.width *
-                                                                        0.045),
-                                                            child: Text(
-                                                              widget.homePage
-                                                                  ? item
-                                                                      .domeName
-                                                                  : item
-                                                                      .leagueName,
-                                                              overflow:
-                                                                  TextOverflow
-                                                                      .clip,
-                                                              maxLines: 3,
-                                                              style: TextStyle(
-                                                                  fontSize: cx
-                                                                      .responsive(
-                                                                          22,
-                                                                          17,
-                                                                          15)),
-                                                            ),
-                                                          ),
-                                                        )
-                                                      ],
-                                                    ),
-                                                  ),
-                                                );
-                                              },
-                                            ),
+                                                      ),
+                                                    );
+                                                  },
+                                                ),
+                                    ),
+                                    MediaQuery.of(context).viewInsets.bottom == 0.0
+                                        ? Gap(cx.height * 0.4)
+                                        : Gap(cx.height * 0.15)
+                                  ],
                                 ),
-                                MediaQuery.of(context).viewInsets.bottom == 0.0
-                                    ? Gap(cx.height * 0.4)
-                                    : Gap(cx.height * 0.15)
-                              ],
-                            ),
-                          ),
-              ),
+                              ),
+                  ),
+                ),
+              ],
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

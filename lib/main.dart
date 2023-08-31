@@ -40,8 +40,8 @@ Future<void> main() async {
     print(value);
     Stripe.merchantIdentifier = 'merchant.domez.io.domez';
     //TODO NOT DONE
-    Stripe.publishableKey = "pk_test_51LlAvQFysF0okTxJcqvqe5FuA6eGnvPGx09mjkD9XamI1ZY3JDyRZyfI0yMohFkUmYfrYaQVkTqqqXwLtcu5DL4q00sg52wJEO";
-    // Stripe.publishableKey = value;
+    // Stripe.publishableKey = "pk_test_51LlAvQFysF0okTxJcqvqe5FuA6eGnvPGx09mjkD9XamI1ZY3JDyRZyfI0yMohFkUmYfrYaQVkTqqqXwLtcu5DL4q00sg52wJEO";
+    Stripe.publishableKey = value;
   });
 
 

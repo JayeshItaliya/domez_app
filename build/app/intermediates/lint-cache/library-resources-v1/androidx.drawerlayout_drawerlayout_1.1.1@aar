@@ -1,1 +1,0 @@
-http://schemas.android.com/apk/res-auto;androidx.drawerlayout:drawerlayout:1.1.1@aar;/Users/SMIINFOTECH/.gradle/caches/transforms-3/16c210866a701284b280e25412c5ac77/transformed/drawerlayout-1.1.1/res/values/values.xml,+attr:elevation,0,Vdimension:;elevation,0,V:;drawerLayoutStyle,0,Vreference:;+dimen:def_drawer_elevation,0,V"10dp";+styleable:DrawerLayout,0,V-elevation::;

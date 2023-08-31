@@ -49,7 +49,10 @@ class _LeaguePageDetailsState extends State<LeaguePageDetails> {
     super.initState();
     getData().then((value) {
       item = mycontroller.myList[0];
+      print("item.leagueImages.length");
+      print(item.leagueImages.length);
     });
+
   }
 
   Future<void> getData() async {
@@ -126,58 +129,104 @@ class _LeaguePageDetailsState extends State<LeaguePageDetails> {
                                             height:
                                                 size.height + cx.height / 13.34,
                                             // color: AppColor.bg,
-                                            child: PageIndicatorContainer(
-                                                padding: EdgeInsets.only(
-                                                  bottom: cx.responsive(
-                                                      cx.height / 6.5,
-                                                      cx.height / 6.5,
-                                                      cx.height / 7),
-                                                ),
-                                                align: IndicatorAlign.bottom,
-                                                length:
-                                                    item.leagueImages.length,
-                                                indicatorColor: AppColor.bg,
-                                                indicatorSelectorColor:
-                                                    AppColor.darkGreen,
-                                                // size: 10.0,
-                                                indicatorSpace: 8.0,
-                                                child: PageView.builder(
-                                                    itemCount: item
-                                                        .leagueImages.length,
-                                                    itemBuilder:
-                                                        (BuildContext context,
-                                                            int i) {
-                                                      return CachedNetworkImage(
-                                                        imageUrl: item
-                                                            .leagueImages[i]
-                                                            .image
-                                                            .toString(),
-                                                        imageBuilder: (context,
-                                                                imageProvider) =>
-                                                            Image.network(
-                                                          item.leagueImages[i]
-                                                              .image
-                                                              .toString(),
-                                                          fit: BoxFit.cover,
-                                                        ),
-                                                        placeholder:
-                                                            (context, url) =>
-                                                                Image.asset(
-                                                          scale: cx.responsive(
-                                                              0.8, 0.8, 0.5),
-                                                          fit: BoxFit.cover,
-                                                          Image1.domesAround,
-                                                        ),
-                                                        errorWidget: (context,
-                                                                url, error) =>
+                                            child: item.leagueImages.length ==
+                                                        0 ||
+                                                    item.leagueImages.length ==
+                                                        1
+                                                ? CachedNetworkImage(
+                                                    imageUrl: item
+                                                        .leagueImages[0].image
+                                                        .toString(),
+                                                    imageBuilder: (context,
+                                                            imageProvider) =>
+                                                        Image.network(
+                                                      item.leagueImages[0].image
+                                                          .toString(),
+                                                      fit: BoxFit.cover,
+                                                    ),
+                                                    placeholder:
+                                                        (context, url) =>
                                                             Image.asset(
-                                                          scale: cx.responsive(
-                                                              0.8, 0.8, 0.5),
-                                                          fit: BoxFit.cover,
-                                                          Image1.domesAround,
-                                                        ),
-                                                      );
-                                                    })),
+                                                      scale: cx.responsive(
+                                                          0.8, 0.8, 0.5),
+                                                      fit: BoxFit.cover,
+                                                      Image1.domesAround,
+                                                    ),
+                                                    errorWidget:
+                                                        (context, url, error) =>
+                                                            Image.asset(
+                                                      scale: cx.responsive(
+                                                          0.8, 0.8, 0.5),
+                                                      fit: BoxFit.cover,
+                                                      Image1.domesAround,
+                                                    ),
+                                                  )
+                                                : PageIndicatorContainer(
+                                                    padding: EdgeInsets.only(
+                                                      bottom: cx.responsive(
+                                                          cx.height / 6.5,
+                                                          cx.height / 6.5,
+                                                          cx.height / 7),
+                                                    ),
+                                                    align:
+                                                        IndicatorAlign.bottom,
+                                                    length: item
+                                                        .leagueImages.length,
+                                                    indicatorColor: AppColor.bg,
+                                                    indicatorSelectorColor:
+                                                        AppColor.darkGreen,
+                                                    indicatorSpace: 8.0,
+                                                    child: PageView.builder(
+                                                        itemCount: item
+                                                            .leagueImages
+                                                            .length,
+                                                        itemBuilder:
+                                                            (BuildContext
+                                                                    context,
+                                                                int i) {
+                                                          return CachedNetworkImage(
+                                                            imageUrl: item
+                                                                .leagueImages[i]
+                                                                .image
+                                                                .toString(),
+                                                            imageBuilder: (context,
+                                                                    imageProvider) =>
+                                                                Image.network(
+                                                              item
+                                                                  .leagueImages[
+                                                                      i]
+                                                                  .image
+                                                                  .toString(),
+                                                              fit: BoxFit.cover,
+                                                            ),
+                                                            placeholder:
+                                                                (context,
+                                                                        url) =>
+                                                                    Image.asset(
+                                                              scale:
+                                                                  cx.responsive(
+                                                                      0.8,
+                                                                      0.8,
+                                                                      0.5),
+                                                              fit: BoxFit.cover,
+                                                              Image1
+                                                                  .domesAround,
+                                                            ),
+                                                            errorWidget:
+                                                                (context, url,
+                                                                        error) =>
+                                                                    Image.asset(
+                                                              scale:
+                                                                  cx.responsive(
+                                                                      0.8,
+                                                                      0.8,
+                                                                      0.5),
+                                                              fit: BoxFit.cover,
+                                                              Image1
+                                                                  .domesAround,
+                                                            ),
+                                                          );
+                                                        })),
                                           ),
                                         ),
                                         Positioned(
@@ -187,10 +236,12 @@ class _LeaguePageDetailsState extends State<LeaguePageDetails> {
                                             onTap: () {
                                               // Get.back();
                                               LeagueList.getTask2(
-                                                  categoryController.sportid.value)
+                                                      categoryController
+                                                          .sportid.value)
                                                   .then((value) {
                                                 LeagueList.getTask3(
-                                                    categoryController.sportid.value);
+                                                    categoryController
+                                                        .sportid.value);
                                                 Get.back();
                                               });
                                             },
@@ -227,7 +278,10 @@ class _LeaguePageDetailsState extends State<LeaguePageDetails> {
                                                     lid: item.id.toString());
                                               } else {
                                                 // Get.to(SignIn());
-                                                onAlertSignIn(context: context,currentIndex: 2,noOfPopTimes: 1);
+                                                onAlertSignIn(
+                                                    context: context,
+                                                    currentIndex: 2,
+                                                    noOfPopTimes: 1);
                                               }
                                             },
                                             child: CircleAvatar(
@@ -315,31 +369,35 @@ class _LeaguePageDetailsState extends State<LeaguePageDetails> {
                                     ),
                                   ),
                                 ),
-                                !isDeadlineGone()?Padding(
-                                  padding: EdgeInsets.only(
-                                      bottom: cx.responsive(cx.height / 25,
-                                          cx.height / 35, cx.height / 50)),
-                                  child: Container(
-                                    child: CustomButton(
-                                      text: "Book Now",
-                                      fun: () async {
-                                        Get.to(
-                                          AddYourDetails(
-                                            isFav: widget.isFav,
+                                !isDeadlineGone()
+                                    ? Padding(
+                                        padding: EdgeInsets.only(
+                                            bottom: cx.responsive(
+                                                cx.height / 25,
+                                                cx.height / 35,
+                                                cx.height / 50)),
+                                        child: Container(
+                                          child: CustomButton(
+                                            text: "Book Now",
+                                            fun: () async {
+                                              Get.to(
+                                                AddYourDetails(
+                                                  isFav: widget.isFav,
+                                                ),
+                                              )?.then((value) {
+                                                setState(() {
+                                                  widget.isFav = value;
+                                                });
+                                              });
+                                            },
+                                            radius: cx.height / 13.34,
+                                            width: cx.width * 0.32,
+                                            size: cx.responsive(24, 20, 18),
+                                            color: Colors.white,
                                           ),
-                                        )?.then((value) {
-                                          setState(() {
-                                            widget.isFav = value;
-                                          });
-                                        });
-                                      },
-                                      radius: cx.height / 13.34,
-                                      width: cx.width * 0.32,
-                                      size: cx.responsive(24, 20, 18),
-                                      color: Colors.white,
-                                    ),
-                                  ),
-                                ):Container()
+                                        ),
+                                      )
+                                    : Container()
                               ],
                             ),
                           ),
@@ -347,13 +405,15 @@ class _LeaguePageDetailsState extends State<LeaguePageDetails> {
           ),
         ));
   }
-  bool isDeadlineGone(){
-    String todayDate=DateFormat('yyyy-MM-dd').format(item.currentTime);
-    String deadlineDate=DateFormat('yyyy-MM-dd').format(item.bookingDeadline);
-    if(todayDate==deadlineDate){
-       return false;
+
+  bool isDeadlineGone() {
+    String todayDate = DateFormat('yyyy-MM-dd').format(item.currentTime);
+    String deadlineDate = DateFormat('yyyy-MM-dd').format(item.bookingDeadline);
+    if (todayDate == deadlineDate) {
+      return false;
     }
-    if(item.currentTime.microsecondsSinceEpoch>=item.bookingDeadline.microsecondsSinceEpoch){
+    if (item.currentTime.microsecondsSinceEpoch >=
+        item.bookingDeadline.microsecondsSinceEpoch) {
       return true;
     }
 

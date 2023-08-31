@@ -42,7 +42,7 @@ class _BottomSheetBookingState extends State<BottomSheetBooking> {
           ),
           padding: EdgeInsets.symmetric(horizontal: 10),
           child: Padding(
-            padding: EdgeInsets.only(left: cx.height / 44.47),
+            padding: EdgeInsets.only(left: cx.width / 60),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisAlignment: MainAxisAlignment.start,
@@ -50,7 +50,7 @@ class _BottomSheetBookingState extends State<BottomSheetBooking> {
                 Gap(25),
                 Previous
                     ? Padding(
-                        padding: EdgeInsets.only(left: 5, right: 5),
+                        padding: EdgeInsets.only(right: cx.width / 60),
                         child: Container(
                           height: cx.height / 13.34,
                           decoration: BoxDecoration(
@@ -80,7 +80,7 @@ class _BottomSheetBookingState extends State<BottomSheetBooking> {
 
                                     child: NunitoText(
                                       text: "Active",
-                                      fontSize: cx.responsive(28,22, 18),
+                                      fontSize: cx.responsive(28, 22, 18),
                                       fontWeight: FontWeight.w800,
                                       color: Color(0xFF17563E),
                                     ),
@@ -125,7 +125,7 @@ class _BottomSheetBookingState extends State<BottomSheetBooking> {
                                                 Colors.white)),
                                     child: NunitoText(
                                       text: "Previous",
-                                      fontSize: cx.responsive(28,22, 18),
+                                      fontSize: cx.responsive(28, 22, 18),
                                       fontWeight: FontWeight.w800,
                                       color: Color(0xFF17563E),
                                     ),
@@ -147,7 +147,7 @@ class _BottomSheetBookingState extends State<BottomSheetBooking> {
                         ),
                       )
                     : Padding(
-                        padding: EdgeInsets.only(left: 5, right: 5),
+                        padding: EdgeInsets.only(right: cx.width / 60),
                         child: Container(
                           height: cx.height / 13.34,
                           decoration: BoxDecoration(
@@ -183,7 +183,7 @@ class _BottomSheetBookingState extends State<BottomSheetBooking> {
                                                 Colors.white)),
                                     child: NunitoText(
                                       text: "Active",
-                                      fontSize: cx.responsive(28,22, 18),
+                                      fontSize: cx.responsive(28, 22, 18),
                                       fontWeight: FontWeight.w800,
                                       color: Color(0xFF17563E),
                                     ),
@@ -222,7 +222,7 @@ class _BottomSheetBookingState extends State<BottomSheetBooking> {
 
                                     child: NunitoText(
                                       text: "Previous",
-                                      fontSize: cx.responsive(28,22, 18),
+                                      fontSize: cx.responsive(28, 22, 18),
                                       fontWeight: FontWeight.w800,
                                       color: Color(0xFF17563E),
                                     ),
@@ -277,299 +277,319 @@ class _BottomSheetBookingState extends State<BottomSheetBooking> {
                                               ? 'Oops! You have not done any previous bookings yet'
                                               : 'Oops! You don\'t have any active bookings',
                                           textAlign: TextAlign.center,
-                                          fontSize: cx.responsive(35,27, 23),
+                                          fontSize: cx.responsive(35, 27, 23),
                                           color: Colors.grey.shade600),
                                     ),
                                   ],
                                 )
-                      : Column(
-                    children: [
-                      ListView.builder(
-                        shrinkWrap: true,
-                        physics: BouncingScrollPhysics(),
-                        // scrollDirection: Axis.horizontal,
-                        itemCount: mycontroller.myList.length,
-                        itemBuilder: (context, index) {
-                          BookingListModel item =
-                          mycontroller.myList[index];
-                          return Column(
-                            children: [
-                              InkWell(
-                                onTap: () {
-                                  if(item.type==1){
-                                    bx.setBid(item.bookingId.toString(),item.paymentType,!Previous,true);
-                                  }
-                                  else{
-                                    bx.setBid(item.bookingId.toString(),3,!Previous,true);
-                                  }
-                                },
-                                child: Row(
-                                  crossAxisAlignment:
-                                  CrossAxisAlignment.start,
-                                  mainAxisAlignment:
-                                  MainAxisAlignment.start,
-                                  mainAxisSize: MainAxisSize.max,
+                              : Column(
                                   children: [
-                                    Stack(
-                                      children: [
-                                        Container(
-                                          height: cx.responsive(
-                                              cx.height / 4.2,
-                                              cx.height / 4.2,
-                                              cx.height / 3.51),
-                                          width: MediaQuery.of(context)
-                                              .size
-                                              .width *0.83,
-                                          child: Row(
-                                            children: [
-                                              Padding(
-                                                padding:
-                                                const EdgeInsets
-                                                    .fromLTRB(4.0,8,0,8),
-                                                child: Container(
-                                                  width: cx.responsive(
-                                                      160,135, 120),
-                                                  height: cx.responsive(
-                                                      160,135, 120),
-                                                  decoration:
-                                                  errorBooking.contains(item.bookingId)?BoxDecoration(
-                                                      borderRadius:
-                                                      BorderRadius
-                                                          .all(
-                                                        Radius
-                                                            .circular(
-                                                            20),
-                                                      ),
-                                                      gradient: backShadowContainer(),
+                                    ListView.builder(
+                                      shrinkWrap: true,
+                                      physics: BouncingScrollPhysics(),
+                                      // scrollDirection: Axis.horizontal,
+                                      itemCount: mycontroller.myList.length,
+                                      itemBuilder: (context, index) {
+                                        BookingListModel item =
+                                            mycontroller.myList[index];
+                                        return Column(
+                                          children: [
+                                            InkWell(
+                                              onTap: () {
+                                                if (item.type == 1) {
+                                                  bx.setBid(
+                                                      item.bookingId.toString(),
+                                                      item.paymentType,
+                                                      !Previous,
+                                                      true);
+                                                } else {
+                                                  bx.setBid(
+                                                      item.bookingId.toString(),
+                                                      3,
+                                                      !Previous,
+                                                      true);
+                                                }
+                                              },
+                                              child: Row(
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.start,
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment.start,
+                                                mainAxisSize: MainAxisSize.max,
+                                                children: [
+                                                  Stack(
+                                                    children: [
+                                                      Container(
+                                                        height: cx.responsive(
+                                                            cx.height / 4.2,
+                                                            cx.height / 4.2,
+                                                            cx.height / 3.51),
+                                                        width: MediaQuery.of(
+                                                                    context)
+                                                                .size
+                                                                .width *
+                                                            0.83,
+                                                        child: Row(
+                                                          children: [
+                                                            Padding(
+                                                              padding:
+                                                                  const EdgeInsets
+                                                                          .fromLTRB(
+                                                                      4.0,
+                                                                      8,
+                                                                      0,
+                                                                      8),
+                                                              child: Container(
+                                                                width: cx
+                                                                    .responsive(
+                                                                        160,
+                                                                        135,
+                                                                        120),
+                                                                height: cx
+                                                                    .responsive(
+                                                                        160,
+                                                                        135,
+                                                                        120),
+                                                                decoration: errorBooking
+                                                                        .contains(
+                                                                            item
+                                                                                .bookingId)
+                                                                    ? BoxDecoration(
+                                                                        borderRadius:
+                                                                            BorderRadius
+                                                                                .all(
+                                                                          Radius.circular(
+                                                                              20),
+                                                                        ),
+                                                                        gradient:
+                                                                            backShadowContainer(),
+                                                                        image: DecorationImage(
+                                                                            image: AssetImage(
+                                                                              Image1.domesAround,
+                                                                            ),
+                                                                            fit: BoxFit.cover))
+                                                                    : BoxDecoration(
+                                                                        borderRadius: BorderRadius.all(
+                                                                          Radius.circular(
+                                                                              20),
+                                                                        ),
+                                                                        image: DecorationImage(
+                                                                          image:
+                                                                              NetworkImage(
+                                                                            item.image,
+                                                                          ),
+                                                                          fit: BoxFit
+                                                                              .cover,
+                                                                          onError:
+                                                                              (Object e, StackTrace? stackTrace) {
+                                                                            setState(() {
+                                                                              errorBooking.add(item.bookingId);
+                                                                            });
+                                                                          },
+                                                                        )),
+                                                              ),
+                                                            ),
+                                                            Padding(
+                                                              padding: EdgeInsets
+                                                                  .fromLTRB(
+                                                                      cx.height /
+                                                                          41.69,
+                                                                      3,
+                                                                      0,
+                                                                      0),
+                                                              child: Column(
+                                                                mainAxisAlignment:
+                                                                    MainAxisAlignment
+                                                                        .center,
+                                                                crossAxisAlignment:
+                                                                    CrossAxisAlignment
+                                                                        .start,
+                                                                children: [
+                                                                  Container(
+                                                                    width:
+                                                                        cx.width *
+                                                                            0.38,
+                                                                    child:
+                                                                        NunitoText(
+                                                                      textAlign:
+                                                                          TextAlign
+                                                                              .start,
+                                                                      text: item.type ==
+                                                                              1
+                                                                          ? "Field - " +
+                                                                              item.field
+                                                                          : item.leagueName,
+                                                                      fontWeight:
+                                                                          FontWeight
+                                                                              .w700,
+                                                                      fontSize: cx.height >
+                                                                              800
+                                                                          ? 18
+                                                                          : 16,
+                                                                      color: AppColor
+                                                                          .grey,
+                                                                      textOverflow:
+                                                                          TextOverflow
+                                                                              .ellipsis,
+                                                                      maxLines:
+                                                                          1,
+                                                                    ),
+                                                                  ),
+                                                                  Padding(
+                                                                    padding:
+                                                                        const EdgeInsets.fromLTRB(
+                                                                            0,
+                                                                            2,
+                                                                            0,
+                                                                            3),
+                                                                    child:
+                                                                        Container(
+                                                                      width:
+                                                                          cx.width *
+                                                                              0.4,
+                                                                      child:
+                                                                          InterText(
+                                                                        text: item
+                                                                            .domeName,
+                                                                        fontWeight:
+                                                                            FontWeight.w600,
+                                                                        fontSize: cx.height >
+                                                                                800
+                                                                            ? 20
+                                                                            : 19,
 
-                                                      image:
-                                                      DecorationImage(
-                                                          image:
-                                                          AssetImage(
-                                                            Image1.domesAround,
-                                                          ),
-                                                          fit: BoxFit
-                                                              .cover)):
-                                                  BoxDecoration(
-                                                      borderRadius:
-                                                      BorderRadius
-                                                          .all(
-                                                        Radius
-                                                            .circular(
-                                                            20),
-                                                      ),
-                                                      image:
-                                                      DecorationImage(
-                                                        image:
-                                                        NetworkImage(
-                                                          item.image,
-                                                        ),
-                                                        fit: BoxFit.cover,
-                                                        onError: (Object e, StackTrace? stackTrace) {
-                                                          setState(() {
-                                                            errorBooking.add(item.bookingId);
-                                                          });
-                                                        },
-                                                      )),
-                                                ),
-                                              ),
-                                              Padding(
-                                                padding:
-                                                EdgeInsets.fromLTRB(
-                                                    cx.height / 41.69,
-                                                    3,
-                                                    0,
-                                                    0),
-                                                child: Column(
-                                                  mainAxisAlignment:
-                                                  MainAxisAlignment
-                                                      .center,
-                                                  crossAxisAlignment:
-                                                  CrossAxisAlignment
-                                                      .start,
-                                                  children: [
-                                                    Container(
-                                                      width:
-                                                      cx.width * 0.38,
-                                                      child: NunitoText(
-                                                        textAlign:
-                                                        TextAlign
-                                                            .start,
-                                                        text: item.type ==
-                                                            1
-                                                            ? "Field - "+item.field
-                                                            : item
-                                                            .leagueName,
-                                                        fontWeight:
-                                                        FontWeight
-                                                            .w700,
-                                                        fontSize:
-                                                        cx.height >
-                                                            800
-                                                            ? 18
-                                                            : 16,
-                                                        color:
-                                                        AppColor.grey,
-                                                        textOverflow:
-                                                        TextOverflow
-                                                            .ellipsis,
-                                                        maxLines: 1,
-                                                      ),
-                                                    ),
-                                                    Padding(
-                                                      padding:
-                                                      const EdgeInsets
-                                                          .fromLTRB(
-                                                          0, 2, 0, 3),
-                                                      child: Container(
-                                                        width: cx.width *
-                                                            0.4,
-                                                        child: InterText(
-                                                          text: item
-                                                              .domeName,
-                                                          fontWeight:
-                                                          FontWeight
-                                                              .w600,
-                                                          fontSize:
-                                                          cx.height >
-                                                              800
-                                                              ? 20
-                                                              : 19,
+                                                                        // color: Color(0xFF6E6B6B),
+                                                                      ),
+                                                                    ),
+                                                                  ),
+                                                                  Padding(
+                                                                    padding:
+                                                                        const EdgeInsets.fromLTRB(
+                                                                            0,
+                                                                            0,
+                                                                            0,
+                                                                            4),
+                                                                    child:
+                                                                        Container(
+                                                                      width:
+                                                                          cx.width *
+                                                                              0.4,
+                                                                      child:
+                                                                          NunitoText(
+                                                                        textAlign:
+                                                                            TextAlign.start,
+                                                                        text: item.date +
+                                                                            ' • ' +
+                                                                            item.time,
+                                                                        fontWeight:
+                                                                            FontWeight.w700,
+                                                                        fontSize: cx.height >
+                                                                                800
+                                                                            ? 16
+                                                                            : 14,
+                                                                        color: AppColor
+                                                                            .grey,
+                                                                        textOverflow:
+                                                                            TextOverflow.ellipsis,
+                                                                        maxLines:
+                                                                            1,
+                                                                      ),
+                                                                    ),
+                                                                  ),
+                                                                  SizedBox(
+                                                                    height: 1,
+                                                                  ),
+                                                                  RichText(
+                                                                    text:
+                                                                        TextSpan(
+                                                                      text: '',
+                                                                      style: DefaultTextStyle.of(
+                                                                              context)
+                                                                          .style,
+                                                                      children: <TextSpan>[
+                                                                        TextSpan(
+                                                                            text:
+                                                                                '\$${item.price.toStringAsFixed(2)}',
+                                                                            style:
+                                                                                TextStyle(fontWeight: FontWeight.w700, fontSize: cx.height > 800 ? 26 : 22)),
+                                                                        TextSpan(
+                                                                            text: item.type == 1
+                                                                                ? ' / Hour'
+                                                                                : ' / team',
+                                                                            style:
+                                                                                TextStyle(fontWeight: FontWeight.w500, fontSize: cx.height > 800 ? 15 : 12)),
+                                                                      ],
+                                                                    ),
+                                                                  ),
 
-                                                          // color: Color(0xFF6E6B6B),
+                                                                  // NunitoText(
+                                                                  //   text: "Sat, 12 may",
+                                                                  //   fontWeight: FontWeight.w500,
+                                                                  //   fontSize: cx.height/41.69,
+                                                                  //   color: Color(0xFFA8A8A8),
+                                                                  // ),
+                                                                ],
+                                                              ),
+                                                            )
+                                                          ],
                                                         ),
                                                       ),
-                                                    ),
-                                                    Padding(
-                                                      padding:
-                                                      const EdgeInsets
-                                                          .fromLTRB(
-                                                          0, 0, 0, 4),
-                                                      child: Container(
-                                                        width: cx.width *
-                                                            0.4,
-                                                        child: NunitoText(
-                                                          textAlign:
-                                                          TextAlign
-                                                              .start,
-                                                          text: item.date+' • '+item.time,
-                                                          fontWeight:
-                                                          FontWeight
-                                                              .w700,
-                                                          fontSize:
-                                                          cx.height >
-                                                              800
-                                                              ? 16
-                                                              : 14,
-                                                          color: AppColor
-                                                              .grey,
-                                                          textOverflow:
-                                                          TextOverflow
-                                                              .ellipsis,
-                                                          maxLines: 1,
-                                                        ),
-                                                      ),
-                                                    ),
-                                                    SizedBox(
-                                                      height: 1,
-                                                    ),
-                                                    RichText(
-                                                      text: TextSpan(
-                                                        text: '',
-                                                        style: DefaultTextStyle
-                                                            .of(context)
-                                                            .style,
-                                                        children: <
-                                                            TextSpan>[
-                                                          TextSpan(
-                                                              text:
-                                                              '\$${item.price.toStringAsFixed(2)}',
-                                                              style: TextStyle(
-                                                                  fontWeight:
-                                                                  FontWeight
-                                                                      .w700,
-                                                                  fontSize: cx.height >
-                                                                      800
-                                                                      ? 26
-                                                                      : 22)),
-                                                          TextSpan(
-                                                              text: item.type ==
+                                                      index ==
+                                                              mycontroller
+                                                                      .myList
+                                                                      .length -
                                                                   1
-                                                                  ? ' / Hour'
-                                                                  : ' / team',
-                                                              style: TextStyle(
-                                                                  fontWeight:
-                                                                  FontWeight
-                                                                      .w500,
-                                                                  fontSize: cx.height >
-                                                                      800
-                                                                      ? 15
-                                                                      : 12)),
-                                                        ],
-                                                      ),
-                                                    ),
-
-                                                    // NunitoText(
-                                                    //   text: "Sat, 12 may",
-                                                    //   fontWeight: FontWeight.w500,
-                                                    //   fontSize: cx.height/41.69,
-                                                    //   color: Color(0xFFA8A8A8),
-                                                    // ),
-                                                  ],
-                                                ),
-                                              )
-                                            ],
-                                          ),
-                                        ),
-                                        index ==
-                                            mycontroller
-                                                .myList.length -
-                                                1
-                                            ? Container()
-                                            : Positioned(
-                                          bottom: 0,
-                                          child: Column(
-                                            children: [
-                                              Gap(cx.height /
-                                                  22.23),
-                                              Container(
-                                                color: Color(
-                                                    0xFFD6D6D6),
-                                                height: 1,
-                                                width: cx.width,
+                                                          ? Container()
+                                                          : Positioned(
+                                                              bottom: 0,
+                                                              child: Column(
+                                                                children: [
+                                                                  Gap(cx.height /
+                                                                      22.23),
+                                                                  Container(
+                                                                    color: Color(
+                                                                        0xFFD6D6D6),
+                                                                    height: 1,
+                                                                    width: cx
+                                                                        .width,
+                                                                  ),
+                                                                  // Gap(cx.height/22.23),
+                                                                ],
+                                                              ),
+                                                            ),
+                                                    ],
+                                                  ),
+                                                ],
                                               ),
-                                              // Gap(cx.height/22.23),
-                                            ],
-                                          ),
-                                        ),
-                                      ],
+                                            ),
+                                          ],
+                                        );
+                                      },
                                     ),
+                                    mycontroller.reLoadingDataProcessing
+                                                .value ==
+                                            true
+                                        ? Container(
+                                            height: cx.height / 15,
+                                            alignment: Alignment.topCenter,
+                                            child: Column(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.start,
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              children: [
+                                                Center(
+                                                  child:
+                                                      CircularProgressIndicator(
+                                                    color: AppColor.darkGreen,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          )
+                                        : Container(),
                                   ],
                                 ),
-                              ),
-                            ],
-                          );
-                        },
-                      ),
-                      mycontroller.reLoadingDataProcessing.value == true
-                          ? Container(
-                        height: cx.height/15,
-                        alignment: Alignment.topCenter,
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Center(
-                              child: CircularProgressIndicator(
-                                color: AppColor.darkGreen,
-                              ),
-                            ),
-                          ],
-                        ),
-                      )
-                          :Container(),
-                    ],
-                  ),
                 ),
                 SizedBox(
                   height: cx.height / 7,

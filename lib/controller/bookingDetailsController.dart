@@ -56,7 +56,7 @@ class BookingDetailsController extends GetxController {
 
       if (isoffline.value == false) {
         print(bookId);
-        TaskProvider().getBookingDetails(bid: bookId).then((resp) {
+        await TaskProvider().getBookingDetails(bid: bookId).then((resp) {
           if (resp != null) {
 
             isDataProcessing.value = false;
@@ -64,17 +64,18 @@ class BookingDetailsController extends GetxController {
             myList.addAll(resp);
             print(type.toString());
             print("timeExpire");
-            print(myList[0].bookingStatus=="cancelled");
+            print(myList[0].bookingStatus=="Cancelled");
 
             if(isNavigate){
-              if(myList[0].bookingStatus=="cancelled"){
+              if(myList[0].bookingStatus=="Cancelled"){
                 Get.to(TimeExpirePage());
               }
               else{
                 if (type == 1) {
                   Get.to(BookingDetailsDomesFull(linkAccess: linkAccess,isActive: isActive,));
                 } else if (type == 2) {
-                  Get.to(BookingDetailsDomesSplit(isActive: isActive,linkAccess: linkAccess??false,));
+                  Get.to(BookingDetailsDomesSplit(isActive: isActive,linkAccess: true,));
+                  // Get.to(BookingDetailsDomesSplit(isActive: isActive,linkAccess: linkAccess??false,));
                 } else {
                   Get.to(BookingDetailsLeague(linkAccess: linkAccess,));
                 }

@@ -82,7 +82,7 @@ class LeagueDetailsModel {
     state: json["state"],
     lat: json["lat"],
     lng: json["lng"],
-    amenitiesDescription: json["amenities_description"],
+    amenitiesDescription: json["amenities_description"]??"No Description Available",
     leagueImages: List<LeagueImage>.from(json["league_images"].map((x) => LeagueImage.fromJson(x))),
     amenities: List<Amenity>.from(json["amenities"].map((x) => Amenity.fromJson(x))),
     bookingDeadline: DateTime.parse(json["booking_deadline"]),

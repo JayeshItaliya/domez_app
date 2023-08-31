@@ -53,7 +53,7 @@ class _BottomSheetFavState extends State<BottomSheetFav> {
                   Gap(25),
                   League
                       ? Padding(
-                          padding: EdgeInsets.only(left: 5, right: 5),
+                    padding: EdgeInsets.only(right: cx.width / 60),
                           child: Container(
                             height: cx.height / 13.34,
                             decoration: BoxDecoration(
@@ -149,7 +149,7 @@ class _BottomSheetFavState extends State<BottomSheetFav> {
                           ),
                         )
                       : Padding(
-                          padding: EdgeInsets.only(left: 5, right: 5),
+                    padding: EdgeInsets.only(right: cx.width / 60),
                           child: Container(
                             height: cx.height / 13.34,
                             decoration: BoxDecoration(

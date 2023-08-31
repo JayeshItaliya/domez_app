@@ -4,6 +4,7 @@ import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
 import 'package:domez/commonModule/Strings.dart';
 import 'package:flutter/material.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:rflutter_alert/rflutter_alert.dart';
 import '../../../commonModule/AppColor.dart';
 import '../../../controller/commonController.dart';
@@ -27,12 +28,15 @@ class BookSlot extends StatefulWidget {
   final bool isEditing;
   final List<int>? closedDays;
   final DateTime? torontoTimeStamp;
+  final bool? isExpanded;
 
   BookSlot(
       {Key? key,
       required this.isEditing,
       this.closedDays,
-      this.torontoTimeStamp})
+      this.torontoTimeStamp,
+      this.isExpanded=true,
+      })
       : super(key: key);
 
   @override
@@ -94,7 +98,7 @@ class _BookSlotState extends State<BookSlot> {
 
     print('bookedSlotList');
     print(bookedSlotList);
-
+    s2expanded=widget.isExpanded??true;
     selectedDate = widget.torontoTimeStamp ?? DateTime.now();
     todayDate = widget.torontoTimeStamp?.subtract(const Duration(days: 1)) ??
         DateTime.now();
@@ -199,7 +203,7 @@ class _BookSlotState extends State<BookSlot> {
                                           borderRadius: BorderRadius.all(
                                               Radius.circular(
                                                   cx.height / 26.68)),
-                                      gradient: backShadowContainer(),
+                                          gradient: backShadowContainer(),
                                           image: DecorationImage(
                                             image: NetworkImage(
                                               (cx.read(
@@ -227,7 +231,7 @@ class _BookSlotState extends State<BookSlot> {
                                   height: cx.height / 4.3,
                                 ),
                                 Positioned(
-                                  top: cx.height / 6.06,
+                                  top: cx.height / 4.8,
                                   // top: cx.responsive(200,167, 130),
                                   right: 20,
                                   left: 20,
@@ -393,20 +397,18 @@ class _BookSlotState extends State<BookSlot> {
                                                 height: 1,
                                                 width: 1,
                                               ),
-
                                         title: Center(
                                           child: Padding(
                                             padding: EdgeInsets.only(
-                                              top: s2expanded
-                                                  ? cx.height / 41.69
-                                                  : 0.0,
-                                              left: cx.s4complete.value
-                                                  ? 0
-                                                  : s2expanded
-                                                      ? 0
-                                                      : 10.0,
-                                              right:10
-                                            ),
+                                                top: s2expanded
+                                                    ? cx.height / 41.69
+                                                    : 0.0,
+                                                left: cx.s4complete.value
+                                                    ? 0
+                                                    : s2expanded
+                                                        ? 0
+                                                        : 10.0,
+                                                right: 10),
                                             child: Container(
                                               child: Row(
                                                 mainAxisAlignment: cx
@@ -430,15 +432,16 @@ class _BookSlotState extends State<BookSlot> {
                                                       fontSize: cx.height > 800
                                                           ? 19
                                                           : 17,
-                                                      fontWeight: FontWeight.w700,
+                                                      fontWeight:
+                                                          FontWeight.w700,
                                                       color: s2expanded
                                                           ? AppColor.darkGreen
                                                           : AppColor.darkGreen,
                                                     ),
                                                   ),
                                                   Padding(
-                                                    padding:
-                                                        EdgeInsets.only(top: 3.0),
+                                                    padding: EdgeInsets.only(
+                                                        top: 3.0),
                                                     child: NunitoText(
                                                       text: s2expanded
                                                           ? ""
@@ -449,7 +452,8 @@ class _BookSlotState extends State<BookSlot> {
                                                       fontSize: cx.height > 800
                                                           ? 22
                                                           : 20,
-                                                      fontWeight: FontWeight.w800,
+                                                      fontWeight:
+                                                          FontWeight.w800,
                                                       color: s2expanded
                                                           ? AppColor.darkGreen
                                                           : Color(0xFF628477),
@@ -502,11 +506,9 @@ class _BookSlotState extends State<BookSlot> {
                                                     Gap(cx.height / 41.69),
                                                     Container(
                                                       height: 300,
-
                                                       margin:
                                                           EdgeInsets.symmetric(
                                                               horizontal: 8.0),
-
                                                       child: CalendarCarousel<
                                                           Event>(
                                                         markedDateCustomShapeBorder:
@@ -517,7 +519,8 @@ class _BookSlotState extends State<BookSlot> {
                                                               Color(0xFFF5F7F9),
                                                         )),
 
-                                                        pageScrollPhysics: BouncingScrollPhysics(),
+                                                        pageScrollPhysics:
+                                                            BouncingScrollPhysics(),
 
                                                         markedDateCustomTextStyle:
                                                             TextStyle(
@@ -525,7 +528,8 @@ class _BookSlotState extends State<BookSlot> {
                                                           color:
                                                               Color(0xFFD4D8D6),
                                                         ),
-                                                        daysHaveCircularBorder:false,
+                                                        daysHaveCircularBorder:
+                                                            false,
                                                         // markedDatesMap: _markedDateMap,
                                                         daysTextStyle:
                                                             TextStyle(
@@ -598,7 +602,9 @@ class _BookSlotState extends State<BookSlot> {
                                                           color: Colors.grey,
                                                           fontSize: 18,
                                                         ),
-                                                        childAspectRatio: cx.responsive(1.3, 1.1, 1),
+                                                        childAspectRatio:
+                                                            cx.responsive(
+                                                                1.3, 1.1, 1),
                                                         onDayPressed:
                                                             (date, events) {
                                                           selectedDate = date;
@@ -684,7 +690,8 @@ class _BookSlotState extends State<BookSlot> {
                                                               cx.write(
                                                                   Keys.price,
                                                                   totalPrice);
-                                                            };
+                                                            }
+                                                            ;
                                                           }
                                                         },
                                                         staticSixWeekFormat:
@@ -746,7 +753,8 @@ class _BookSlotState extends State<BookSlot> {
                                                         onCalendarChanged:
                                                             (DateTime date) {
                                                           this.setState(() {
-                                                            _targetDateTime =date;
+                                                            _targetDateTime =
+                                                                date;
                                                             _currentMonth =
                                                                 DateFormat
                                                                         .yMMM()
@@ -754,13 +762,17 @@ class _BookSlotState extends State<BookSlot> {
                                                                         _targetDateTime);
                                                           });
                                                         },
-                                                        markedDateIconBorderColor:Color(0xFFF5F7F9),
-                                                        markedDateWidget:Container(
+                                                        markedDateIconBorderColor:
+                                                            Color(0xFFF5F7F9),
+                                                        markedDateWidget:
+                                                            Container(
                                                           height: 50,
                                                           color: Colors.red,
                                                         ),
                                                         markedDateMoreCustomDecoration:
-                                                            BoxDecoration( color:Colors.red),
+                                                            BoxDecoration(
+                                                                color:
+                                                                    Colors.red),
 
                                                         // nextMonthDayBorderColor:
                                                         //     Colors.red,
@@ -825,7 +837,11 @@ class _BookSlotState extends State<BookSlot> {
                                         ? Container()
                                         : InterText(
                                             text: "Available Slots (" +
-                                                (mycontroller.myList.length)
+                                                (mycontroller.myList
+                                                            .where((item) =>
+                                                                item.status ==
+                                                                1)
+                                                            .length)
                                                     .toString() +
                                                 ")",
                                             fontSize: cx.responsive(25, 20, 17),
@@ -1065,7 +1081,7 @@ class _BookSlotState extends State<BookSlot> {
                                                             Padding(
                                                               padding:
                                                                   const EdgeInsets
-                                                                          .only(
+                                                                      .only(
                                                                       left:
                                                                           8.0),
                                                               child: NunitoText(
@@ -1118,8 +1134,9 @@ class _BookSlotState extends State<BookSlot> {
                                                                             0.15,
                                                                         child:
                                                                             Padding(
-                                                                          padding:
-                                                                              const EdgeInsets.only(right: 12.0),
+                                                                          padding: const EdgeInsets
+                                                                              .only(
+                                                                              right: 12.0),
                                                                           child:
                                                                               Icon(
                                                                             Icons.highlight_remove_rounded,
@@ -1133,8 +1150,9 @@ class _BookSlotState extends State<BookSlot> {
                                                                             0.15,
                                                                         child:
                                                                             Padding(
-                                                                          padding:
-                                                                              const EdgeInsets.only(right: 12.0),
+                                                                          padding: const EdgeInsets
+                                                                              .only(
+                                                                              right: 12.0),
                                                                           child:
                                                                               Icon(
                                                                             Icons.add_circle_outline_rounded,
@@ -1209,8 +1227,9 @@ class _BookSlotState extends State<BookSlot> {
                                         textOverflow: TextOverflow.ellipsis,
                                       ),
                                       SenticText(
-                                        text:
-                                        selectedIndex.length==1?"(${selectedIndex.length} Slot Selected)":"(${selectedIndex.length} Slots Selected)",
+                                        text: selectedIndex.length == 1
+                                            ? "(${selectedIndex.length} Slot Selected)"
+                                            : "(${selectedIndex.length} Slots Selected)",
                                         fontSize: cx.height > 800 ? 12 : 10,
                                         fontWeight: FontWeight.w300,
                                         color: Colors.white,
@@ -1249,7 +1268,6 @@ class _BookSlotState extends State<BookSlot> {
                               child: CustomButton(
                                 text: widget.isEditing ? "Confirm" : "Proceed",
                                 fun: () {
-
                                   cx.write(Keys.price, totalPrice);
                                   cx.write(Keys.slots, selectedIndex.length);
                                   bookedSlotList = '';
@@ -1257,16 +1275,15 @@ class _BookSlotState extends State<BookSlot> {
                                     bookedSlotList = bookedSlotList +
                                         mycontroller.myList[element].slot +
                                         ',';
-
                                   });
                                   cx.write(
                                       Keys.slotsList,
                                       bookedSlotList.substring(
                                           0, bookedSlotList.length - 1));
                                   print("cx.read(Keys.slotsList)");
-                                  print(bookedSlotList.substring(0, bookedSlotList.length - 1));
+                                  print(bookedSlotList.substring(
+                                      0, bookedSlotList.length - 1));
                                   print(cx.read(Keys.slotsList));
-
 
                                   cx.globalSelectedIndex = selectedIndex;
                                   cx.globalPrice.value = totalPrice;

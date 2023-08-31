@@ -20,19 +20,19 @@ import 'controller/domesListController.dart';
 import 'screens/bottomSheet/bottomSheet.dart';
 import 'screens/homePage/homePage.dart';
 
-class WonderEvents extends StatefulWidget {
+class MainPageScreen extends StatefulWidget {
   final int curIndex;
 
-  WonderEvents({
+  MainPageScreen({
     Key? key,
     this.curIndex = 0,
   }) : super(key: key);
 
   @override
-  State<WonderEvents> createState() => _WonderEventsState();
+  State<MainPageScreen> createState() => _MainPageScreenState();
 }
 
-class _WonderEventsState extends State<WonderEvents> {
+class _MainPageScreenState extends State<MainPageScreen> {
   CommonController cx = Get.put(CommonController());
   DomesListController myController = Get.put(DomesListController());
   CategoryController categoryController = Get.put(CategoryController());

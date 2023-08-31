@@ -117,8 +117,7 @@ class _SelectPlayersState extends State<SelectPlayers> {
                                   height: cx.height / 4.3,
                                 ),
                                 Positioned(
-                                  top: cx.height / 6.06,
-                                  // top: cx.responsive(200,167, 130),
+                                  top: cx.height / 4.8,
                                   right: 20,
                                   left: 20,
                                   child: Container(

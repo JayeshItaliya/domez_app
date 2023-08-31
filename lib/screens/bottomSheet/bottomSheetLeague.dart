@@ -677,6 +677,12 @@ class _BottomSheetLeagueState extends State<BottomSheetLeague> {
                                                                       80),
                                                                   InkWell(
                                                                     onTap: () {
+                                                                      if(cx.read(Keys.lat) != '' &&
+                                                                          cx.read(Keys.lng) != '' &&
+                                                                          cx.read(Keys.lat) != null &&
+                                                                          cx.read(Keys.lng) != null){
+                                                                        mycontroller.getTask3(categoryListController.currentCategoryId.value.toString());
+                                                                      }
                                                                       getCurrentLocation();
                                                                     },
                                                                     child:

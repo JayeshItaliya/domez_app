@@ -1,12 +1,12 @@
 import 'dart:async';
+
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
-import 'package:gap/gap.dart';
-import 'package:google_fonts/google_fonts.dart';
-import '../../../../commonModule/AppColor.dart';
-import 'package:get/get.dart';
 import 'package:flutter/material.dart';
+import 'package:gap/gap.dart';
+import 'package:get/get.dart';
 import 'package:ticket_widget/ticket_widget.dart';
+
+import '../../../../commonModule/AppColor.dart';
 import '../../../../controller/commonController.dart';
 import '../../../../main_page.dart';
 import '../../../commonModule/Strings.dart';
@@ -16,7 +16,6 @@ import '../../../commonModule/widget/common/textInter.dart';
 import '../../../commonModule/widget/common/textNunito.dart';
 import '../../../commonModule/widget/common/textSentic.dart';
 
-
 class SplitReceipt extends StatefulWidget {
   final String email;
   final String image;
@@ -24,17 +23,16 @@ class SplitReceipt extends StatefulWidget {
   final String bookingId;
   final DateTime? bookingTime;
   final DateTime? currentTime;
-  SplitReceipt(
-      {Key? key,
-      required this.email,
-      required this.image,
-      required this.paymentLink,
-      required this.bookingId,
-      required this.bookingTime,
-      required this.currentTime,
 
-      })
-      : super(key: key);
+  SplitReceipt({
+    Key? key,
+    required this.email,
+    required this.image,
+    required this.paymentLink,
+    required this.bookingId,
+    required this.bookingTime,
+    required this.currentTime,
+  }) : super(key: key);
 
   @override
   State<SplitReceipt> createState() => _SplitReceiptState();
@@ -85,98 +83,98 @@ class _SplitReceiptState extends State<SplitReceipt> {
   void initState() {
     // TODO: implement initState
     super.initState();
-    currentTime=widget.currentTime??DateTime.now();
-    todayTime=widget.currentTime??DateTime.now();
+    currentTime = widget.currentTime ?? DateTime.now();
+    todayTime = widget.currentTime ?? DateTime.now();
     print(currentTime);
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      print(cx.read(Keys.fullDate));
+      print(cx.read(Keys.startTime).toString().substring(0, 2));
+      startTime = cx.read(Keys.startTime).toString().substring(0, 2);
+      print(cx.read(Keys.startTime).toString().substring(6, 8));
 
-        print(cx.read(Keys.fullDate));
-        print(cx.read(Keys.startTime).toString().substring(0, 2));
-
-        startTime = cx.read(Keys.startTime).toString().substring(0, 2);
-
-        print(cx.read(Keys.startTime).toString().substring(6, 8));
-        if (cx.read(Keys.startTime).toString().substring(6, 8) == "PM") {
-          print("startTime1");
-          if (cx.read(Keys.startTime).toString().substring(0, 2) != "12") {
-            startTime = (int.parse(startTime) + 12).toString();
-          }
-        } else {
-          if (cx.read(Keys.startTime).toString().substring(0, 2) == "12") {
-            startTime = "00";
-          }
+      if (cx.read(Keys.startTime).toString().substring(6, 8) == "PM") {
+        print("startTime1");
+        if(cx.read(Keys.startTime).toString().substring(0, 2) != "12") {
+          startTime = (int.parse(startTime) + 12).toString();
         }
-        print("startTime2");
-        print(startTime);
-
-        timeRemaining = cx.read(Keys.fullDate) + ' ' + startTime + ":${cx.read(Keys.startTime).toString().substring(3, 5)}:00";
-
-        print(timeRemaining);
-        bookingTime = DateTime.parse(timeRemaining);
-        // todayTime.add(Duration(days: 1));
-
-        print(bookingTime);
-        print(todayTime.add(Duration(hours: 2)));
-
-        print("Default Time?");
-
-        print(bookingTime.millisecondsSinceEpoch);
-        print(todayTime.add(Duration(hours: 2)).millisecondsSinceEpoch);
-        if (bookingTime.millisecondsSinceEpoch <=
-            todayTime.add(Duration(hours: 2)).millisecondsSinceEpoch) {
-          dur = bookingTime.difference(widget.currentTime??DateTime.now());
-          print(dur);
-          // dur = calDuration - dur;
-          //
-          // print(dur);
-          print("Duration");
-
-          print("Difference");
-          print(dur.inHours);
-          print(dur.inMinutes);
-          print(dur.inSeconds);
-
-          startTimer();
-          isDefaultTime = false;
-          isCancelAvailable = false;
-          // isTimerAvailable=true;
-        } else {
-          print("Time is bigger");
-          isDefaultTime = true;
-          startTimer1();
-          print(myDuration.inHours);
-          print(myDuration.inMinutes);
-          print(myDuration.inSeconds);
+      } else {
+        if (cx.read(Keys.startTime).toString().substring(0, 2) == "12") {
+          startTime = "00";
         }
+      }
+      print("startTime2");
+      print(startTime);
 
-        //--------24 hours default timer ,Otherwise remaining time---------//
-        // print(bookingTime.millisecondsSinceEpoch);
-        // print(todayTime.add(Duration(days: 1)).millisecondsSinceEpoch);
-        // if (bookingTime.millisecondsSinceEpoch <=
-        //     todayTime.add(Duration(days: 1)).millisecondsSinceEpoch) {
-        //   dur = currentTime.difference(bookingTime);
-        //   print(dur);
-        //   dur = calDuration - dur;
-        //
-        //   print(dur);
-        //   print("Duration");
-        //
-        //
-        //   print("Difference");
-        //   print(dur.inHours);
-        //   print(dur.inMinutes);
-        //   print(dur.inSeconds);
-        //
-        //   startTimer();
-        //   isDefaultTime = false;
-        // } else {
-        //   print("Time is bigger");
-        //   isDefaultTime = true;
-        //
-        //   startTimer1();
-        // }
+      timeRemaining = cx.read(Keys.fullDate) +
+          ' ' +
+          startTime +
+          ":${cx.read(Keys.startTime).toString().substring(3, 5)}:00";
 
+      print(timeRemaining);
+      bookingTime = DateTime.parse(timeRemaining);
+      // todayTime.add(Duration(days: 1));
+
+      print(bookingTime);
+      print(todayTime.add(Duration(hours: 2)));
+
+      print("Default Time?");
+
+      print(bookingTime.millisecondsSinceEpoch);
+      print(todayTime.add(Duration(hours: 2)).millisecondsSinceEpoch);
+      if (bookingTime.millisecondsSinceEpoch <=
+          todayTime.add(Duration(hours: 2)).millisecondsSinceEpoch) {
+        dur = bookingTime.difference(widget.currentTime ?? DateTime.now());
+        print(dur);
+        // dur = calDuration - dur;
+        //
+        // print(dur);
+        print("Duration");
+
+        print("Difference");
+        print(dur.inHours);
+        print(dur.inMinutes);
+        print(dur.inSeconds);
+
+        startTimer();
+        isDefaultTime = false;
+        isCancelAvailable = false;
+        // isTimerAvailable=true;
+      } else {
+        print("Time is bigger");
+        isDefaultTime = true;
+        startTimer1();
+        print(myDuration.inHours);
+        print(myDuration.inMinutes);
+        print(myDuration.inSeconds);
+      }
+
+      //--------24 hours default timer ,Otherwise remaining time---------//
+      // print(bookingTime.millisecondsSinceEpoch);
+      // print(todayTime.add(Duration(days: 1)).millisecondsSinceEpoch);
+      // if (bookingTime.millisecondsSinceEpoch <=
+      //     todayTime.add(Duration(days: 1)).millisecondsSinceEpoch) {
+      //   dur = currentTime.difference(bookingTime);
+      //   print(dur);
+      //   dur = calDuration - dur;
+      //
+      //   print(dur);
+      //   print("Duration");
+      //
+      //
+      //   print("Difference");
+      //   print(dur.inHours);
+      //   print(dur.inMinutes);
+      //   print(dur.inSeconds);
+      //
+      //   startTimer();
+      //   isDefaultTime = false;
+      // } else {
+      //   print("Time is bigger");
+      //   isDefaultTime = true;
+      //
+      //   startTimer1();
+      // }
     });
   }
 
@@ -202,21 +200,19 @@ class _SplitReceiptState extends State<SplitReceipt> {
     print(seconds1);
 
     //-----Booking Time Passed-----
-    if(isDefaultTime){
+    if (isDefaultTime) {
       if (int.parse(hours1) <= 0 &&
           int.parse(minutes1) <= 0 &&
-          int.parse(seconds1) <= 0
-          ) {
+          int.parse(seconds1) <= 0) {
         print("Timer Over");
         isTimerAvailable = false;
         isCancelAvailable = false;
         paymentStatus = "Cancelled";
       }
-    }
-    else{
-      if(int.parse(hours) <= 0 &&
-      int.parse(minutes) <= 0 &&
-      int.parse(seconds) <= 0){
+    } else {
+      if (int.parse(hours) <= 0 &&
+          int.parse(minutes) <= 0 &&
+          int.parse(seconds) <= 0) {
         print("Timer Over");
         isTimerAvailable = false;
         isCancelAvailable = false;
@@ -225,13 +221,13 @@ class _SplitReceiptState extends State<SplitReceipt> {
     }
 
     //-----Before 2 hours of Booking Time-----
-    if ((widget.currentTime??DateTime.now()).millisecondsSinceEpoch >=
+    if ((widget.currentTime ?? DateTime.now()).millisecondsSinceEpoch >=
         bookingTime.subtract(Duration(hours: 2)).millisecondsSinceEpoch) {
       isCancelAvailable = false;
     }
 
     //-----Booking Time Passed-----
-    if ((widget.currentTime??DateTime.now()).millisecondsSinceEpoch >=
+    if ((widget.currentTime ?? DateTime.now()).millisecondsSinceEpoch >=
         bookingTime.millisecondsSinceEpoch) {
       isTimerAvailable = false;
       isCancelAvailable = false;
@@ -240,7 +236,7 @@ class _SplitReceiptState extends State<SplitReceipt> {
 
     return WillPopScope(
       onWillPop: () async {
-        Get.offAll(WonderEvents());
+        Get.offAll(MainPageScreen());
         return false;
       },
       child: Scaffold(
@@ -269,44 +265,41 @@ class _SplitReceiptState extends State<SplitReceipt> {
                             children: [
                               Container(
                                 decoration: errorDomeImage
-                                    .contains(cx.read(Keys.domeId))
+                                        .contains(cx.read(Keys.domeId))
                                     ? BoxDecoration(
-                                    borderRadius:
-                                    BorderRadius.circular(20),
-                                    gradient: backShadowContainer(),
-                                    image: DecorationImage(
-                                      image: AssetImage(
-                                        Image1.domesAround,
-                                      ),
-                                      fit: BoxFit.cover,
-                                    ))
+                                        borderRadius: BorderRadius.circular(20),
+                                        gradient: backShadowContainer(),
+                                        image: DecorationImage(
+                                          image: AssetImage(
+                                            Image1.domesAround,
+                                          ),
+                                          fit: BoxFit.cover,
+                                        ))
                                     : BoxDecoration(
-                                    borderRadius: BorderRadius.all(
-                                        Radius.circular(cx.height / 26.68)),
-                                    image: DecorationImage(
-                                      image: NetworkImage(
-                                        (cx.read(
-                                          Keys.image,
-                                        )).isEmpty
-                                            ? "https://thumbs.dreamstime.com/b/indoor-stadium-view-behind-wicket-cricket-160851985.jpg"
-                                            : cx.read(
-                                          Keys.image,
-                                        ),
-                                        scale:
-                                        cx.height > 800 ? 1.8 : 2.4,
-                                      ),
-                                      fit: BoxFit.cover,
-                                      onError: (Object e,
-                                          StackTrace? stackTrace) {
-                                        setState(() {
-                                          errorDomeImage
-                                              .add(cx.read(Keys.domeId));
-                                        });
-                                      },
-                                    )
-                                ),
-                                margin: EdgeInsets.only(
-                                    left: 8, right: 8, top: 8),
+                                        borderRadius: BorderRadius.all(
+                                            Radius.circular(cx.height / 26.68)),
+                                        image: DecorationImage(
+                                          image: NetworkImage(
+                                            (cx.read(
+                                              Keys.image,
+                                            )).isEmpty
+                                                ? "https://thumbs.dreamstime.com/b/indoor-stadium-view-behind-wicket-cricket-160851985.jpg"
+                                                : cx.read(
+                                                    Keys.image,
+                                                  ),
+                                            scale: cx.height > 800 ? 1.8 : 2.4,
+                                          ),
+                                          fit: BoxFit.cover,
+                                          onError: (Object e,
+                                              StackTrace? stackTrace) {
+                                            setState(() {
+                                              errorDomeImage
+                                                  .add(cx.read(Keys.domeId));
+                                            });
+                                          },
+                                        )),
+                                margin:
+                                    EdgeInsets.only(left: 8, right: 8, top: 8),
                                 width: MediaQuery.of(context).size.width,
                                 height: cx.height / 4.3,
                               ),
@@ -314,7 +307,6 @@ class _SplitReceiptState extends State<SplitReceipt> {
                           ),
                         ),
                       ),
-
                       isTimerAvailable
                           ? Padding(
                               padding: EdgeInsets.only(
@@ -397,7 +389,8 @@ class _SplitReceiptState extends State<SplitReceipt> {
                                                                 "In Progress"
                                                             ? Color(0XFFA19A6F)
                                                             : Color(0xFFFF5C5C),
-                                                        fontSize: cx.responsive(20,15, 12),
+                                                        fontSize: cx.responsive(
+                                                            20, 15, 12),
                                                         textAlign:
                                                             TextAlign.center,
                                                         height: 1.7,
@@ -479,18 +472,17 @@ class _SplitReceiptState extends State<SplitReceipt> {
                                                                       .bookingId
                                                                       .toString())
                                                               .then((value) {
-                                                                if(value==1){
-                                                                  setState(() {
-                                                                    paymentStatus =
+                                                            if (value == 1) {
+                                                              setState(() {
+                                                                paymentStatus =
                                                                     "Cancelled";
-                                                                    isCancelAvailable =
+                                                                isCancelAvailable =
                                                                     false;
-                                                                    isTimerAvailable =
+                                                                isTimerAvailable =
                                                                     false;
-                                                                  });
-                                                                }
-
                                                               });
+                                                            }
+                                                          });
                                                         });
                                                   },
                                                   child: Column(
@@ -503,7 +495,7 @@ class _SplitReceiptState extends State<SplitReceipt> {
                                                         fontWeight:
                                                             FontWeight.w700,
                                                         fontSize: cx.responsive(
-                                                            25,21, 18),
+                                                            25, 21, 18),
                                                       ),
                                                     ],
                                                   ),
@@ -514,7 +506,7 @@ class _SplitReceiptState extends State<SplitReceipt> {
                                     Gap(cx.height / 15),
                                     InkWell(
                                       onTap: () {
-                                        Get.offAll(WonderEvents());
+                                        Get.offAll(MainPageScreen());
                                         setState(() {
                                           cx.curIndex.value = 0;
                                         });
@@ -529,7 +521,7 @@ class _SplitReceiptState extends State<SplitReceipt> {
                                         alignment: Alignment.center,
                                         child: NunitoText(
                                           text: "Home",
-                                          fontSize: cx.responsive(28,22, 18),
+                                          fontSize: cx.responsive(28, 22, 18),
                                           textAlign: TextAlign.center,
                                           color: Colors.white,
                                           fontWeight: FontWeight.w700,
@@ -549,8 +541,16 @@ class _SplitReceiptState extends State<SplitReceipt> {
                           top: cx.height / 6.06,
                           right: 2,
                           left: 4,
-                          child:  timerBox(isDefaultTime,seconds: seconds,minutes: minutes,hours: hours,
-                              seconds1: seconds1,minutes1: minutes1,hours1: hours1,paymentLink: widget.paymentLink,timerMessage:"Share The Link To Split Amount Within The Given Time" ),
+                          child: timerBox(isDefaultTime,
+                              seconds: seconds,
+                              minutes: minutes,
+                              hours: hours,
+                              seconds1: seconds1,
+                              minutes1: minutes1,
+                              hours1: hours1,
+                              paymentLink: widget.paymentLink,
+                              timerMessage:
+                                  "Share The Link To Split Amount Within The Given Time"),
                         )
                       : Padding(
                           padding: EdgeInsets.only(
@@ -627,8 +627,8 @@ class _SplitReceiptState extends State<SplitReceipt> {
                                                             "In Progress"
                                                         ? Color(0XFFA19A6F)
                                                         : Color(0xFFFF5C5C),
-                                                    fontSize:
-                                                        cx.responsive(20,15, 12),
+                                                    fontSize: cx.responsive(
+                                                        20, 15, 12),
                                                     textAlign: TextAlign.center,
                                                     height: 1.7,
                                                     fontWeight: FontWeight.w700,
@@ -672,7 +672,7 @@ class _SplitReceiptState extends State<SplitReceipt> {
                                 Gap(cx.height / 15),
                                 InkWell(
                                   onTap: () {
-                                    Get.offAll(WonderEvents());
+                                    Get.offAll(MainPageScreen());
                                     setState(() {
                                       cx.curIndex.value = 0;
                                     });
@@ -686,7 +686,7 @@ class _SplitReceiptState extends State<SplitReceipt> {
                                     alignment: Alignment.center,
                                     child: NunitoText(
                                       text: "Home",
-                                      fontSize: cx.responsive(28,22, 18),
+                                      fontSize: cx.responsive(28, 22, 18),
                                       textAlign: TextAlign.center,
                                       color: Colors.white,
                                       fontWeight: FontWeight.w700,
@@ -883,8 +883,8 @@ class _SplitReceiptState extends State<SplitReceipt> {
                                 children: [
                                   Padding(
                                     padding: EdgeInsets.only(
-                                      left: cx.responsive(25,18, 13),
-                                      top: cx.responsive(18,14, 12),
+                                      left: cx.responsive(25, 18, 13),
+                                      top: cx.responsive(18, 14, 12),
                                     ),
                                     child: Container(
                                       child: Column(
@@ -895,13 +895,15 @@ class _SplitReceiptState extends State<SplitReceipt> {
                                         children: [
                                           NunitoText(
                                               text: "Paid Amount",
-                                              fontSize: cx.responsive(23,18, 15),
+                                              fontSize:
+                                                  cx.responsive(23, 18, 15),
                                               fontWeight: FontWeight.w600,
                                               color: AppColor.grey),
                                           Gap(8),
                                           NunitoText(
                                               text: "Remaining Amount",
-                                              fontSize: cx.responsive(23,18, 15),
+                                              fontSize:
+                                                  cx.responsive(23, 18, 15),
                                               fontWeight: FontWeight.w600,
                                               color: AppColor.grey),
                                         ],
@@ -910,8 +912,8 @@ class _SplitReceiptState extends State<SplitReceipt> {
                                   ),
                                   Padding(
                                     padding: EdgeInsets.only(
-                                      left: cx.responsive(4,3, 2),
-                                      top: cx.responsive(18,15, 13),
+                                      left: cx.responsive(4, 3, 2),
+                                      top: cx.responsive(18, 15, 13),
                                     ),
                                     child: Container(
                                       child: Column(
@@ -927,7 +929,8 @@ class _SplitReceiptState extends State<SplitReceipt> {
                                                       .read(
                                                           Keys.splitPaidAmount)
                                                       .toStringAsFixed(2),
-                                              fontSize: cx.responsive(25,20, 17),
+                                              fontSize:
+                                                  cx.responsive(25, 20, 17),
                                               fontWeight: FontWeight.w700,
                                               color: Color(0xFF757575)),
                                           Gap(5),
@@ -945,7 +948,7 @@ class _SplitReceiptState extends State<SplitReceipt> {
                                                               .splitRemainingAmount)
                                                           .toStringAsFixed(2),
                                                   fontSize:
-                                                      cx.responsive(25,20, 17),
+                                                      cx.responsive(25, 20, 17),
                                                   fontWeight: FontWeight.w700,
                                                   color: Color(0xFF757575)),
                                             ],
@@ -979,9 +982,7 @@ class _SplitReceiptState extends State<SplitReceipt> {
                                     // width: cx.width * 0.505,
                                     child: NunitoText(
                                         text: "  Total",
-                                        fontSize:
-                                        cx.responsive(
-                                            27,22, 19),
+                                        fontSize: cx.responsive(27, 22, 19),
                                         fontWeight: FontWeight.w700,
                                         color: Color(0xFF757575)),
                                   ),
@@ -991,9 +992,7 @@ class _SplitReceiptState extends State<SplitReceipt> {
                                           cx
                                               .read(Keys.total)
                                               .toStringAsFixed(2),
-                                      fontSize:
-                                      cx.responsive(
-                                          29,24, 21),
+                                      fontSize: cx.responsive(29, 24, 21),
                                       fontWeight: FontWeight.w600,
                                       color: Color(0xFF07261A)),
                                 ],
@@ -1017,7 +1016,7 @@ class _SplitReceiptState extends State<SplitReceipt> {
                                         CrossAxisAlignment.center,
                                     children: [
                                       CircleAvatar(
-                                        radius: cx.responsive(25,22.5, 20),
+                                        radius: cx.responsive(25, 22.5, 20),
                                         backgroundColor: Colors.white,
                                         child: CachedNetworkImage(
                                           imageUrl: widget.image,
@@ -1025,7 +1024,7 @@ class _SplitReceiptState extends State<SplitReceipt> {
                                               (context, imageProvider) =>
                                                   CircleAvatar(
                                             backgroundColor: Colors.transparent,
-                                            radius: cx.responsive(25,20, 17),
+                                            radius: cx.responsive(25, 20, 17),
                                             backgroundImage: NetworkImage(
                                               widget.image,
                                             ),
@@ -1034,7 +1033,7 @@ class _SplitReceiptState extends State<SplitReceipt> {
                                           placeholder: (context, url) =>
                                               CircleAvatar(
                                             backgroundColor: Colors.transparent,
-                                            radius: cx.responsive(25,20, 17),
+                                            radius: cx.responsive(25, 20, 17),
                                             backgroundImage: AssetImage(
                                               Image1.anime,
                                             ),
@@ -1042,7 +1041,7 @@ class _SplitReceiptState extends State<SplitReceipt> {
                                           errorWidget: (context, url, error) =>
                                               CircleAvatar(
                                             backgroundColor: Colors.transparent,
-                                            radius: cx.responsive(25,20, 17),
+                                            radius: cx.responsive(25, 20, 17),
                                             backgroundImage: AssetImage(
                                               Image1.anime,
                                             ),
@@ -1055,7 +1054,7 @@ class _SplitReceiptState extends State<SplitReceipt> {
                                         child: NunitoText(
                                           text: widget.email,
                                           fontWeight: FontWeight.w500,
-                                          fontSize: cx.responsive(22,18, 16),
+                                          fontSize: cx.responsive(22, 18, 16),
                                           color: Color(0xFF628477),
                                           textOverflow: TextOverflow.ellipsis,
                                           maxLines: 1,
@@ -1076,7 +1075,7 @@ class _SplitReceiptState extends State<SplitReceipt> {
                 height: cx.height * 0.39,
                 decoration: BoxDecoration(
                     color: Colors.white,
-                    borderRadius: isexpanded&&!isCancelAvailable
+                    borderRadius: isexpanded && !isCancelAvailable
                         ? BorderRadius.only(
                             bottomLeft: Radius.circular(cx.height / 37.06),
                             bottomRight: Radius.circular(cx.height / 37.06))
@@ -1090,8 +1089,8 @@ class _SplitReceiptState extends State<SplitReceipt> {
                         children: [
                           Padding(
                             padding: EdgeInsets.only(
-                              left: cx.responsive(25,18, 13),
-                              top: cx.responsive(18,14, 12),
+                              left: cx.responsive(25, 18, 13),
+                              top: cx.responsive(18, 14, 12),
                             ),
                             child: Container(
                               child: Column(
@@ -1101,13 +1100,13 @@ class _SplitReceiptState extends State<SplitReceipt> {
                                 children: [
                                   NunitoText(
                                       text: "Paid Amount",
-                                      fontSize: cx.responsive(23,18, 15),
+                                      fontSize: cx.responsive(23, 18, 15),
                                       fontWeight: FontWeight.w600,
                                       color: AppColor.grey),
                                   Gap(8),
                                   NunitoText(
                                       text: "Remaining Amount",
-                                      fontSize: cx.responsive(23,18, 15),
+                                      fontSize: cx.responsive(23, 18, 15),
                                       fontWeight: FontWeight.w600,
                                       color: AppColor.grey),
                                 ],
@@ -1116,8 +1115,8 @@ class _SplitReceiptState extends State<SplitReceipt> {
                           ),
                           Padding(
                             padding: EdgeInsets.only(
-                              left: cx.responsive(4,3, 2),
-                              top: cx.responsive(18,15, 13),
+                              left: cx.responsive(4, 3, 2),
+                              top: cx.responsive(18, 15, 13),
                             ),
                             child: Container(
                               child: Column(
@@ -1130,7 +1129,7 @@ class _SplitReceiptState extends State<SplitReceipt> {
                                           cx
                                               .read(Keys.splitPaidAmount)
                                               .toStringAsFixed(2),
-                                      fontSize: cx.responsive(25,20, 17),
+                                      fontSize: cx.responsive(25, 20, 17),
                                       fontWeight: FontWeight.w700,
                                       color: Color(0xFF757575)),
                                   Gap(5),
@@ -1146,7 +1145,7 @@ class _SplitReceiptState extends State<SplitReceipt> {
                                                   .read(
                                                       Keys.splitRemainingAmount)
                                                   .toStringAsFixed(2),
-                                          fontSize: cx.responsive(25,20, 17),
+                                          fontSize: cx.responsive(25, 20, 17),
                                           fontWeight: FontWeight.w700,
                                           color: Color(0xFF757575)),
                                     ],
@@ -1209,14 +1208,14 @@ class _SplitReceiptState extends State<SplitReceipt> {
                             crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
                               CircleAvatar(
-                                radius: cx.responsive(25,22.5, 20),
+                                radius: cx.responsive(25, 22.5, 20),
                                 backgroundColor: Colors.white,
                                 child: CachedNetworkImage(
                                   imageUrl: widget.image,
                                   imageBuilder: (context, imageProvider) =>
                                       CircleAvatar(
                                     backgroundColor: Colors.transparent,
-                                    radius: cx.responsive(25,20, 17),
+                                    radius: cx.responsive(25, 20, 17),
                                     backgroundImage: NetworkImage(
                                       widget.image,
                                     ),
@@ -1224,7 +1223,7 @@ class _SplitReceiptState extends State<SplitReceipt> {
                                   fit: BoxFit.cover,
                                   placeholder: (context, url) => CircleAvatar(
                                     backgroundColor: Colors.transparent,
-                                    radius: cx.responsive(25,20, 17),
+                                    radius: cx.responsive(25, 20, 17),
                                     backgroundImage: AssetImage(
                                       Image1.anime,
                                     ),
@@ -1232,7 +1231,7 @@ class _SplitReceiptState extends State<SplitReceipt> {
                                   errorWidget: (context, url, error) =>
                                       CircleAvatar(
                                     backgroundColor: Colors.transparent,
-                                    radius: cx.responsive(25,20, 17),
+                                    radius: cx.responsive(25, 20, 17),
                                     backgroundImage: AssetImage(
                                       Image1.anime,
                                     ),
@@ -1245,7 +1244,7 @@ class _SplitReceiptState extends State<SplitReceipt> {
                                 child: NunitoText(
                                   text: widget.email,
                                   fontWeight: FontWeight.w500,
-                                  fontSize: cx.responsive(22,18, 16),
+                                  fontSize: cx.responsive(22, 18, 16),
                                   color: Color(0xFF628477),
                                   textOverflow: TextOverflow.ellipsis,
                                   maxLines: 1,
@@ -1309,5 +1308,4 @@ class _SplitReceiptState extends State<SplitReceipt> {
       }
     });
   }
-
 }

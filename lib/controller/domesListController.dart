@@ -110,8 +110,6 @@ class DomesListController extends GetxController {
     }
     return null;
   }
-
-
   Future<void> getTask2(String sid) async {
     try {
       print("dome2");

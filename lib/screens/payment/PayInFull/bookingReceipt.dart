@@ -194,7 +194,7 @@ class _BookingReceiptState extends State<BookingReceipt> {
 
     return WillPopScope(
       onWillPop: () async {
-        Get.offAll(WonderEvents());
+        Get.offAll(MainPageScreen());
         return false;
       },
       child: Scaffold(
@@ -449,7 +449,7 @@ class _BookingReceiptState extends State<BookingReceipt> {
                                     Gap(cx.height / 15),
                                     InkWell(
                                       onTap: () {
-                                        Get.offAll(WonderEvents());
+                                        Get.offAll(MainPageScreen());
                                         setState(() {
                                           cx.curIndex.value = 0;
                                         });
@@ -645,7 +645,7 @@ class _BookingReceiptState extends State<BookingReceipt> {
                                 Gap(cx.height / 15),
                                 InkWell(
                                   onTap: () {
-                                    Get.offAll(WonderEvents());
+                                    Get.offAll(MainPageScreen());
                                     setState(() {
                                       cx.curIndex.value = 0;
                                     });

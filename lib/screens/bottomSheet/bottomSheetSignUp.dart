@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
-import 'package:device_info_plus/device_info_plus.dart';
+
 import 'package:dotted_line/dotted_line.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
@@ -10,15 +10,18 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:gap/gap.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:http/http.dart' as http;
 import 'package:intl_phone_field/intl_phone_field.dart';
 import 'package:pin_code_text_field/pin_code_text_field.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
+
 import '../../commonModule/AppColor.dart';
 import '../../commonModule/Constant.dart';
-import 'package:gap/gap.dart';
+import '../../commonModule/utils.dart';
 import '../../commonModule/widget/common/textNunito.dart';
 import '../../commonModule/widget/common/textSentic.dart';
 import '../../commonModule/widget/common/webView.dart';
@@ -27,9 +30,6 @@ import '../../controller/commonController.dart';
 import '../../main_page.dart';
 import '../../service/getAPI.dart';
 import '../authPage/signIn.dart';
-import '../../commonModule/utils.dart';
-
-import 'package:http/http.dart' as http;
 
 class BottomSheetSignUp extends StatefulWidget {
   final int curIndex;
@@ -74,6 +74,7 @@ class _BottomSheetSignUpState extends State<BottomSheetSignUp> {
   bool isfailed = false;
   bool checkedValue = false;
   bool termsError = false;
+
   @override
   void initState() {
     // TODO: implement initState
@@ -275,7 +276,6 @@ class _BottomSheetSignUpState extends State<BottomSheetSignUp> {
                       Gap(cx.height / 44.47),
                       IntlPhoneField(
                         textInputAction: TextInputAction.next,
-
                         obscureText: false,
                         controller: mobilecontroller,
                         flagsButtonPadding: EdgeInsets.all(10),
@@ -348,13 +348,11 @@ class _BottomSheetSignUpState extends State<BottomSheetSignUp> {
                         invalidNumberMessage: "Please Enter Valid Length",
                         initialCountryCode: 'CA',
                         onCountryChanged: (country) {
-
                           setState(() {
                             twodigitcountryCode = country.code;
                             countryCode = country.dialCode;
                           });
                         },
-
                       ),
                       Gap(cx.height / 44.47),
                       TextFormField(
@@ -535,7 +533,9 @@ class _BottomSheetSignUpState extends State<BottomSheetSignUp> {
                               Checkbox(
                                   value: checkedValue,
                                   fillColor: MaterialStateProperty.all(
-                                      AppColor.darkGreen),
+                                      checkedValue
+                                          ? AppColor.darkGreen
+                                          : Colors.transparent),
                                   side: BorderSide(
                                       color: termsError
                                           ? Color(0xFFD32F2F)
@@ -800,7 +800,6 @@ class _BottomSheetSignUpState extends State<BottomSheetSignUp> {
                               final userData =
                                   FirebaseAuth.instance.currentUser;
 
-
                               TaskProvider.appleSignInAPI(
                                   email: userData?.providerData[0].email
                                               .toString() !=
@@ -827,7 +826,6 @@ class _BottomSheetSignUpState extends State<BottomSheetSignUp> {
                                   context: context,
                                   curIndex: widget.curIndex,
                                   noOfPopTime: widget.noOfPopTime);
-
 
                               // This is the endpoint that will convert an authorization code obtained
                               // via Sign in with Apple into a session in your system
@@ -913,8 +911,8 @@ class _BottomSheetSignUpState extends State<BottomSheetSignUp> {
                       onTap: () {
                         Get.off(
                             SignIn(
-                                curIndex: widget.curIndex,
-                                noOfPopTime: widget.noOfPopTime,
+                              curIndex: widget.curIndex,
+                              noOfPopTime: widget.noOfPopTime,
                             ),
                             transition: Transition.rightToLeft);
                       },
@@ -1086,7 +1084,6 @@ class _BottomSheetSignUpState extends State<BottomSheetSignUp> {
                         controller.text = data!.text.toString().substring(0, 4);
                       });
 
-
                       if (Constant.signUpotp.toString() == controller.text) {
                         Future verify() async {
                           setState(() {
@@ -1115,7 +1112,6 @@ class _BottomSheetSignUpState extends State<BottomSheetSignUp> {
                             final jsonBody = await jsonDecode(respStr);
 
                             if (jsonBody['status'] == 1) {
-
                               cx.write(
                                   'username', jsonBody['userdata']['name']);
                               cx.write(
@@ -1156,10 +1152,9 @@ class _BottomSheetSignUpState extends State<BottomSheetSignUp> {
                                     Get.back();
                                   }
                                 } else {
-
                                   Navigator.of(context).pushAndRemoveUntil(
                                     MaterialPageRoute(
-                                        builder: (context) => WonderEvents(
+                                        builder: (context) => MainPageScreen(
                                               curIndex: widget.curIndex,
                                             )),
                                     (Route<dynamic> route) => false,
@@ -1216,124 +1211,133 @@ class _BottomSheetSignUpState extends State<BottomSheetSignUp> {
                       });
                     },
                     onDone: (text) {
+                      setState(() {
+                        isprocessing = true;
+                        isconfirm = false;
+                        isfailed = false;
+                        isuccessful = false;
+                      });
                       print(Constant.signUpotp.toString());
                       print("DONE $text");
-
-                      if (Constant.signUpotp.toString() == text) {
-                        Future verify() async {
-                          setState(() {
-                            isprocessing = true;
-                            isconfirm = false;
-                            isfailed = false;
-                            isuccessful = false;
-                          });
-                          onAlert(context: context, type: 1, msg: "Loading...");
-
-                          try {
-                            var request = http.MultipartRequest(
-                                'POST', Uri.parse(Constant.verify));
-                            request.fields.addAll({
-                              'email': emailcontroller.text,
-                              'name': namecontroller.text,
-                              'countrycode': twodigitcountryCode,
-                              'phone': mobilecontroller.text,
-                              'password': passcontroller.text,
-                              'cpassword': confirmpasscontroller.text
+                      Timer(du, () {
+                        if (Constant.signUpotp.toString() == text) {
+                          Future verify() async {
+                            setState(() {
+                              isprocessing = true;
+                              isconfirm = false;
+                              isfailed = false;
+                              isuccessful = false;
                             });
-                            print("query2");
+                            onAlert(
+                                context: context, type: 1, msg: "Loading...");
 
-                            final response = await request.send();
-                            final respStr =
-                                await response.stream.bytesToString();
-                            final jsonBody = await jsonDecode(respStr);
-
-                            if (jsonBody['status'] == 1) {
-                              print("query3");
-
-                              cx.write(
-                                  'username', jsonBody['userdata']['name']);
-                              cx.write(
-                                  'useremail', jsonBody['userdata']['email']);
-                              cx.write('phone', jsonBody['userdata']['phone']);
-                              cx.write('countrycode',
-                                  jsonBody['userdata']['countrycode']);
-                              cx.write('image', jsonBody['userdata']['image']);
-                              cx.write('id', jsonBody['userdata']['id']);
-                              cx.write('islogin', true);
-                              cx.write('isVerified', true);
-
-                              cx.id.value = cx.read("id");
-                              cx.email.value = cx.read("useremail");
-                              cx.phone.value = cx.read("phone");
-                              cx.countrycode.value = cx.read("countrycode");
-                              cx.image.value = cx.read("image");
-                              cx.isLogin.value = cx.read("islogin");
-                              cx.name.value = cx.read("username");
-                              cx.isVerified.value = cx.read("isVerified");
-                              setState(() {
-                                isuccessful = true;
-                                isprocessing = false;
-                                isconfirm = false;
-                                isfailed = false;
+                            try {
+                              var request = http.MultipartRequest(
+                                  'POST', Uri.parse(Constant.verify));
+                              request.fields.addAll({
+                                'email': emailcontroller.text,
+                                'name': namecontroller.text,
+                                'countrycode': twodigitcountryCode,
+                                'phone': mobilecontroller.text,
+                                'password': passcontroller.text,
+                                'cpassword': confirmpasscontroller.text
                               });
-                              print(jsonBody.toString());
-                              onAlert(
-                                  context: context,
-                                  type: 2,
-                                  msg: jsonBody['message']);
-                              Duration du = const Duration(seconds: 3);
+                              print("query2");
 
-                              Timer(du, () {
-                                Get.back();
+                              final response = await request.send();
+                              final respStr =
+                                  await response.stream.bytesToString();
+                              final jsonBody = await jsonDecode(respStr);
 
-                                //Navigation from receipt
-                                if (widget.noOfPopTime == 99) {
-                                  widget.noOfPopTime = 1;
-                                  while (widget.noOfPopTime != 0) {
-                                    widget.noOfPopTime--;
-                                    Get.back(result: true);
+                              if (jsonBody['status'] == 1) {
+                                print("query3");
+
+                                cx.write(
+                                    'username', jsonBody['userdata']['name']);
+                                cx.write(
+                                    'useremail', jsonBody['userdata']['email']);
+                                cx.write(
+                                    'phone', jsonBody['userdata']['phone']);
+                                cx.write('countrycode',
+                                    jsonBody['userdata']['countrycode']);
+                                cx.write(
+                                    'image', jsonBody['userdata']['image']);
+                                cx.write('id', jsonBody['userdata']['id']);
+                                cx.write('islogin', true);
+                                cx.write('isVerified', true);
+
+                                cx.id.value = cx.read("id");
+                                cx.email.value = cx.read("useremail");
+                                cx.phone.value = cx.read("phone");
+                                cx.countrycode.value = cx.read("countrycode");
+                                cx.image.value = cx.read("image");
+                                cx.isLogin.value = cx.read("islogin");
+                                cx.name.value = cx.read("username");
+                                cx.isVerified.value = cx.read("isVerified");
+                                setState(() {
+                                  isuccessful = true;
+                                  isprocessing = false;
+                                  isconfirm = false;
+                                  isfailed = false;
+                                });
+                                print(jsonBody.toString());
+                                onAlert(
+                                    context: context,
+                                    type: 2,
+                                    msg: jsonBody['message']);
+                                Duration du = const Duration(seconds: 3);
+
+                                Timer(du, () {
+                                  Get.back();
+
+                                  //Navigation from receipt
+                                  if (widget.noOfPopTime == 99) {
+                                    widget.noOfPopTime = 1;
+                                    while (widget.noOfPopTime != 0) {
+                                      widget.noOfPopTime--;
+                                      Get.back(result: true);
+                                    }
+                                  } else if (widget.noOfPopTime != -1) {
+                                    while (widget.noOfPopTime != 0) {
+                                      widget.noOfPopTime--;
+                                      Get.back();
+                                    }
+                                  } else {
+                                    Navigator.of(context).pushAndRemoveUntil(
+                                      MaterialPageRoute(
+                                          builder: (context) => MainPageScreen(
+                                                curIndex: widget.curIndex,
+                                              )),
+                                      (Route<dynamic> route) => false,
+                                    );
                                   }
-                                } else if (widget.noOfPopTime != -1) {
-                                  while (widget.noOfPopTime != 0) {
-                                    widget.noOfPopTime--;
-                                    Get.back();
-                                  }
-                                } else {
-
-                                  Navigator.of(context).pushAndRemoveUntil(
-                                    MaterialPageRoute(
-                                        builder: (context) => WonderEvents(
-                                              curIndex: widget.curIndex,
-                                            )),
-                                    (Route<dynamic> route) => false,
-                                  );
-                                }
-                              });
-                            } else {
-                              onAlert(
-                                  context: context,
-                                  type: 3,
-                                  msg: jsonBody['message']);
-                              print(jsonBody);
-                            }
-                          } catch (e) {
-                            Get.back();
-                            print(e.toString());
-                            if (e is SocketException) {
-                              showLongToast("Could not connect to internet");
+                                });
+                              } else {
+                                onAlert(
+                                    context: context,
+                                    type: 3,
+                                    msg: jsonBody['message']);
+                                print(jsonBody);
+                              }
+                            } catch (e) {
+                              Get.back();
+                              print(e.toString());
+                              if (e is SocketException) {
+                                showLongToast("Could not connect to internet");
+                              }
                             }
                           }
-                        }
 
-                        verify();
-                      } else {
-                        setState(() {
-                          isprocessing = false;
-                          isconfirm = false;
-                          isfailed = true;
-                          isuccessful = false;
-                        });
-                      }
+                          verify();
+                        } else {
+                          setState(() {
+                            isprocessing = false;
+                            isconfirm = false;
+                            isfailed = true;
+                            isuccessful = false;
+                          });
+                        }
+                      });
                       print("DONE CONTROLLER ${controller.text}");
                     },
                     pinBoxWidth: cx.width / 7,
@@ -1395,7 +1399,7 @@ class _BottomSheetSignUpState extends State<BottomSheetSignUp> {
 
                           setState(() {
                             Constant.signUpotp = jsonBody['otp'];
-                            print( Constant.signUpotp.toString());
+                            print(Constant.signUpotp.toString());
                           });
                         } else {
                           onAlert(
@@ -1595,6 +1599,4 @@ class _BottomSheetSignUpState extends State<BottomSheetSignUp> {
         color: pinBoxColor,
         borderRadius: BorderRadius.circular(10));
   };
-
-
 }

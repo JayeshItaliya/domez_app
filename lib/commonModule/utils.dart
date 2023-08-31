@@ -375,7 +375,7 @@ Widget noInternetLottie({bool? backbutton}) {
           InkWell(
             onTap: () {
               Get.offAll(
-                WonderEvents(),
+                MainPageScreen(),
                 transition: Transition.fade,
               );
             },
@@ -1065,7 +1065,7 @@ Future<String> initDynamicLinks() async {
       print("bookingID=>"+bookingId.toString());
       Get.to(InitialLinkAccess(bId: bookingId,));
     } else {
-      Get.offAll(WonderEvents());
+      Get.offAll(MainPageScreen());
     }
 
     //If app is shutDown
@@ -1106,7 +1106,7 @@ void handleLinkData(PendingDynamicLinkData data) {
 }
 navigateToScreen() async {
   await Future.delayed(Duration(seconds: 2), () {
-    Get.offAll(WonderEvents());
+    Get.offAll(MainPageScreen());
   });
 }
 Future<void> _requestPermissions() async {

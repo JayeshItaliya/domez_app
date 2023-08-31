@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 
 
 class Constant {
-  static String stripeSecretKey = "sk_test_51LlAvQFysF0okTxJjCODF1rt79hZpNypYCfAAUaSgy9EGXbg5dL3h9a93rxNCgXMpBJEFETvdWO1y5xyClOxn6D200JgDzWUe5";
+  static String stripeSecretKey = "";
   static const String mapkey = "AIzaSyCvlZaKvRSMouyH9pDgGC6pMGADfytOrsA";
   static int page=1;
 
@@ -12,8 +12,8 @@ class Constant {
   static const String perPage = "10";
 
   // static const String baseUrl = "http://52.22.227.137/api/";
-  static const String baseUrl="https://domez.io/api/";
-  // static const String baseUrl="http://192.168.0.114/domez_backend/api/";
+  // static const String baseUrl="https://domez.io/api/";
+  static const String baseUrl="http://192.168.0.105/domez_backend/api/";
 
   static const String dummyProfileUrl ="https://www.domez.io/storage/app/public/admin/images/profiles/default.png";
   static String fcmToken = "";

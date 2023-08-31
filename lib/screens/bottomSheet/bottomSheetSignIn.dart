@@ -696,7 +696,7 @@ class _BottomSheetSignInState extends State<BottomSheetSignIn> {
           }
           else{
             Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (context) =>
-                WonderEvents(curIndex: widget.curIndex,)),
+                MainPageScreen(curIndex: widget.curIndex,)),
                   (Route<dynamic> route) => false,);
           }
         });

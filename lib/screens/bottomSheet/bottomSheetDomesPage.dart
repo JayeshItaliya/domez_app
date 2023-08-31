@@ -76,8 +76,8 @@ class _BottomSheetDomesPageState extends State<BottomSheetDomesPage> {
             borderRadius: BorderRadius.circular(cx.height / 13.34),
           ),
           child: Padding(
-            padding: EdgeInsets.only(
-                left: cx.height / 33.5, right: cx.height / 44.47),
+            padding: EdgeInsets.symmetric(
+                horizontal: cx.width / 30),
             child: Obx(
               () => mycontroller.isoffline.value
                   ? noInternetLottie()
@@ -127,78 +127,89 @@ class _BottomSheetDomesPageState extends State<BottomSheetDomesPage> {
                                 fontWeight: FontWeight.w500,
                               ),
                             ),
-                            Row(
-                              children: [
-                                Padding(
-                                  padding:
-                                      const EdgeInsets.fromLTRB(0, 4, 0, 4),
-                                  child: Row(
-                                    mainAxisAlignment: MainAxisAlignment.start,
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.center,
-                                    children: [
-                                      CircleAvatar(
-                                        backgroundColor: Color(0xFFF5F7F9),
-                                        radius: cx.responsive(25, 20, 17),
-                                        child: Icon(
-                                          Icons.add_circle_outline,
-                                          color: Color(0xFF629C86),
-                                          size: cx.responsive(30, 24, 21),
-                                        ),
+                            Container(
+                              width: cx.width-cx.width/15,
+                              child: Row(
+                                children: [
+                                  Expanded(
+                                    flex: 0,
+                                    child: Padding(
+                                      padding:
+                                          const EdgeInsets.fromLTRB(0, 4, 0, 4),
+                                      child: Row(
+                                        mainAxisAlignment: MainAxisAlignment.start,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.center,
+                                        children: [
+                                          CircleAvatar(
+                                            backgroundColor: Color(0xFFF5F7F9),
+                                            radius: cx.responsive(25, 20, 17),
+                                            child: Icon(
+                                              Icons.add_circle_outline,
+                                              color: Color(0xFF629C86),
+                                              size: cx.responsive(30, 24, 21),
+                                            ),
+                                          ),
+                                          Gap(8),
+                                          NunitoText(
+                                            textAlign: TextAlign.start,
+                                            text: item.totalFields == 1
+                                                ? item.totalFields.toString() +
+                                                    " Field"
+                                                : item.totalFields.toString() +
+                                                    " Fields",
+                                            fontWeight: FontWeight.w500,
+                                            fontSize: cx.height > 800 ? 17 : 14,
+                                            color: Color(0xFFA8A8A8),
+                                            textOverflow: TextOverflow.ellipsis,
+                                            maxLines: 1,
+                                          ),
+                                        ],
                                       ),
-                                      Gap(8),
-                                      NunitoText(
-                                        textAlign: TextAlign.start,
-                                        text: item.totalFields == 1
-                                            ? item.totalFields.toString() +
-                                                " Field"
-                                            : item.totalFields.toString() +
-                                                " Fields",
-                                        fontWeight: FontWeight.w500,
-                                        fontSize: cx.height > 800 ? 17 : 14,
-                                        color: Color(0xFFA8A8A8),
-                                        textOverflow: TextOverflow.ellipsis,
-                                        maxLines: 1,
-                                      ),
-                                    ],
+                                    ),
                                   ),
-                                ),
-                                Gap(cx.width / 20),
-                                Padding(
-                                  padding:
-                                      const EdgeInsets.fromLTRB(0, 4, 0, 4),
-                                  child: Row(
-                                    mainAxisAlignment: MainAxisAlignment.start,
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.center,
-                                    children: [
-                                      CircleAvatar(
-                                        backgroundColor: Color(0xFFF5F7F9),
-                                        radius: cx.responsive(25, 20, 17),
-                                        child: Icon(
-                                          Icons.access_time,
-                                          color: Color(0xFF629C86),
-                                          size: cx.responsive(30, 24, 21),
-                                        ),
+                                  Expanded(
+                                    flex: 0,
+                                      child: Gap(cx.width / 20)),
+                                  Expanded(
+                                    flex: 1,
+                                    child: Padding(
+                                      padding:
+                                          const EdgeInsets.fromLTRB(0, 4, 0, 4),
+                                      child: Row(
+                                        mainAxisAlignment: MainAxisAlignment.start,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.center,
+                                        children: [
+                                          CircleAvatar(
+                                            backgroundColor: Color(0xFFF5F7F9),
+                                            radius: cx.responsive(25, 20, 17),
+                                            child: Icon(
+                                              Icons.access_time,
+                                              color: Color(0xFF629C86),
+                                              size: cx.responsive(30, 24, 21),
+                                            ),
+                                          ),
+                                          Gap(8),
+                                          Container(
+                                            // width: cx.width * 0.5,
+                                            child: NunitoText(
+                                              textAlign: TextAlign.start,
+                                              text:
+                                                  "${item.startTime} To ${item.endTime}",
+                                              fontWeight: FontWeight.w500,
+                                              fontSize: cx.height > 800 ? 17 : 14,
+                                              color: Color(0xFF9F9F9F),
+                                              textOverflow: TextOverflow.ellipsis,
+                                              maxLines: 1,
+                                            ),
+                                          ),
+                                        ],
                                       ),
-                                      Gap(8),
-                                      Container(
-                                        width: cx.width * 0.44,
-                                        child: NunitoText(
-                                          textAlign: TextAlign.start,
-                                          text:
-                                              "${item.startTime} To ${item.endTime}",
-                                          fontWeight: FontWeight.w500,
-                                          fontSize: cx.height > 800 ? 17 : 14,
-                                          color: Color(0xFF9F9F9F),
-                                          textOverflow: TextOverflow.ellipsis,
-                                          maxLines: 1,
-                                        ),
-                                      ),
-                                    ],
+                                    ),
                                   ),
-                                ),
-                              ],
+                                ],
+                              ),
                             ),
                             Gap(10),
                             InkWell(
@@ -542,7 +553,6 @@ class _BottomSheetDomesPageState extends State<BottomSheetDomesPage> {
       ),
     );
   }
-
   Widget moreDialog(String title,String desc) =>
       StatefulBuilder(builder: (BuildContext context,
           StateSetter setState /*You can rename this!*/) {

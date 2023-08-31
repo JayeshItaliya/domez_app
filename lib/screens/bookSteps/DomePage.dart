@@ -1,17 +1,16 @@
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:domez/commonModule/Strings.dart';
 import 'package:domez/controller/categoryController.dart';
 import 'package:domez/controller/domesListController.dart';
-import 'package:intl/intl.dart';
-import '../../../commonModule/AppColor.dart';
-import 'package:domez/commonModule/Strings.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_statusbarcolor_ns/flutter_statusbarcolor_ns.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:get/get.dart';
-import 'package:page_indicator/page_indicator.dart';
-import '../../commonModule/Constant.dart';
 import 'package:gap/gap.dart';
+import 'package:get/get.dart';
+import 'package:intl/intl.dart';
+import 'package:page_indicator/page_indicator.dart';
+import '../../../commonModule/AppColor.dart';
 import '../../commonModule/utils.dart';
 import '../../commonModule/widget/common/textInter.dart';
 import '../../commonModule/widget/common/textNunito.dart';
@@ -46,7 +45,7 @@ class _DomePageState extends State<DomePage> {
   final domesListController = Get.put(DomesListController());
   FavListController favListController = Get.put(FavListController());
   late final DomesDetailsModel item;
-  List<int> closedDays=[];
+  List<int> closedDays = [];
 
   @override
   void initState() {
@@ -55,13 +54,13 @@ class _DomePageState extends State<DomePage> {
     getData().then((value) {
       item = mycontroller.myList[0];
 
-      item.closedDays?.asMap().forEach((index,int element) {
+      item.closedDays?.asMap().forEach((index, int element) {
         print(element);
-        if(element==1){
-          closedDays.add(index+1);
+        if (element == 1) {
+          closedDays.add(index + 1);
         }
       });
-      print("closed days==="+closedDays.toString());
+      print("closed days===" + closedDays.toString());
     });
     setState(() {
       initfav = widget.isFav;
@@ -160,55 +159,93 @@ class _DomePageState extends State<DomePage> {
                                           height:
                                               size.height + cx.height / 13.34,
                                           // color: AppColor.bg,
-                                          child: PageIndicatorContainer(
-                                              padding: EdgeInsets.only(
-                                                bottom: cx.responsive(
-                                                    cx.height / 6.5,
-                                                    cx.height / 6.5,
-                                                    cx.height / 7),
-                                              ),
-                                              align: IndicatorAlign.bottom,
-                                              length: item.domeImages.length,
-                                              indicatorColor: AppColor.bg,
-                                              indicatorSelectorColor:
-                                                  AppColor.darkGreen,
-                                              // size: 10.0,
-                                              indicatorSpace: 8.0,
-                                              child: PageView.builder(
-                                                  itemCount:
-                                                      item.domeImages.length,
-                                                  itemBuilder:
-                                                      (BuildContext context,
-                                                          int i) {
-                                                    return CachedNetworkImage(
-                                                      imageUrl: item
-                                                          .domeImages[i].image
-                                                          .toString(),
-                                                      imageBuilder: (context,
-                                                              imageProvider) =>
-                                                          Image.network(
-                                                        item.domeImages[i].image
-                                                            .toString(),
-                                                        fit: BoxFit.cover,
-                                                      ),
-                                                      placeholder:
-                                                          (context, url) =>
-                                                              Image.asset(
-                                                        scale: cx.responsive(
-                                                            0.8, 0.8, 0.5),
-                                                        fit: BoxFit.cover,
-                                                        Image1.domesAround,
-                                                      ),
-                                                      errorWidget: (context,
-                                                              url, error) =>
+                                          child: item.domeImages.length == 1 ||
+                                                  item.domeImages.length == 0
+                                              ? CachedNetworkImage(
+                                                  imageUrl: item
+                                                      .domeImages[0].image
+                                                      .toString(),
+                                                  imageBuilder: (context,
+                                                          imageProvider) =>
+                                                      Image.network(
+                                                    item.domeImages[0].image
+                                                        .toString(),
+                                                    fit: BoxFit.cover,
+                                                  ),
+                                                  placeholder: (context, url) =>
+                                                      Image.asset(
+                                                    scale: cx.responsive(
+                                                        0.8, 0.8, 0.5),
+                                                    fit: BoxFit.cover,
+                                                    Image1.domesAround,
+                                                  ),
+                                                  errorWidget:
+                                                      (context, url, error) =>
                                                           Image.asset(
-                                                        scale: cx.responsive(
-                                                            0.8, 0.8, 0.5),
-                                                        fit: BoxFit.cover,
-                                                        Image1.domesAround,
-                                                      ),
-                                                    );
-                                                  })),
+                                                    scale: cx.responsive(
+                                                        0.8, 0.8, 0.5),
+                                                    fit: BoxFit.cover,
+                                                    Image1.domesAround,
+                                                  ),
+                                                )
+                                              : PageIndicatorContainer(
+                                                  padding: EdgeInsets.only(
+                                                    bottom: cx.responsive(
+                                                        cx.height / 6.5,
+                                                        cx.height / 6.5,
+                                                        cx.height / 7),
+                                                  ),
+                                                  align: IndicatorAlign.bottom,
+                                                  length:
+                                                      item.domeImages.length,
+                                                  indicatorColor: AppColor.bg,
+                                                  indicatorSelectorColor:
+                                                      AppColor.darkGreen,
+                                                  // size: 10.0,
+                                                  indicatorSpace: 8.0,
+                                                  child: PageView.builder(
+                                                      itemCount: item
+                                                          .domeImages.length,
+                                                      itemBuilder:
+                                                          (BuildContext context,
+                                                              int i) {
+                                                        return CachedNetworkImage(
+                                                          imageUrl: item
+                                                              .domeImages[i]
+                                                              .image
+                                                              .toString(),
+                                                          imageBuilder: (context,
+                                                                  imageProvider) =>
+                                                              Image.network(
+                                                            item.domeImages[i]
+                                                                .image
+                                                                .toString(),
+                                                            fit: BoxFit.cover,
+                                                          ),
+                                                          placeholder:
+                                                              (context, url) =>
+                                                                  Image.asset(
+                                                            scale:
+                                                                cx.responsive(
+                                                                    0.8,
+                                                                    0.8,
+                                                                    0.5),
+                                                            fit: BoxFit.cover,
+                                                            Image1.domesAround,
+                                                          ),
+                                                          errorWidget: (context,
+                                                                  url, error) =>
+                                                              Image.asset(
+                                                            scale:
+                                                                cx.responsive(
+                                                                    0.8,
+                                                                    0.8,
+                                                                    0.5),
+                                                            fit: BoxFit.cover,
+                                                            Image1.domesAround,
+                                                          ),
+                                                        );
+                                                      })),
                                         ),
                                       ),
                                       Positioned(
@@ -290,7 +327,10 @@ class _DomePageState extends State<DomePage> {
                                                   type: "1");
                                             } else {
                                               // Get.to(SignIn());
-                                              onAlertSignIn(context: context,currentIndex: 0,noOfPopTimes: 1);
+                                              onAlertSignIn(
+                                                  context: context,
+                                                  currentIndex: 0,
+                                                  noOfPopTimes: 1);
                                             }
                                           },
                                           child: CircleAvatar(
@@ -394,8 +434,9 @@ class _DomePageState extends State<DomePage> {
                                               children: List.generate(
                                                 item.sportsList.length,
                                                 (index) {
-                                                  if(item.sportsList.length==1){
-                                                    selectedIndex=0;
+                                                  if (item.sportsList.length ==
+                                                      1) {
+                                                    selectedIndex = 0;
                                                     sportId = item
                                                         .sportsList[index]
                                                         .sportId;
@@ -551,13 +592,13 @@ class _DomePageState extends State<DomePage> {
                                                     cx.globalSelectedIndex = [];
                                                     cx.globalPrice.value = 0.0;
 
-
-
                                                     Get.back();
                                                     Get.to(BookSlot(
                                                       isEditing: false,
                                                       closedDays: closedDays,
-                                                      torontoTimeStamp: item.currentTime??DateTime.now(),
+                                                      torontoTimeStamp:
+                                                          item.currentTime ??
+                                                              DateTime.now(),
                                                     ));
                                                   });
                                                 },

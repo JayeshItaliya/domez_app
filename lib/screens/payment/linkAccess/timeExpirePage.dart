@@ -45,7 +45,7 @@ class _TimeExpirePageState extends State<TimeExpirePage> {
             top: cx.responsive(35, 25, 20),
             child: InkWell(
               onTap: () {
-                Get.offAll(WonderEvents());
+                Get.offAll(MainPageScreen());
                 cx.curIndex.value=0;
               },
               child: CircleAvatar(

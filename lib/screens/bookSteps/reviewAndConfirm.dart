@@ -148,8 +148,7 @@ class _ReviewConfirmState extends State<ReviewConfirm> {
                                             height: cx.height / 4.3,
                                           ),
                                           Positioned(
-                                            top: cx.height / 6.06,
-                                            // top: cx.responsive(200,167, 130),
+                                            top: cx.height / 4.8,
                                             right: 20,
                                             left: 20,
                                             child: Container(
@@ -555,7 +554,7 @@ class _ReviewConfirmState extends State<ReviewConfirm> {
                                         InkWell(
                                           onTap: () async {
                                             var result = await Get.to(
-                                              BookSlot(isEditing: true),
+                                              BookSlot(isEditing: true,isExpanded: false),
                                             );
                                             if (result != null) {
                                               print("update");

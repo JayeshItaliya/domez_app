@@ -3,7 +3,6 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -28,13 +27,12 @@ import 'package:http/http.dart' as http;
 import '../../commonModule/utils.dart';
 
 class BookingDetailsDomesSplit extends StatefulWidget {
-  bool isActive;
-  bool linkAccess;
+  final bool isActive;
+  final bool linkAccess;
 
   BookingDetailsDomesSplit(
       {Key? key, required this.isActive, this.linkAccess = false})
       : super(key: key);
-
   @override
   State<BookingDetailsDomesSplit> createState() =>
       _BookingDetailsDomesSplitState();
@@ -97,7 +95,7 @@ class _BookingDetailsDomesSplitState extends State<BookingDetailsDomesSplit> {
   String? _linkMessage;
   bool _isCreatingLink = false;
   FirebaseDynamicLinks dynamicLinks = FirebaseDynamicLinks.instance;
-
+  double minimumAmount=0.0;
   @override
   void initState() {
     // TODO: implement initState
@@ -106,17 +104,30 @@ class _BookingDetailsDomesSplitState extends State<BookingDetailsDomesSplit> {
     print(linkAccess);
 
     BookingDetailsModel item = mycontroller.myList[0];
-    //TODO NOT DONE
-    // item.bookingStatus = "";
+
 
     _createDynamicLink(true, "/domeBooking", item.id.toString());
     torontoCurTime = item.currentTime;
-    if (item.dueAmount > 0) {
+    if (item.dueAmount > 0 &&
+        ((item.players - item.otherContributors.length) > 0)) {
       amountCorrect = true;
       bottomMoneyController.text =
-          (item.dueAmount / (item.players - item.otherContributors.length - 1))
+          (item.dueAmount / (item.players - item.otherContributors.length))
               .toStringAsFixed(2);
+      minimumAmount=double.parse((item.dueAmount / (item.players - item.otherContributors.length))
+          .toStringAsFixed(2));
+
+      print("Ahmed");
+      print(minimumAmount);
+      print(item.dueAmount);
+      print(item.players);
+      print(item.otherContributors.length);
+    } else {
+      amountCorrect = true;
+      bottomMoneyController.text = item.dueAmount.toStringAsFixed(2);
     }
+
+
     bookingCreatedTime = item.bookingCreatedAt;
 
     // var dateTime = DateFormat("yyyy-MM-dd HH:mm:ss").parse(bookingCreatedTime.toString(), true);
@@ -339,7 +350,7 @@ class _BookingDetailsDomesSplitState extends State<BookingDetailsDomesSplit> {
 
     return WillPopScope(
       onWillPop: () async {
-        Get.offAll(WonderEvents());
+        Get.offAll(MainPageScreen());
         return false;
       },
       child: Form(
@@ -348,149 +359,493 @@ class _BookingDetailsDomesSplitState extends State<BookingDetailsDomesSplit> {
             key: _scaffoldKey,
             extendBodyBehindAppBar: true,
             backgroundColor: AppColor.bg,
-            body: Container(
-              decoration: BoxDecoration(
-                color: AppColor.bg,
-              ),
-              child: Obx(
-                () => mycontroller.isDataProcessing.value
-                    ? Container(
-                        height: cx.height,
-                        // height: 200,
-                        color: AppColor.bg,
-                        child: Center(
-                          child: CircularProgressIndicator(
-                            color: AppColor.darkGreen,
+            body: GestureDetector(
+              onTap: (){
+                FocusScopeNode currentFocus = FocusScope.of(context);
+                if (!currentFocus.hasPrimaryFocus) {
+                  currentFocus.unfocus();
+                }
+              },
+              child: Container(
+                decoration: BoxDecoration(
+                  color: AppColor.bg,
+                ),
+                child: Obx(
+                  () => mycontroller.isDataProcessing.value
+                      ? Container(
+                          height: cx.height,
+                          // height: 200,
+                          color: AppColor.bg,
+                          child: Center(
+                            child: CircularProgressIndicator(
+                              color: AppColor.darkGreen,
+                            ),
                           ),
-                        ),
-                      )
-                    : ListView(
-                        shrinkWrap: true,
-                        physics: BouncingScrollPhysics(),
-                        children: [
-                          Stack(
-                            children: [
-                              Column(
-                                children: [
-                                  Center(
-                                    child: SizedBox(
-                                      width: cx.width * 0.9,
-                                      height: mycontroller.myList[0]
-                                                  .bookingStatus.isEmpty &&
-                                              mycontroller
-                                                      .myList[0].paymentStatus
-                                                      .toString() ==
-                                                  "In Progress"
-                                          ? cx.height * 0.485
-                                          : isexpanded
-                                              ? cx.responsive(
-                                                    cx.height * 0.75,
-                                                    cx.height * 0.8,
-                                                    cx.height * 0.85,
-                                                  ) +
-                                                  (mycontroller
-                                                          .myList[0]
-                                                          .otherContributors
-                                                          .length *
-                                                      (cx.height / 9.5))
-                                              : cx.responsive(
-                                                    cx.height * 0.85,
-                                                    cx.height * 0.93,
-                                                    cx.height * 1.05,
-                                                  ) +
-                                                  45 +
-                                                  (mycontroller
-                                                          .myList[0]
-                                                          .otherContributors
-                                                          .length *
-                                                      (cx.height / 9.5)),
-                                      child: Stack(
-                                        clipBehavior: Clip.none,
-                                        children: [
-                                          Container(
-                                            decoration: errorDomeImage.contains(
-                                                    cx.read(Keys.domeId))
-                                                ? BoxDecoration(
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                            20),
-                                                    gradient:
-                                                        backShadowContainer(),
-                                                    image: DecorationImage(
-                                                      image: AssetImage(
-                                                        Image1.domesAround,
-                                                      ),
-                                                      fit: BoxFit.cover,
-                                                    ))
-                                                : BoxDecoration(
-                                                    borderRadius: BorderRadius
-                                                        .all(Radius.circular(
-                                                            cx.height / 26.68)),
-                                                    image: DecorationImage(
-                                                      image: NetworkImage(
-                                                        mycontroller.myList[0]
-                                                                .image.isEmpty
-                                                            ? "https://thumbs.dreamstime.com/b/indoor-stadium-view-behind-wicket-cricket-160851985.jpg"
-                                                            : mycontroller
-                                                                .myList[0]
-                                                                .image,
-                                                        scale: cx.height > 800
-                                                            ? 1.8
-                                                            : 2.4,
-                                                      ),
-                                                      fit: BoxFit.cover,
-                                                      onError: (Object e,
-                                                          StackTrace?
-                                                              stackTrace) {
-                                                        setState(() {
-                                                          errorDomeImage.add(
-                                                              cx.read(
-                                                                  Keys.domeId));
-                                                        });
-                                                      },
-                                                    )),
-                                            margin: EdgeInsets.only(
-                                                left: 8, right: 8, top: 8),
-                                            width: MediaQuery.of(context)
-                                                .size
-                                                .width,
-                                            height: cx.height / 4.3,
-                                          ),
-                                          Positioned(
-                                            left: cx.responsive(60, 38, 28),
-                                            top: cx.responsive(35, 25, 20),
-                                            child: InkWell(
-                                              onTap: () {
-                                                if (widget.linkAccess) {
-                                                  Get.offAll(WonderEvents());
-                                                  cx.curIndex.value = 0;
-                                                } else {
-                                                  Get.back();
-                                                }
-                                              },
-                                              child: CircleAvatar(
-                                                backgroundColor: Colors.white,
-                                                radius: 22,
-                                                child: SimpleCircularIconButton(
-                                                  iconData:
-                                                      Icons.arrow_back_ios_new,
-                                                  iconColor: Colors.black,
-                                                  radius:
-                                                      cx.responsive(50, 42, 37),
+                        )
+                      : ListView(
+                          shrinkWrap: true,
+                          physics: BouncingScrollPhysics(),
+                          keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+                          children: [
+                            Stack(
+                              children: [
+                                Column(
+                                  children: [
+                                    Center(
+                                      child: SizedBox(
+                                        width: cx.width * 0.9,
+                                        height: mycontroller.myList[0]
+                                                    .bookingStatus.isEmpty &&
+                                                mycontroller
+                                                        .myList[0].paymentStatus
+                                                        .toString() ==
+                                                    "In Progress"
+                                            ? cx.height * 0.485
+                                            : isexpanded
+                                                ? cx.responsive(
+                                                      cx.height * 0.75,
+                                                      cx.height * 0.8,
+                                                      cx.height * 0.85,
+                                                    ) +
+                                                    (mycontroller
+                                                            .myList[0]
+                                                            .otherContributors
+                                                            .length *
+                                                        (cx.height / 9.5))
+                                                : cx.responsive(
+                                                      cx.height * 0.85,
+                                                      cx.height * 0.93,
+                                                      cx.height * 1.05,
+                                                    ) +
+                                                    45 +
+                                                    (mycontroller
+                                                            .myList[0]
+                                                            .otherContributors
+                                                            .length *
+                                                        (cx.height / 9.5)),
+                                        child: Stack(
+                                          clipBehavior: Clip.none,
+                                          children: [
+                                            Container(
+                                              decoration: errorDomeImage.contains(
+                                                      cx.read(Keys.domeId))
+                                                  ? BoxDecoration(
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                              20),
+                                                      gradient:
+                                                          backShadowContainer(),
+                                                      image: DecorationImage(
+                                                        image: AssetImage(
+                                                          Image1.domesAround,
+                                                        ),
+                                                        fit: BoxFit.cover,
+                                                      ))
+                                                  : BoxDecoration(
+                                                      borderRadius: BorderRadius
+                                                          .all(Radius.circular(
+                                                              cx.height / 26.68)),
+                                                      image: DecorationImage(
+                                                        image: NetworkImage(
+                                                          mycontroller.myList[0]
+                                                                  .image.isEmpty
+                                                              ? "https://thumbs.dreamstime.com/b/indoor-stadium-view-behind-wicket-cricket-160851985.jpg"
+                                                              : mycontroller
+                                                                  .myList[0]
+                                                                  .image,
+                                                          scale: cx.height > 800
+                                                              ? 1.8
+                                                              : 2.4,
+                                                        ),
+                                                        fit: BoxFit.cover,
+                                                        onError: (Object e,
+                                                            StackTrace?
+                                                                stackTrace) {
+                                                          setState(() {
+                                                            errorDomeImage.add(
+                                                                cx.read(
+                                                                    Keys.domeId));
+                                                          });
+                                                        },
+                                                      )),
+                                              margin: EdgeInsets.only(
+                                                  left: 8, right: 8, top: 8),
+                                              width: MediaQuery.of(context)
+                                                  .size
+                                                  .width,
+                                              height: cx.height / 4.3,
+                                            ),
+                                            Positioned(
+                                              left: cx.responsive(60, 38, 28),
+                                              top: cx.responsive(35, 25, 20),
+                                              child: InkWell(
+                                                onTap: () {
+                                                  if (widget.linkAccess) {
+                                                    Get.offAll(MainPageScreen());
+                                                    cx.curIndex.value = 0;
+                                                  } else {
+                                                    Get.back();
+                                                  }
+                                                },
+                                                child: CircleAvatar(
+                                                  backgroundColor: Colors.white,
+                                                  radius: 22,
+                                                  child: SimpleCircularIconButton(
+                                                    iconData:
+                                                        Icons.arrow_back_ios_new,
+                                                    iconColor: Colors.black,
+                                                    radius:
+                                                        cx.responsive(50, 42, 37),
+                                                  ),
                                                 ),
                                               ),
                                             ),
-                                          ),
-                                        ],
+                                          ],
+                                        ),
                                       ),
                                     ),
-                                  ),
-                                  mycontroller.myList[0].bookingStatus
-                                              .isEmpty &&
-                                          mycontroller.myList[0].paymentStatus
+                                    mycontroller.myList[0].bookingStatus
+                                                .isEmpty &&
+                                            mycontroller.myList[0].paymentStatus
+                                                    .toString() ==
+                                                "In Progress"
+                                        ? Padding(
+                                            padding: EdgeInsets.only(
+                                                top: 0,
+                                                left: cx.width * 0.09,
+                                                right: cx.width * 0.09,
+                                                bottom: 10),
+                                            child: Container(
+                                              decoration: BoxDecoration(
+                                                  color: AppColor.bg,
+                                                  borderRadius:
+                                                      BorderRadius.circular(
+                                                          cx.height / 44.47)),
+                                              child: Column(
+                                                children: [
+                                                  // widget.linkAccess==true?
+                                                  // linkAccess():
+                                                  // Container(),
+                                                  widget.linkAccess
+                                                      ? Container(
+                                                          height: cx.height * 0.4)
+                                                      : Container(),
+                                                  Container(
+                                                    decoration: BoxDecoration(
+                                                        color: Colors.white,
+                                                        borderRadius: BorderRadius
+                                                            .only(
+                                                                topLeft: Radius
+                                                                    .circular(
+                                                                        cx.height /
+                                                                            37.06),
+                                                                topRight: Radius
+                                                                    .circular(cx
+                                                                            .height /
+                                                                        37.06))),
+                                                    child: Column(
+                                                      mainAxisAlignment:
+                                                          MainAxisAlignment.end,
+                                                      crossAxisAlignment:
+                                                          CrossAxisAlignment.end,
+                                                      children: [
+                                                        Container(
+                                                          decoration: BoxDecoration(
+                                                              color:
+                                                                  Color.fromRGBO(
+                                                                      241,
+                                                                      247,
+                                                                      236,
+                                                                      0.6),
+                                                              borderRadius:
+                                                                  BorderRadius
+                                                                      .circular(cx
+                                                                              .height /
+                                                                          44.47)),
+                                                          child: ListTile(
+                                                            dense: true,
+                                                            contentPadding:
+                                                                EdgeInsets.fromLTRB(
+                                                                    20,
+                                                                    cx.height /
+                                                                        100,
+                                                                    cx.height /
+                                                                        44.47,
+                                                                    0),
+                                                            title: Column(
+                                                              crossAxisAlignment:
+                                                                  CrossAxisAlignment
+                                                                      .start,
+                                                              children: [
+                                                                Container(
+                                                                  // width:cx.width*0.15,
+                                                                  decoration: BoxDecoration(
+                                                                      color: mycontroller.myList[0].bookingStatus.isNotEmpty || mycontroller.myList[0].paymentStatus.toString() == "Paid" ? Colors.transparent : Color(0xFFFDF5D2),
+                                                                      borderRadius: BorderRadius.circular(30),
+                                                                      border: Border.all(
+                                                                          width: 1,
+                                                                          color: mycontroller.myList[0].bookingStatus.isEmpty
+                                                                              ? mycontroller.myList[0].paymentStatus.toString() == "In Progress"
+                                                                                  ? Color(0xFFE1DAB4)
+                                                                                  : AppColor.lightGreen
+                                                                              : Color(0xFFF04257))),
+
+                                                                  child: Padding(
+                                                                    padding:
+                                                                        const EdgeInsets
+                                                                            .fromLTRB(
+                                                                      10,
+                                                                      0,
+                                                                      10,
+                                                                      4,
+                                                                    ),
+                                                                    child:
+                                                                        InterText(
+                                                                      text: mycontroller
+                                                                              .myList[
+                                                                                  0]
+                                                                              .bookingStatus
+                                                                              .isEmpty
+                                                                          ? mycontroller
+                                                                              .myList[
+                                                                                  0]
+                                                                              .paymentStatus
+                                                                              .toString()
+                                                                          : mycontroller
+                                                                              .myList[0]
+                                                                              .bookingStatus
+                                                                              .toString(),
+                                                                      color: mycontroller
+                                                                              .myList[
+                                                                                  0]
+                                                                              .bookingStatus
+                                                                              .isEmpty
+                                                                          ? mycontroller.myList[0].paymentStatus.toString() ==
+                                                                                  "In Progress"
+                                                                              ? Color(
+                                                                                  0XFFA19A6F)
+                                                                              : AppColor
+                                                                                  .darkGreen
+                                                                          : Color(
+                                                                              0xFFFF5C5C),
+                                                                      fontSize: cx
+                                                                          .responsive(
+                                                                              20,
+                                                                              15,
+                                                                              12),
+                                                                      textAlign:
+                                                                          TextAlign
+                                                                              .center,
+                                                                      height: 1.7,
+                                                                    ),
+                                                                  ),
+                                                                  // alignment: Alignment.center,
+                                                                ),
+                                                                Gap(8),
+                                                                SenticText(
+                                                                  text: mycontroller
+                                                                      .myList[0]
+                                                                      .domeName,
+                                                                  fontSize:
+                                                                      cx.height >
+                                                                              800
+                                                                          ? 21
+                                                                          : 19,
+                                                                  fontWeight:
+                                                                      FontWeight
+                                                                          .w600,
+                                                                  color: Color(
+                                                                      0xFF222222),
+                                                                ),
+                                                                Gap(4),
+                                                              ],
+                                                            ),
+                                                            trailing: InkWell(
+                                                              onTap: () {
+                                                                setState(() {
+                                                                  isexpanded =
+                                                                      !isexpanded;
+                                                                });
+                                                                print(isexpanded);
+                                                              },
+                                                              child: Icon(
+                                                                  isexpanded
+                                                                      ? Icons
+                                                                          .keyboard_arrow_down_rounded
+                                                                      : Icons
+                                                                          .keyboard_arrow_up_rounded,
+                                                                  size: 35,
+                                                                  color: AppColor
+                                                                      .darkGreen),
+                                                            ),
+                                                          ),
+                                                        ),
+                                                      ],
+                                                    ),
+                                                  ),
+                                                  splitTicket(),
+                                                  isCancelButtonAvailable
+                                                      ? !widget.linkAccess
+                                                          ? Column(
+                                                              children: [
+                                                                Container(
+                                                                  height: mycontroller
+                                                                              .myList[
+                                                                                  0]
+                                                                              .bookingStatus
+                                                                              .isEmpty &&
+                                                                          mycontroller.myList[0].paymentStatus.toString() ==
+                                                                              "In Progress"
+                                                                      ? cx.height /
+                                                                          9
+                                                                      : cx.height /
+                                                                          50,
+                                                                  decoration: BoxDecoration(
+                                                                      color: Colors
+                                                                          .white,
+                                                                      borderRadius: BorderRadius.only(
+                                                                          bottomLeft:
+                                                                              Radius.circular(cx.height /
+                                                                                  37.06),
+                                                                          bottomRight:
+                                                                              Radius.circular(cx.height /
+                                                                                  37.06))),
+                                                                  child: Column(
+                                                                    children: [
+                                                                      Gap(6),
+                                                                      Padding(
+                                                                        padding: EdgeInsets
+                                                                            .fromLTRB(
+                                                                                20.0,
+                                                                                0,
+                                                                                20,
+                                                                                0),
+                                                                        child:
+                                                                            const Divider(
+                                                                          color: Color(
+                                                                              0xFFE7F4EF),
+                                                                          thickness:
+                                                                              2,
+                                                                        ),
+                                                                      ),
+                                                                      InkWell(
+                                                                        onTap:
+                                                                            () {
+                                                                          onCancelAlert(
+                                                                              context:
+                                                                                  context,
+                                                                              bookingId:
+                                                                                  mycontroller.myList[0].id.toString(),
+                                                                              onCancel: () {
+                                                                                Get.back();
+                                                                                cancelAccount(context: context, bookingId: mycontroller.myList[0].id.toString()).then((value) {
+                                                                                  if (value == 1) {
+                                                                                    setState(() {
+                                                                                      mycontroller.myList[0].bookingStatus = "Cancelled";
+                                                                                      isCancelButtonAvailable = false;
+                                                                                    });
+                                                                                  }
+                                                                                });
+                                                                              });
+                                                                        },
+                                                                        child:
+                                                                            Column(
+                                                                          children: [
+                                                                            Gap(7),
+                                                                            InterText(
+                                                                              text:
+                                                                                  "Cancel Booking",
+                                                                              color:
+                                                                                  Color(0xFFB01717),
+                                                                              fontWeight:
+                                                                                  FontWeight.w700,
+                                                                              fontSize: cx.responsive(
+                                                                                  26,
+                                                                                  21,
+                                                                                  18),
+                                                                            ),
+                                                                            Gap(7),
+                                                                          ],
+                                                                        ),
+                                                                      ),
+                                                                    ],
+                                                                  ),
+                                                                ),
+                                                                Gap(cx.height /
+                                                                    40),
+                                                              ],
+                                                            )
+                                                          : Container(
+                                                              height:
+                                                                  cx.height / 45,
+                                                              decoration: BoxDecoration(
+                                                                  color: Colors
+                                                                      .white,
+                                                                  borderRadius: BorderRadius.only(
+                                                                      bottomLeft: Radius.circular(
+                                                                          cx.height /
+                                                                              37.06),
+                                                                      bottomRight:
+                                                                          Radius.circular(cx.height /
+                                                                              37.06))),
+                                                              // child: Gap(15),
+                                                            )
+                                                      : Container(),
+                                                  !isCancelButtonAvailable
+                                                      ? Container(
+                                                          height: cx.height / 45,
+                                                          decoration: BoxDecoration(
+                                                              color: Colors.white,
+                                                              borderRadius: BorderRadius.only(
+                                                                  bottomLeft: Radius
+                                                                      .circular(cx
+                                                                              .height /
+                                                                          37.06),
+                                                                  bottomRight: Radius
+                                                                      .circular(cx
+                                                                              .height /
+                                                                          37.06))),
+                                                          // child: Gap(15),
+                                                        )
+                                                      : Container(),
+                                                  Gap(cx.height / 15),
+
+                                                  widget.linkAccess
+                                                      ? Container(
+                                                          height:
+                                                              cx.height * 0.15)
+                                                      : Container(),
+                                                ],
+                                              ),
+                                            ),
+                                          )
+                                        : Container(),
+                                  ],
+                                ),
+                                Positioned(
+                                  top: cx.height / 6.06,
+                                  right: 2,
+                                  left: 4,
+                                  child: mycontroller
+                                              .myList[0].bookingStatus.isEmpty &&
+                                          mycontroller
+                                                  .myList[0].paymentStatus
                                                   .toString() ==
                                               "In Progress"
-                                      ? Padding(
+                                      ? !widget.linkAccess
+                                          ? timerBox(
+                                              isDefaultTime,
+                                              hours: hours,
+                                              minutes: minutes,
+                                              seconds: seconds,
+                                              hours1: hours1,
+                                              minutes1: minutes1,
+                                              seconds1: seconds1,
+                                              timerMessage:
+                                                  "Share The Link To Split Amount Within The Given Time",
+                                              paymentLink: _linkMessage)
+                                          : linkAccess()
+                                      : Padding(
                                           padding: EdgeInsets.only(
                                               top: 0,
                                               left: cx.width * 0.09,
@@ -504,25 +859,24 @@ class _BookingDetailsDomesSplitState extends State<BookingDetailsDomesSplit> {
                                                         cx.height / 44.47)),
                                             child: Column(
                                               children: [
-                                                // widget.linkAccess==true?
-                                                // linkAccess():
-                                                // Container(),
-                                                widget.linkAccess
-                                                    ? Container(
-                                                        height: cx.height * 0.4)
-                                                    : Container(),
+                                                // linkAccess(),
                                                 Container(
                                                   decoration: BoxDecoration(
                                                       color: Colors.white,
-                                                      borderRadius: BorderRadius
-                                                          .only(
-                                                              topLeft: Radius
-                                                                  .circular(
-                                                                      cx.height /
-                                                                          37.06),
-                                                              topRight: Radius
-                                                                  .circular(cx
-                                                                          .height /
+                                                      borderRadius: BorderRadius.only(
+                                                          topLeft: Radius.circular(
+                                                              cx.height / 37.06),
+                                                          topRight:
+                                                              Radius.circular(
+                                                                  cx.height /
+                                                                      37.06),
+                                                          bottomLeft:
+                                                              Radius.circular(
+                                                                  cx.height /
+                                                                      37.06),
+                                                          bottomRight:
+                                                              Radius.circular(
+                                                                  cx.height /
                                                                       37.06))),
                                                   child: Column(
                                                     mainAxisAlignment:
@@ -532,24 +886,22 @@ class _BookingDetailsDomesSplitState extends State<BookingDetailsDomesSplit> {
                                                     children: [
                                                       Container(
                                                         decoration: BoxDecoration(
-                                                            color:
-                                                                Color.fromRGBO(
-                                                                    241,
-                                                                    247,
-                                                                    236,
-                                                                    0.6),
+                                                            color: Color.fromRGBO(
+                                                                241,
+                                                                247,
+                                                                236,
+                                                                0.6),
                                                             borderRadius:
                                                                 BorderRadius
-                                                                    .circular(cx
-                                                                            .height /
-                                                                        44.47)),
+                                                                    .circular(
+                                                                        cx.height /
+                                                                            44.47)),
                                                         child: ListTile(
                                                           dense: true,
                                                           contentPadding:
                                                               EdgeInsets.fromLTRB(
                                                                   20,
-                                                                  cx.height /
-                                                                      100,
+                                                                  cx.height / 100,
                                                                   cx.height /
                                                                       44.47,
                                                                   0),
@@ -560,16 +912,25 @@ class _BookingDetailsDomesSplitState extends State<BookingDetailsDomesSplit> {
                                                             children: [
                                                               Container(
                                                                 // width:cx.width*0.15,
-                                                                decoration: BoxDecoration(
-                                                                    color: mycontroller.myList[0].bookingStatus.isNotEmpty || mycontroller.myList[0].paymentStatus.toString() == "Paid" ? Colors.transparent : Color(0xFFFDF5D2),
-                                                                    borderRadius: BorderRadius.circular(30),
-                                                                    border: Border.all(
-                                                                        width: 1,
-                                                                        color: mycontroller.myList[0].bookingStatus.isEmpty
-                                                                            ? mycontroller.myList[0].paymentStatus.toString() == "In Progress"
-                                                                                ? Color(0xFFE1DAB4)
-                                                                                : AppColor.lightGreen
-                                                                            : Color(0xFFF04257))),
+                                                                decoration:
+                                                                    BoxDecoration(
+                                                                        color: mycontroller.myList[0].bookingStatus.isNotEmpty ||
+                                                                                mycontroller.myList[0].paymentStatus.toString() ==
+                                                                                    "Paid"
+                                                                            ? Colors
+                                                                                .transparent
+                                                                            : Color(
+                                                                                0xFFFDF5D2),
+                                                                        borderRadius:
+                                                                            BorderRadius.circular(
+                                                                                30),
+                                                                        border: Border.all(
+                                                                            width: 1,
+                                                                            color: mycontroller.myList[0].bookingStatus.isEmpty
+                                                                                ? mycontroller.myList[0].paymentStatus.toString() == "In Progress"
+                                                                                    ? Color(0xFFE1DAB4)
+                                                                                    : AppColor.lightGreen
+                                                                                : Color(0xFFF04257))),
 
                                                                 child: Padding(
                                                                   padding:
@@ -593,7 +954,8 @@ class _BookingDetailsDomesSplitState extends State<BookingDetailsDomesSplit> {
                                                                             .paymentStatus
                                                                             .toString()
                                                                         : mycontroller
-                                                                            .myList[0]
+                                                                            .myList[
+                                                                                0]
                                                                             .bookingStatus
                                                                             .toString(),
                                                                     color: mycontroller
@@ -661,390 +1023,49 @@ class _BookingDetailsDomesSplitState extends State<BookingDetailsDomesSplit> {
                                                           ),
                                                         ),
                                                       ),
-                                                    ],
-                                                  ),
-                                                ),
-                                                splitTicket(),
-                                                isCancelButtonAvailable
-                                                    ? !widget.linkAccess
-                                                        ? Column(
-                                                            children: [
-                                                              Container(
-                                                                height: mycontroller
-                                                                            .myList[
-                                                                                0]
-                                                                            .bookingStatus
-                                                                            .isEmpty &&
-                                                                        mycontroller.myList[0].paymentStatus.toString() ==
-                                                                            "In Progress"
-                                                                    ? cx.height /
-                                                                        9
-                                                                    : cx.height /
-                                                                        50,
-                                                                decoration: BoxDecoration(
-                                                                    color: Colors
-                                                                        .white,
-                                                                    borderRadius: BorderRadius.only(
-                                                                        bottomLeft:
-                                                                            Radius.circular(cx.height /
-                                                                                37.06),
-                                                                        bottomRight:
-                                                                            Radius.circular(cx.height /
-                                                                                37.06))),
-                                                                child: Column(
-                                                                  children: [
-                                                                    Gap(6),
-                                                                    Padding(
-                                                                      padding: EdgeInsets
-                                                                          .fromLTRB(
-                                                                              20.0,
-                                                                              0,
-                                                                              20,
-                                                                              0),
-                                                                      child:
-                                                                          const Divider(
-                                                                        color: Color(
-                                                                            0xFFE7F4EF),
-                                                                        thickness:
-                                                                            2,
-                                                                      ),
-                                                                    ),
-                                                                    InkWell(
-                                                                      onTap:
-                                                                          () {
-                                                                        onCancelAlert(
-                                                                            context:
-                                                                                context,
-                                                                            bookingId:
-                                                                                mycontroller.myList[0].id.toString(),
-                                                                            onCancel: () {
-                                                                              Get.back();
-                                                                              cancelAccount(context: context, bookingId: mycontroller.myList[0].id.toString()).then((value) {
-                                                                                if (value == 1) {
-                                                                                  setState(() {
-                                                                                    mycontroller.myList[0].bookingStatus = "Cancelled";
-                                                                                    isCancelButtonAvailable = false;
-                                                                                  });
-                                                                                }
-                                                                              });
-                                                                            });
-                                                                      },
-                                                                      child:
-                                                                          Column(
-                                                                        children: [
-                                                                          Gap(7),
-                                                                          InterText(
-                                                                            text:
-                                                                                "Cancel Booking",
-                                                                            color:
-                                                                                Color(0xFFB01717),
-                                                                            fontWeight:
-                                                                                FontWeight.w700,
-                                                                            fontSize: cx.responsive(
-                                                                                26,
-                                                                                21,
-                                                                                18),
-                                                                          ),
-                                                                          Gap(7),
-                                                                        ],
-                                                                      ),
-                                                                    ),
-                                                                  ],
-                                                                ),
-                                                              ),
-                                                              Gap(cx.height /
-                                                                  40),
-                                                            ],
-                                                          )
-                                                        : Container(
-                                                            height:
-                                                                cx.height / 45,
-                                                            decoration: BoxDecoration(
-                                                                color: Colors
-                                                                    .white,
-                                                                borderRadius: BorderRadius.only(
-                                                                    bottomLeft: Radius.circular(
-                                                                        cx.height /
-                                                                            37.06),
-                                                                    bottomRight:
-                                                                        Radius.circular(cx.height /
-                                                                            37.06))),
-                                                            // child: Gap(15),
-                                                          )
-                                                    : Container(),
-                                                !isCancelButtonAvailable
-                                                    ? Container(
-                                                        height: cx.height / 45,
+                                                      splitTicket(),
+                                                      Container(
+                                                        height: cx.height / 40,
                                                         decoration: BoxDecoration(
-                                                            color: Colors.white,
+                                                            color: Colors.red,
                                                             borderRadius: BorderRadius.only(
                                                                 bottomLeft: Radius
-                                                                    .circular(cx
-                                                                            .height /
-                                                                        37.06),
+                                                                    .circular(
+                                                                        cx.height /
+                                                                            37.06),
                                                                 bottomRight: Radius
                                                                     .circular(cx
                                                                             .height /
                                                                         37.06))),
-                                                        // child: Gap(15),
-                                                      )
-                                                    : Container(),
-                                                Gap(cx.height / 15),
-
-                                                widget.linkAccess
-                                                    ? Container(
-                                                        height:
-                                                            cx.height * 0.15)
-                                                    : Container(),
+                                                        child: Column(
+                                                          children: [
+                                                            SizedBox(
+                                                              height: 2,
+                                                            )
+                                                          ],
+                                                        ),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ),
                                               ],
                                             ),
                                           ),
-                                        )
-                                      : Container(),
-                                ],
-                              ),
-                              Positioned(
-                                top: cx.height / 6.06,
-                                right: 2,
-                                left: 4,
-                                child: mycontroller
-                                            .myList[0].bookingStatus.isEmpty &&
-                                        mycontroller
-                                                .myList[0].paymentStatus
-                                                .toString() ==
-                                            "In Progress"
-                                    ? !widget.linkAccess
-                                        ? timerBox(
-                                            isDefaultTime,
-                                            hours: hours,
-                                            minutes: minutes,
-                                            seconds: seconds,
-                                            hours1: hours1,
-                                            minutes1: minutes1,
-                                            seconds1: seconds1,
-                                            timerMessage:
-                                                "Share The Link To Split Amount Within The Given Time",
-                                            paymentLink: _linkMessage)
-                                        : linkAccess()
-                                    : Padding(
-                                        padding: EdgeInsets.only(
-                                            top: 0,
-                                            left: cx.width * 0.09,
-                                            right: cx.width * 0.09,
-                                            bottom: 10),
-                                        child: Container(
-                                          decoration: BoxDecoration(
-                                              color: AppColor.bg,
-                                              borderRadius:
-                                                  BorderRadius.circular(
-                                                      cx.height / 44.47)),
-                                          child: Column(
-                                            children: [
-                                              // linkAccess(),
-                                              Container(
-                                                decoration: BoxDecoration(
-                                                    color: Colors.white,
-                                                    borderRadius: BorderRadius.only(
-                                                        topLeft: Radius.circular(
-                                                            cx.height / 37.06),
-                                                        topRight:
-                                                            Radius.circular(
-                                                                cx.height /
-                                                                    37.06),
-                                                        bottomLeft:
-                                                            Radius.circular(
-                                                                cx.height /
-                                                                    37.06),
-                                                        bottomRight:
-                                                            Radius.circular(
-                                                                cx.height /
-                                                                    37.06))),
-                                                child: Column(
-                                                  mainAxisAlignment:
-                                                      MainAxisAlignment.end,
-                                                  crossAxisAlignment:
-                                                      CrossAxisAlignment.end,
-                                                  children: [
-                                                    Container(
-                                                      decoration: BoxDecoration(
-                                                          color: Color.fromRGBO(
-                                                              241,
-                                                              247,
-                                                              236,
-                                                              0.6),
-                                                          borderRadius:
-                                                              BorderRadius
-                                                                  .circular(
-                                                                      cx.height /
-                                                                          44.47)),
-                                                      child: ListTile(
-                                                        dense: true,
-                                                        contentPadding:
-                                                            EdgeInsets.fromLTRB(
-                                                                20,
-                                                                cx.height / 100,
-                                                                cx.height /
-                                                                    44.47,
-                                                                0),
-                                                        title: Column(
-                                                          crossAxisAlignment:
-                                                              CrossAxisAlignment
-                                                                  .start,
-                                                          children: [
-                                                            Container(
-                                                              // width:cx.width*0.15,
-                                                              decoration:
-                                                                  BoxDecoration(
-                                                                      color: mycontroller.myList[0].bookingStatus.isNotEmpty ||
-                                                                              mycontroller.myList[0].paymentStatus.toString() ==
-                                                                                  "Paid"
-                                                                          ? Colors
-                                                                              .transparent
-                                                                          : Color(
-                                                                              0xFFFDF5D2),
-                                                                      borderRadius:
-                                                                          BorderRadius.circular(
-                                                                              30),
-                                                                      border: Border.all(
-                                                                          width: 1,
-                                                                          color: mycontroller.myList[0].bookingStatus.isEmpty
-                                                                              ? mycontroller.myList[0].paymentStatus.toString() == "In Progress"
-                                                                                  ? Color(0xFFE1DAB4)
-                                                                                  : AppColor.lightGreen
-                                                                              : Color(0xFFF04257))),
-
-                                                              child: Padding(
-                                                                padding:
-                                                                    const EdgeInsets
-                                                                        .fromLTRB(
-                                                                  10,
-                                                                  0,
-                                                                  10,
-                                                                  4,
-                                                                ),
-                                                                child:
-                                                                    InterText(
-                                                                  text: mycontroller
-                                                                          .myList[
-                                                                              0]
-                                                                          .bookingStatus
-                                                                          .isEmpty
-                                                                      ? mycontroller
-                                                                          .myList[
-                                                                              0]
-                                                                          .paymentStatus
-                                                                          .toString()
-                                                                      : mycontroller
-                                                                          .myList[
-                                                                              0]
-                                                                          .bookingStatus
-                                                                          .toString(),
-                                                                  color: mycontroller
-                                                                          .myList[
-                                                                              0]
-                                                                          .bookingStatus
-                                                                          .isEmpty
-                                                                      ? mycontroller.myList[0].paymentStatus.toString() ==
-                                                                              "In Progress"
-                                                                          ? Color(
-                                                                              0XFFA19A6F)
-                                                                          : AppColor
-                                                                              .darkGreen
-                                                                      : Color(
-                                                                          0xFFFF5C5C),
-                                                                  fontSize: cx
-                                                                      .responsive(
-                                                                          20,
-                                                                          15,
-                                                                          12),
-                                                                  textAlign:
-                                                                      TextAlign
-                                                                          .center,
-                                                                  height: 1.7,
-                                                                ),
-                                                              ),
-                                                              // alignment: Alignment.center,
-                                                            ),
-                                                            Gap(8),
-                                                            SenticText(
-                                                              text: mycontroller
-                                                                  .myList[0]
-                                                                  .domeName,
-                                                              fontSize:
-                                                                  cx.height >
-                                                                          800
-                                                                      ? 21
-                                                                      : 19,
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .w600,
-                                                              color: Color(
-                                                                  0xFF222222),
-                                                            ),
-                                                            Gap(4),
-                                                          ],
-                                                        ),
-                                                        trailing: InkWell(
-                                                          onTap: () {
-                                                            setState(() {
-                                                              isexpanded =
-                                                                  !isexpanded;
-                                                            });
-                                                            print(isexpanded);
-                                                          },
-                                                          child: Icon(
-                                                              isexpanded
-                                                                  ? Icons
-                                                                      .keyboard_arrow_down_rounded
-                                                                  : Icons
-                                                                      .keyboard_arrow_up_rounded,
-                                                              size: 35,
-                                                              color: AppColor
-                                                                  .darkGreen),
-                                                        ),
-                                                      ),
-                                                    ),
-                                                    splitTicket(),
-                                                    Container(
-                                                      height: cx.height / 40,
-                                                      decoration: BoxDecoration(
-                                                          color: Colors.red,
-                                                          borderRadius: BorderRadius.only(
-                                                              bottomLeft: Radius
-                                                                  .circular(
-                                                                      cx.height /
-                                                                          37.06),
-                                                              bottomRight: Radius
-                                                                  .circular(cx
-                                                                          .height /
-                                                                      37.06))),
-                                                      child: Column(
-                                                        children: [
-                                                          SizedBox(
-                                                            height: 2,
-                                                          )
-                                                        ],
-                                                      ),
-                                                    ),
-                                                  ],
-                                                ),
-                                              ),
-                                            ],
-                                          ),
                                         ),
-                                      ),
-                              )
-                            ],
-                          ),
-                        ],
-                      ),
+                                )
+                              ],
+                            ),
+                          ],
+                        ),
+                ),
               ),
             ),
             floatingActionButtonLocation:
                 FloatingActionButtonLocation.centerDocked,
             floatingActionButton: widget.linkAccess &&
                     mycontroller.myList[0].paymentStatus.toString() ==
-                        "In Progress"
+                        "In Progress"&&
+                mycontroller.myList[0].bookingStatus != "Cancelled"
                 ? Container(
                     width: cx.width,
                     child: Container(
@@ -1064,47 +1085,69 @@ class _BookingDetailsDomesSplitState extends State<BookingDetailsDomesSplit> {
                             child: InkWell(
                               onTap: () {
                                 print("No Verification Required");
-                                print((mycontroller.myList[0].dueAmount -
-                                    (double.parse(
-                                        bottomMoneyController.text))));
-                                print((mycontroller.myList[0].dueAmount));
-                                print(double.parse(
-                                    bottomMoneyController.text));
+                                if(linkAccessKey.currentState!.validate()) {
+                                  print((mycontroller.myList[0].dueAmount -
+                                      (double.parse(
+                                          bottomMoneyController.text))));
+                                  print((mycontroller.myList[0].dueAmount));
+                                  print(
+                                      double.parse(bottomMoneyController.text));
 
-                                if ((mycontroller.myList[0].dueAmount -
-                                            (double.parse(
-                                                bottomMoneyController.text))) <
-                                        0.51 &&
-                                    ((mycontroller.myList[0].dueAmount -
-                                        (double.parse(
-                                            bottomMoneyController.text))) >0.01)) {
-                                  showLongToast(
-                                      "Sorry...! You can't keep less than 0.5\$ pending");
-                                } else {
-                                  if (linkAccessKey.currentState!.validate() &&
-                                      bottomMoneyController.text.isNotEmpty &&
-                                      bottomNameController.text.isNotEmpty &&
-                                      amountCorrect) {
-                                    setState(() {
-                                      cx.isSplitAmount.value = true;
-                                    });
-                                    if (!isDataProcesssing) {
-                                      print("start payment");
-                                      makePayment();
-                                    }
+                                  if ((mycontroller.myList[0].dueAmount -
+                                      (double.parse(
+                                          bottomMoneyController.text))) <
+                                      0.51 &&
+                                      ((mycontroller.myList[0].dueAmount -
+                                          (double.parse(
+                                              bottomMoneyController.text))) >
+                                          0.01)) {
+                                    showLongToast(
+                                        "Sorry...! You can't keep less than 0.5\$ pending");
                                   } else {
-                                    if (int.parse(bottomMoneyController.text) <
-                                        0) {
-                                      showLongToast(
-                                          "Please enter positive amount");
-                                    } else if (bottomMoneyController
-                                        .text.isNotEmpty) {
-                                      showLongToast("Please enter the amount");
-                                    } else if (bottomNameController
-                                        .text.isNotEmpty) {
-                                      showLongToast("Please enter your name");
-                                    } else if (amountCorrect) {
-                                      showLongToast("Please check the amount");
+                                    print("Bottom Text" +
+                                        bottomMoneyController.text);
+                                    print("Minimum Text" +
+                                        minimumAmount.toString());
+
+                                    if (
+                                        bottomMoneyController.text.isNotEmpty &&
+                                        bottomNameController.text.isNotEmpty &&
+                                        amountCorrect &&
+                                        double.parse(
+                                            bottomMoneyController.text) >=
+                                            minimumAmount) {
+                                      print("if");
+                                      print(isDataProcesssing);
+                                      setState(() {
+                                        cx.isSplitAmount.value = true;
+                                      });
+                                      if (!isDataProcesssing) {
+                                        print("start payment");
+                                        makePayment();
+                                      }
+                                    } else {
+                                      print("else");
+                                      if (double.parse(
+                                          bottomMoneyController.text) <
+                                          0) {
+                                        showLongToast(
+                                            "Please enter positive amount");
+                                      } else if (bottomMoneyController
+                                          .text.isEmpty) {
+                                        showLongToast(
+                                            "Please enter the amount");
+                                      } else if (bottomNameController
+                                          .text.isEmpty) {
+                                        showLongToast("Please enter your name");
+                                      } else if (!amountCorrect) {
+                                        showLongToast(
+                                            "Please check the amount");
+                                      } else if (double.parse(
+                                          bottomMoneyController.text) <
+                                          minimumAmount) {
+                                        showLongToast(
+                                            "Please enter valid amount \n(Minimum Amount is ${minimumAmount})");
+                                      }
                                     }
                                   }
                                 }
@@ -1266,6 +1309,7 @@ class _BookingDetailsDomesSplitState extends State<BookingDetailsDomesSplit> {
               child: ListView(
                 shrinkWrap: true,
                 physics: ClampingScrollPhysics(),
+                keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
                 children: [
                   isexpanded
                       ? Container()
@@ -1838,6 +1882,7 @@ class _BookingDetailsDomesSplitState extends State<BookingDetailsDomesSplit> {
                       ListView.builder(
                         shrinkWrap: true,
                         physics: BouncingScrollPhysics(),
+                        keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
                         // scrollDirection: Axis.horizontal,
                         itemCount:
                             mycontroller.myList[0].otherContributors.length,
@@ -1853,7 +1898,7 @@ class _BookingDetailsDomesSplitState extends State<BookingDetailsDomesSplit> {
                                         radius: cx.responsive(30, 25, 20),
                                         child: NunitoText(
                                           text: data.contributorName.isEmpty
-                                              ? "D"
+                                              ? "Dome User"
                                               : data.contributorName
                                                   .substring(0, 1)
                                                   .toUpperCase(),
@@ -1875,6 +1920,7 @@ class _BookingDetailsDomesSplitState extends State<BookingDetailsDomesSplit> {
                                       trailing: Container(
                                         child: SenticText(
                                           text: "\$${data.amount}",
+                                          // text: "\$${data.amount.toStringAsFixed(2)}",
                                           fontWeight: FontWeight.w300,
                                           fontSize: cx.responsive(22, 17, 15),
                                           color: Color(0xFF07261A),
@@ -1931,8 +1977,8 @@ class _BookingDetailsDomesSplitState extends State<BookingDetailsDomesSplit> {
           mycontroller.myList[0].bookingStatus.isEmpty &&
                   mycontroller.myList[0].paymentStatus == "Paid" &&
                   mycontroller.myList[0].isRattingExist == 0 &&
-                  !(torontoCurTime.millisecondsSinceEpoch >=
-                      bookingEndTimeAPI.millisecondsSinceEpoch)
+                  torontoCurTime.millisecondsSinceEpoch >=
+                      bookingEndTimeAPI.millisecondsSinceEpoch
               ? Column(
                   children: [
                     Container(
@@ -1953,6 +1999,8 @@ class _BookingDetailsDomesSplitState extends State<BookingDetailsDomesSplit> {
                           InkWell(
                             onTap: () {
                               print("Review Booking");
+                              print(torontoCurTime);
+                              print(bookingEndTimeAPI);
                               msgpasscontroller.clear();
                               starsValue = 5;
                               onRatingsPopUp(
@@ -1993,7 +2041,7 @@ class _BookingDetailsDomesSplitState extends State<BookingDetailsDomesSplit> {
       child: Column(
         children: [
           Container(
-            height: cx.height * 0.65,
+            // height: cx.height * 0.65,
             width: cx.width * 0.9,
             decoration: BoxDecoration(
                 gradient: LinearGradient(
@@ -2239,8 +2287,19 @@ class _BookingDetailsDomesSplitState extends State<BookingDetailsDomesSplit> {
                         if (double.parse(value) >
                             mycontroller.myList[0].dueAmount) {
                           print(value);
+                          print(value);
                           print(bottomMoneyController.text);
                           return "Please Enter Valid Amount";
+                        }
+                        else if (double.parse(value) <
+                            0) {
+                          showLongToast(
+                              "Please Enter Positive Amount");
+                        }
+                        else if (double.parse(value) <
+                            minimumAmount) {
+                          return "Minimum Amount is ${minimumAmount}";
+
                         }
                       } else {
                         return "Please Enter Valid Amount";
@@ -2365,6 +2424,7 @@ class _BookingDetailsDomesSplitState extends State<BookingDetailsDomesSplit> {
                     ],
                   ),
                 ),
+                Gap(cx.height * 0.01),
               ],
             ),
           ),
@@ -2408,10 +2468,32 @@ class _BookingDetailsDomesSplitState extends State<BookingDetailsDomesSplit> {
               // isLinkTimerExpire: true
             )
                 .then((value) {
-              bottomMoneyController.text = '';
+              // bottomMoneyController.text = '';
               bottomNameController.text = '';
               isPaymentAPICalling = false;
               isDataProcesssing = false;
+              print("hiiiiiiii Ahmed");
+
+              var data=mycontroller.myList[0];
+
+              if (data.dueAmount > 0 &&
+                  ((data.players - data.otherContributors.length) > 0)) {
+                amountCorrect = true;
+                bottomMoneyController.text =
+                    (data.dueAmount / (data.players - data.otherContributors.length))
+                        .toStringAsFixed(2);
+                minimumAmount=double.parse((data.dueAmount / (data.players - data.otherContributors.length))
+                    .toStringAsFixed(2));
+
+                print("Ahmed");
+                print(minimumAmount);
+                print(data.dueAmount);
+                print(data.players);
+                print(data.otherContributors.length);
+              } else {
+                amountCorrect = true;
+                bottomMoneyController.text = data.dueAmount.toStringAsFixed(2);
+              }
             });
           });
         });
@@ -2617,12 +2699,15 @@ class _BookingDetailsDomesSplitState extends State<BookingDetailsDomesSplit> {
     onAlert(context: context, type: 1, msg: "Loading...");
 
     try {
+      print("bottomMoneyController.text");
+      print(bottomMoneyController.text);
       var request =
           http.MultipartRequest('POST', Uri.parse(Constant.splitPayment));
       request.fields.addAll({
         'contributor_name': bottomNameController.text,
         'transaction_id': paymentIntent.toString(),
         'amount': bottomMoneyController.text,
+        // 'amount': (double.tryParse(bottomMoneyController.text) ?? 0.0).toStringAsFixed(2),
         'booking_id': mycontroller.myList[0].id.toString(),
         'payment_method': '1'
       });
